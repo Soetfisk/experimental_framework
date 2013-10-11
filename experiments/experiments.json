@@ -1,0 +1,30 @@
+{
+  "experiment": {
+    "id":"0",
+    "elements": [
+      {
+        "className":"FullScreenImage", 
+        "name":"Image00",
+        "s_url":"models/textures/text.tga",
+        "f_scale":[0.9,0.9],
+        "f_timeout":5
+      },
+      {
+        "className":"FullScreenImage",
+        "name":"Image11",
+        "s_url":"models/textures/text.tga",
+        "f_scale":[0.5,0.5],
+        "f_timeout":5
+      },
+      {
+        "className":"Game",
+        "name":"Game",
+        "s_config_json":"config/gameConfig.json",
+        "s_saveReplay":"run/replayLog.txt,w",
+        "s_logFile":"run/gameLog.txt,a"
+      }
+  }
+}
+
+
+

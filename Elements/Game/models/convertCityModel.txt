@@ -1,0 +1,2 @@
+for i in `find ./ -iname "*.flt"`; do flt2egg -ignore $i >$(dirname $i)/$(basename $i .flt).egg; sed -i -e 's/\\/\//g'
+$(dirname $i)/$(basename $i .flt).egg; done;

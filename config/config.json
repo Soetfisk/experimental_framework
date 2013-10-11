@@ -1,0 +1,17 @@
+{
+    "cameraConfig": {
+       "pos":[0.0,-110.0,7.0],
+       "lookAt":[0.0,0.0,20.0],
+       "fov":60.0,
+       "screenWidth":1024,
+       "screenHeight":768,
+       "parDistCam":250.0,
+       "delta":0
+    },
+    "simulationLog": {
+       "outfile":"run/worldlog.txt",
+       "mode":"a"
+    }
+}
+
+

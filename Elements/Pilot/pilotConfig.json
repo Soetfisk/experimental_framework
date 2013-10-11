@@ -1,0 +1,181 @@
+{
+     "cameraConfig": {
+        "pos":[0.0,-110.0,7.0],
+        "lookAt":[0.0,0.0,20.0],
+        "fov":60.0,
+        "screenWidth":1024,
+        "screenHeight":768,
+        "parDistCam":250.0
+     },
+     "_keys":"Keyboard callbacks, execute only once or many and arguments",
+     "keys": [
+      { "key":"z", "callback":"startPilot", "comment":"Start the pilot","once":true  }
+      ],
+    "pointsHUD": 
+    {
+        "enabled":true,
+        "font":"Elements/Game/models/textures/komikax.egg",
+        "size":0.05
+    },
+
+    "shooter": 
+    {
+        "crosshair":"Elements/Game/models/textures/crosshair256.png",
+        "control":"mouse",
+        "_control":"mouse or keyboard",
+        "focusplane":135.0,
+        "cannonModel":"Elements/Game/models/turret.egg",
+        "cannonPosY":3.5,
+        "cannonPosZ":-1.0,
+
+        "_cannonPosZ": [
+          " this is tricky, and a workaround, use",
+          "-1 for 1680x1050",
+          "-1.2 for 1024x768",
+          "-0.95 for 1280x800"
+        ],
+
+        "scaleCH":10.0,
+        "weapon":"",
+        "speedCH":1.0,
+        "bullet":"Elements/Game/models/ball.egg",
+        "bulletSet":10,
+        "_bulletSet":"How many bullets can be at the air at the same time",
+        "bulletSize":0.1,
+        "bulletTime":0.4,
+        "explosionParticle":"Elements/Game/explosion.ptf",
+        "cannonParticle":"Elements/Game/dust.ptf"
+    },
+
+    "validation":
+    {
+        "parachutesId":0,
+        "fallSpeed":8,
+        "distBetween":10,
+        "levelsTest":[0,1,2,3,4,5,6]
+    },
+
+    "soundsConfig":
+    {
+      "vol":100,
+      "enabled":true,
+      "sounds": [
+      { "id":"shoot", "filename":"Elements/Game/sounds/shoot.wav", "vol":1.0 },
+      { "id":"explosion", "filename":"Elements/Game/sounds/explosion.wav", "vol":0.5 }
+      ]
+    },
+
+    "targetSequences":
+    {
+      "use":"0",
+      "sequences": [
+          { "id":"0", "difficulty":"hard", "seq":["Red","Blue","Green","Green","Red","Blue"] },
+          { "id":"1", "difficulty":"easy", "seq":["Red","Red","Red","Red","Red","Red"] },
+          { "id":"2", "difficulty":"medium", "seq":["Red","Blue","Red","Blue","Red","Blue"] }
+      ]
+    },
+
+    "LODEvents":
+    {
+        "comment": [
+        "- affects: could be red,red0,all,non_targets,all_but_ct (ct=current_target) ",
+        "- speed: is the speed of change",
+        "- steps: is how many intermediate steps between the change in quality (change blindness)",
+        "- newQuality: could be a fixed quality or nothing if the type has a different way of calculating",
+        "- cycles: is specific for CYCLE type, indicating after how many cycles it should change to 'newQuality'",
+        "  see LoDManager.newCycle()"
+        ],
+
+        "lodEvents": [
+          { "evtType":"CYCLE", "affects":"all", "speed":1, "steps":1, "newQuality":"5", "cycles":1, "handler":"newCycle" },
+          { "evtType":"CURSOR_CHANGE", "affects":"non_targets", "speed":1, "steps":1, "newQuality":"X" },
+          { "evtType":"FORCE", "affects":"all_but_ct", "speed":1, "steps":1, "newQuality":"4" }
+        ]
+    },
+
+    "parachutes":
+    {
+      "simultaneous":6,
+      "falltime":6,
+      "scale":10,
+      "parachutes":
+        [
+         { "index":"0", 
+           "name":"Red",
+            "blendtype": {
+              "blendfunction":"direct"
+            },
+            "_blendtype": "change from 1 to 4 directly or in 4 steps -- direct, steps",
+            "textures": [
+               { "level":"0", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_50pct.png" },
+               { "level":"1", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_30pct.png" },
+               { "level":"2", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_25pct.png" },
+               { "level":"3", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_20pct.png" },
+               { "level":"4", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_15pct.png" },
+               { "level":"5", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_10pct.png" },
+               { "level":"6", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_5pct.png" }
+            ],
+            "models": [
+             { "level":"0", "name":"para01.egg" },
+             { "level":"1", "name":"para01.egg" },
+             { "level":"2", "name":"para01.egg" },
+             { "level":"3", "name":"para01.egg" },
+             { "level":"4", "name":"para01.egg" },
+             { "level":"5", "name":"para01.egg" },
+             { "level":"6", "name":"para01.egg" }
+            ]
+         },
+
+         { "index":"1", 
+           "name":"Blue",
+            "blendtype": {
+              "blendfunction":"direct"
+            },
+            "_blendtype": "change from 1 to 4 directly or in 4 steps -- direct, steps",
+            "textures": [
+               { "level":"0", "name":"Elements/Game/models/textures/soldiers/new/soldierBlue_50pct.png" },
+               { "level":"1", "name":"Elements/Game/models/textures/soldiers/new/soldierBlue_30pct.png" },
+               { "level":"2", "name":"Elements/Game/models/textures/soldiers/new/soldierBlue_25pct.png" },
+               { "level":"3", "name":"Elements/Game/models/textures/soldiers/new/soldierBlue_20pct.png" },
+               { "level":"4", "name":"Elements/Game/models/textures/soldiers/new/soldierBlue_15pct.png" },
+               { "level":"5", "name":"Elements/Game/models/textures/soldiers/new/soldierBlue_10pct.png" },
+               { "level":"6", "name":"Elements/Game/models/textures/soldiers/new/soldierBlue_5pct.png" }
+            ],
+            "models": [
+             { "level":"0", "name":"para01.egg" },
+             { "level":"1", "name":"para01.egg" },
+             { "level":"2", "name":"para01.egg" },
+             { "level":"3", "name":"para01.egg" },
+             { "level":"4", "name":"para01.egg" },
+             { "level":"5", "name":"para01.egg" },
+             { "level":"6", "name":"para01.egg" }
+            ]
+         },
+         { "index":"2", 
+           "name":"Green",
+            "blendtype": {
+              "blendfunction":"direct"
+            },
+            "_blendtype": "change from 1 to 4 directly or in 4 steps -- direct, steps",
+            "textures": [
+               { "level":"0", "name":"Elements/Game/models/textures/soldiers/new/soldierGreen_50pct.png" },
+               { "level":"1", "name":"Elements/Game/models/textures/soldiers/new/soldierGreen_30pct.png" },
+               { "level":"2", "name":"Elements/Game/models/textures/soldiers/new/soldierGreen_25pct.png" },
+               { "level":"3", "name":"Elements/Game/models/textures/soldiers/new/soldierGreen_20pct.png" },
+               { "level":"4", "name":"Elements/Game/models/textures/soldiers/new/soldierGreen_15pct.png" },
+               { "level":"5", "name":"Elements/Game/models/textures/soldiers/new/soldierGreen_10pct.png" },
+               { "level":"6", "name":"Elements/Game/models/textures/soldiers/new/soldierGreen_5pct.png" }
+            ],
+            "models": [
+             { "level":"0", "name":"para01.egg" },
+             { "level":"1", "name":"para01.egg" },
+             { "level":"2", "name":"para01.egg" },
+             { "level":"3", "name":"para01.egg" },
+             { "level":"4", "name":"para01.egg" },
+             { "level":"5", "name":"para01.egg" },
+             { "level":"6", "name":"para01.egg" }
+            ]
+         }
+      ]
+    }
+  }

@@ -1,0 +1,20 @@
+{
+    "keys": [
+        { "key":"a", "callback":"pressedKey", "once":true, "args":[1,2,3] },
+        { "key":"b", "callback":"pressedKey", "once":false, "args":[1,2,3] },
+        { "key":"C", "callback":"pressedKeyC" }
+      ],
+    "settings": {
+      "scale":0.06,
+      "maxlabel":10,
+      "labelcolour":[1.0,0.5,0.5,1.0],
+      "title":"Enter your data"
+    },
+    "input":[
+      { "label":"Name",      "type":"TextEntry", "default":"Jhon" },
+      { "label":"Last name", "type":"TextEntry", "default":"Doe" },
+      { "label":"Sex",       "type":"Option",    "values":["Female","Male","Undisclosed"] },
+      { "label":"Age",       "type":"TextEntry", "default":0 }
+    ]
+}
+

@@ -1,0 +1,10 @@
+Your home city is being invaded by aliens, you must
+protect your planet! You can only destroy the robots
+following the colours indicated in the sequence at
+the right side of your cannon.
+Some robot allies are comming to help you, their
+colour is not in the list of targets, do not attack
+them. If you shoot at the wrong colour, you will loose
+points and they will not be destroyed.
+At the end, you will be asked a short questionnaire
+about the game.

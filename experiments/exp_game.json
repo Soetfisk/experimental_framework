@@ -1,0 +1,35 @@
+{
+  "elements": [
+      {
+        "module":"Game",
+        "className":"Game",
+        "name":"GameA",
+        "s_config_json":"Elements/Game/gameConfig.json",
+        "s_saveReplay":"run/replayLogA.txt,w",
+        "s_logFile":"run/gameLogA.txt,a"
+      },
+      {
+        "module":"FullScreenImage",
+        "className":"FullScreenImage",
+        "name":"Image00",
+        "s_url":"Elements/Game/models/textures/text.tga",
+        "f_scale":[0.9,0.9],
+        "f_timeout":5
+      },
+      {
+        "module":"ReplayModule",
+        "className":"Replay",
+        "name":"ReplayA",
+        "replay":true,
+        "s_config_json":"Elements/ReplayModule/replayConfig.json",
+        "s_replayLog":"run/replayLogA.txt"
+      }
+      ],
+  "transitions": [
+     { "trans": "start @ GameA:auto" },
+     { "trans": "GameA @ Image00:auto" },
+     { "trans": "Image00 @ ReplayA:auto" },
+     { "trans": "ReplayA @ end:auto" }
+    ]
+}
+ 

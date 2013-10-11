@@ -1,0 +1,24 @@
+{
+  "elements": [
+      {
+        "className":"DataForm",
+        "name":"Questionnaire",
+        "s_config_json":"Elements/DataForm/userDataForm.json"
+      },
+      {
+        "className":"Game",
+        "name":"Game",
+        "s_config_json":"Elements/Game/gameConfig.json",
+        "s_saveReplay":"run/replayLog.txt,w",
+        "s_logFile":"run/gameLog.txt,a"
+      }
+    ],
+  "transitions": [
+     { "trans": "start @ Questionnaire:auto" },
+     { "trans": "Questionnaire @ Game:auto" },
+     { "trans": "Game @ end:auto" }
+    ]
+}
+
+
+

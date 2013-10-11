@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<text>
+
+<!-- Some text messages, default lang specified as well. -->
+    <gameIntro lang="english">
+       <english text="Your home city is being invaded by aliens, you must
+protect your planet!.\n
+You can only destroy the robots following the colours indicated in the sequence
+at the right side of your cannon.\n\n
+Some robot allies are comming to help you, their colour is not in the list
+of targets, do not attack them. If you shoot at the wrong colour, you will loose points and they will
+not be destroyed.\n\n
+At the end, you will be asked a short questionnaire about the game." />
+    </gameIntro>
+    <pilotIntro lang="english">
+       <english text="In this experimentation, you need to make selections
+between two parachute models falling in the 3d scene. You need to select
+which of the two has better visual quality.\n\nThey will appear side by side,
+and you will need click on the left or right buttons in the bottom of the screen to select one
+of them.\n\nTake your time to make the selection when you are sure, the models
+will cycle up-down on the scene. Once you have selected one model, click on
+the next button to test again with a different pair of models.\n\nPress the key z to
+start."/>
+    </pilotIntro>
+    <pilotThanks lang="english">
+        <english text="Thank you for your participation!, your results will be
+stored\n\n and used for future research. Press q to finish the application"/>
+    </pilotThanks>
+
+</text>

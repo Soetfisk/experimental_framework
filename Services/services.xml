@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services>
+    <service>
+        <arg name='s_description' value="Provides user data in a dictionary 
+            form (key,value) The data provided is defined in the userDataForm.xml 
+            UserData IS the name of the service, and once a service is obtained 
+            it can be accessed using the interface of the class Service."/>
+        <arg name='s_serviceName' value='UserData'/>
+        <arg name='s_direction' value='pull'/>
+        <arg name='s_taskChain' value='background'/>
+    </service>
+</services>
+
+

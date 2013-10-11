@@ -1,0 +1,11 @@
+{
+"_global_keys":["Directly specify hooks in the World object (METHODS) for keys"],
+"global_keys":
+    [
+      { "key":"v", "callback":"toggleVerbose", "comment":"Toggles verbose mode"},
+      { "key":"q", "callback":"quit","comment":"Quit the experiment"},
+      { "key":"0", "callback":"advanceFSM","comment":"Advance State Machine" },
+      { "key":"m", "callback":"toggleMouseCursor","comment":"Show/Hide mouse cursor" }
+    ]
+}
+ 

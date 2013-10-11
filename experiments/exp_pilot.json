@@ -1,0 +1,28 @@
+{
+  "elements": [
+      {
+        "className":"ScreenText",
+        "name":"IntroScreen",
+        "plain_text":"Elements/ScreenText/text1.txt"
+      },
+      {
+        "className":"ScreenText",
+        "name":"EndScreen",
+        "plain_text":"Elements/ScreenText/text2.txt"
+      },
+      {
+        "className":"Pilot",
+        "name":"Pilot",
+        "s_config_json":"Elements/Pilot/pilotConfig.json",
+        "s_saveReplay":"run/replayLogA.txt,w",
+        "s_logFile":"run/gameLogA.txt,a"    
+      }
+      ],
+  "transitions": [
+     { "trans": "start @ IntroScreen:auto" },
+     { "trans": "IntroScreen @ Pilot:auto" },
+     { "trans": "Pilot @ EndScreen:auto" },
+     { "trans": "EndScreen @ end:auto" }
+    ]
+}
+ 

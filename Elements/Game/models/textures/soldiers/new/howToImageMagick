@@ -1,0 +1,4 @@
+for i in `seq 10 70`; 
+do convert soldierMagenta.png -filter Lanczos -resize ${i}% temp.png; convert temp.png -filter Lanczos -resize 256x256 soldierMagenta_pct${i}.png; 
+done;
+

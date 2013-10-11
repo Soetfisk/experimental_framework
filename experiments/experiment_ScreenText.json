@@ -1,0 +1,21 @@
+{
+  "elements": [
+      {
+        "className":"ScreenText",
+        "name":"Screen1",
+        "plain_text":"Elements/ScreenText/text1.txt"
+      },
+      {
+        "className":"ScreenText",
+        "name":"Screen2",
+        "plain_text":"Elements/ScreenText/text2.txt"
+      }
+    ],
+  "transitions": [
+     { "trans": "start @ Screen1:auto" },
+     { "trans": "Screen1 @ Screen2:auto" },
+     { "trans": "Screen2 @ end:auto" }
+    ]
+}
+
+

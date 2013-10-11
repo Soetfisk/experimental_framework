@@ -1,0 +1,23 @@
+{
+  "elements": [
+      {
+        "className":"ImageChoice", 
+        "name":"ImageChoice",
+        "i_slots":3,
+        "csv_path_prefix":"Elements/ImageChoice/",
+        "images_path_prefix":"Elements/Game/models/textures/soldiers/new/",
+        "s_images":"Compare1.csv",
+        "r_scale":"High,Medium,Low",
+        "s_layout":"horizontal",
+        "b_random":true,
+        "f_scale":[0.3,0.3],
+        "f_horgap":0.2,
+        "f_timeout":50
+      }
+      ],
+  "transitions": [
+     { "trans": "start @ ImageChoice:auto" },
+     { "trans": "ImageChoice @ end:auto" }
+    ]
+}
+ 

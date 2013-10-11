@@ -1,0 +1,26 @@
+{
+  "elements": [
+      {
+        "module":"FullScreenImage",
+        "className":"FullScreenImage",
+        "name":"Image00",
+        "s_url":"Elements/Game/models/textures/text.tga",
+        "f_scale":[0.9,0.9],
+        "f_timeout":5
+      },
+      {
+        "module":"ReplayModule",
+        "className":"Replay",
+        "name":"ReplayA",
+        "replay":true,
+        "s_config_json":"Elements/ReplayModule/replayConfig.json",
+        "s_replayLog":"run/replayLogA.txt"
+      }
+      ],
+  "transitions": [
+     { "trans": "start @ Image00:auto" },
+     { "trans": "Image00 @ ReplayA:auto" },
+     { "trans": "ReplayA @ end:auto" }
+    ]
+}
+ 

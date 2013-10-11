@@ -1,0 +1,64 @@
+<CoordinateSystem> { Y-Up-Left }
+
+<Comment> {
+  "x2egg plane2.x plane2.egg"
+}
+<Group> groundPlane_transform {
+}
+<Group> pPlane1 {
+  <Group> mesh1 {
+    <VertexPool> mesh1 {
+      <Vertex> 0 {
+        0.5 -0.5 0
+        <UV> { 1 0 }
+        <Normal> { 0 0 1 }
+        <RGBA> { 1 1 1 1 }
+      }
+      <Vertex> 1 {
+        0.5 0.5 0
+        <UV> { 1 1 }
+        <Normal> { 0 0 1 }
+        <RGBA> { 1 1 1 1 }
+      }
+      <Vertex> 2 {
+        -0.5 0.5 0
+        <UV> { 0 1 }
+        <Normal> { 0 0 1 }
+        <RGBA> { 1 1 1 1 }
+      }
+      <Vertex> 3 {
+        -0.5 -0.5 0
+        <UV> { 0 0 }
+        <Normal> { 0 0 1 }
+        <RGBA> { 1 1 1 1 }
+      }
+      <Vertex> 4 {
+        -0.5 -0.5 0
+        <UV> { 0 0 }
+        <Normal> { 0 0 -1 }
+        <RGBA> { 1 1 1 1 }
+      }
+      <Vertex> 5 {
+        -0.5 0.5 0
+        <UV> { 0 1 }
+        <Normal> { 0 0 -1 }
+        <RGBA> { 1 1 1 1 }
+      }
+      <Vertex> 6 {
+        0.5 -0.5 0
+        <UV> { 1 0 }
+        <Normal> { 0 0 -1 }
+        <RGBA> { 1 1 1 1 }
+      }
+      <Vertex> 7 {
+        0.5 0.5 0
+        <UV> { 1 1 }
+        <Normal> { 0 0 -1 }
+        <RGBA> { 1 1 1 1 }
+      }
+    }
+    <Polygon> {
+      <VertexRef> { 6 7 5 4 <Ref> { mesh1 } }
+    }
+  }
+}

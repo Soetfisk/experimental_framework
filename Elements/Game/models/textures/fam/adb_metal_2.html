@@ -1,0 +1,349 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+	<title>Metal texture family</title>
+
+	<style type="text/css">
+		* html	{ overflow: auto; }	/* hide unnecessary scrollbars in IE */
+		body
+		{
+			background-color: black;
+			color: #678;
+			font: 95% Georgia, "Times New Roman", Times, serif;
+			padding: 0;
+			margin: 0;
+		}
+
+		h1, h2, h3	{ font-family: Georgia, "Times New Roman", Times, serif; font-weight: normal; margin: 0; }
+
+		h1	{ font-size: 200%; color: #DEF; border-bottom: 1px solid #332; line-height: 75%; margin: 0.25em 0; text-align: center; }
+		h2	{ font-size: 145%; color: #9AC; margin: 0 0 0.25em; }
+		h3	{ font-size: 133%; color: #456; margin: 0.5em 0 0; }
+
+		img	{ padding: 3px; vertical-align: middle; border: 1px solid #654; }
+
+		a			{ font-weight: bold; text-decoration: none; }
+		a:link		{ color: #A86; }
+		a:visited	{ color: #654; }
+		a:hover,
+		a:active	{ color: #FC9; }
+
+		.hide				{ visibility: hidden; }
+
+		#family_details		{ margin: 0 0 1em; padding: 0; list-style: none; font-size: 75%; text-align: center; color: #9AC; }
+		#family_details	li	{ display: inline; padding: 0 0.33em 0 0.5em; border-left: 1px dotted #345; white-space: nowrap; }
+		#family_details #family_name	{ display: none; }
+		#family_details #version		{ border-left: 0; }
+
+		#viewmode_control
+		{
+			font-size: 100%;
+			font-family: Georgia, "Times New Roman", Times, serif;
+			vertical-align: middle;
+			background-color: black;
+			color: white;
+			border: 1px solid #654;
+		}
+
+		#preview ul			{ width: 256px; margin: 0 auto; padding: 0; font-size: 75%; }
+		#preview li			{ list-style: none; padding: 0; border: 0; margin: 0; width: auto; }
+		#preview_assetname	{ float: left; color: #9AB; }
+		#preview_dimensions	{ float: right !important; color: white; }
+
+		#thumbnails img				{ margin: 4px 2px; }
+		#thumbnails a:hover img		{ border-color: #A86; }
+		#thumbnails a:focus img,
+		#thumbnails a.focus img		{ border: 2px solid #FC6 !important; padding: 2px; }
+		#thumbnails a:focus			{ outline: none; -moz-outline: none; }
+
+		#thumbnail_tip		{ font-size: 75%; margin: 0 0 1em; }
+		#thumbnail_controls	{ color: #654; }
+	</style>
+
+	<style type="text/css" rel="preferred stylesheet" title="Grouped by style">
+		/* Only for IE: hack to emulate fixed-positioning /* */
+		* html				{ overflow: hidden; }
+		* html body			{ height: 100%; overflow: auto; }
+		* html #preview		{ position: absolute; }
+		/* */
+
+		#preview			{ text-align: center; position: fixed; top: 4.5em; left: 0; width: 360px; }
+
+		#thumbnail_pane		{ margin-left: 360px; padding-left: 40px; border-left: 1px solid #223; }
+		#thumbnail_controls	{ display: none; }
+
+		#thumbnails ul.gallery		{ list-style: none; margin: 0; padding: 0; }
+		#thumbnails ul.gallery li	{ display: inline; }
+
+		/* 0.5x scaling */
+		.width-128	{ width: 64px; }
+		.width-256	{ width: 128px; }
+		.height-128	{ height: 64px; }
+		.height-256	{ height: 128px; }
+	</style>
+
+	<style type="text/css" rel="alternate stylesheet" title="Filmstrip" disabled="disabled">
+		#preview	{ height: 320px; text-align: center; }
+
+		#thumbnail_pane
+		{
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			width: 100%;
+			white-space: nowrap;
+			background: black;
+			border-top: 1px solid #223;
+			padding-top: 4px;
+			text-align: center;
+		}
+		#thumbnails	{ width: 100%; height: 112px; overflow: auto; }
+		html>body #thumbnails	{ height: auto; min-height: 112px; }
+
+		#thumbnails div.section,
+		#thumbnails ul.gallery,
+		#thumbnails ul.gallery li		{ display: inline; margin: 0; padding: 0; }
+		#thumbnails div.section h3		{ display: none; }
+
+		/* 0.25x scaling */
+		.width-128	{ width: 32px; }
+		.width-256	{ width: 64px; }
+		.height-128	{ height: 32px; }
+		.height-256	{ height: 64px; }
+	</style>
+
+	<style type="text/css" rel="alternate stylesheet" title="Thumbnails" disabled="disabled">
+		#preview						{ height: 320px; text-align: center; }
+
+		#thumbnail_pane					{ background: black; border-top: 1px solid #223; padding-top: 4px; text-align: center; }
+		#thumbnails div.section,
+		#thumbnails ul.gallery,
+		#thumbnails ul.gallery li		{ display: inline; margin: 0; padding: 0; }
+		#thumbnails div.section h3		{ display: none; }
+	
+		/* 0.25x scaling */
+		.width-128	{ width: 32px; }
+		.width-256	{ width: 64px; }
+		.height-128	{ height: 32px; }
+		.height-256	{ height: 64px; }
+	</style>
+
+
+	<script type="text/javascript">
+		/* Texture-picker functions */
+		function showTexture(linkEl)
+		{
+			previewEl	= document.getElementById('preview');
+			imageEl		= linkEl.firstChild;
+
+			path		= imageEl.src;
+			title		= imageEl.alt;
+			width		= imageEl.className.match('width-(\\d*)')[1];
+			height		= imageEl.className.match('height-(\\d*)')[1];
+			assetName	= path.substring(path.lastIndexOf('/adb_') + 1, path.lastIndexOf('.'));
+			assetName	= assetName.replace('/', '\\', 'g');
+
+			previewTitle		= document.getElementById('preview_title');
+			previewImage		= document.getElementById('preview_image');
+			previewAssetName	= document.getElementById('preview_assetname');
+			previewWidth		= document.getElementById('preview_width');
+			previewHeight		= document.getElementById('preview_height');
+
+			previewImage.src			= path;
+			previewTitle.innerHTML		= title;
+			previewAssetName.innerHTML	= assetName;
+			previewWidth.innerHTML		= width;
+			previewHeight.innerHTML		= height;
+
+			if (document.textureList)
+			{
+				if (typeof(document.textureList.currentIndex) != 'undefined')
+				{
+					document.textureList[document.textureList.currentIndex].className = '';
+				}
+				document.textureList.currentIndex = getArrayIndex(document.textureList, linkEl);
+			}
+
+			//Fix the link and preview classes
+			linkEl.focus();
+			linkEl.className = 'focus';
+
+			//remove the hide class from the preview
+			previewEl.className = '';
+
+			return false;
+		}
+
+		function showPreviousTexture()
+		{
+			if (!document.textureList) return false;
+
+			previousIndex = document.textureList.currentIndex - 1;
+			if (previousIndex < 0) previousIndex = document.textureList.length - 1;
+
+			showTexture(document.textureList[previousIndex]);
+		}
+
+		function showNextTexture()
+		{
+			if (!document.textureList) return false;
+
+			nextIndex = document.textureList.currentIndex + 1;
+			if (!document.textureList[nextIndex]) nextIndex = 0;
+
+			showTexture(document.textureList[nextIndex]);
+		}
+
+		var LEFTARROW = 37;
+		var RIGHTARROW = 39;
+		function scrollWithArrows(event)
+		{
+			if (window.event) event = window.event;	//Internet Explorer event model
+			if (event.keyCode == LEFTARROW) showPreviousTexture();
+			else if (event.keyCode == RIGHTARROW) showNextTexture();
+			return false;
+		}
+
+		/* View-mode selection functions */
+
+		function switchViewMode(viewMode)
+		{
+			styleSheets = document.getElementsByTagName('style');
+			for (var i = 0; i < styleSheets.length; i++)
+			{
+				style = styleSheets[i];
+				style.disabled = (style.title && style.title != viewMode);
+			}
+			document.viewMode = viewMode;
+			//record this choice for the next pageview
+			setCookie('viewMode', viewMode);
+		}
+
+		function restoreViewMode()
+		{
+			viewMode = getCookie('viewMode');
+			if (!viewMode) return false;
+			modeSelector = document.getElementById('viewmode_control');
+			for (var i = 0; i < modeSelector.options.length; i++)
+			{
+				if (modeSelector.options[i].value == viewMode)
+				{
+					modeSelector.selectedIndex = i;
+					switchViewMode(viewMode);
+				}
+			}
+		}
+
+		/* Script initialisation */
+		function initPage()
+		{
+			document.textureList = document.getElementById('thumbnails').getElementsByTagName('a');
+			for (var i = 0; i < document.textureList.length; i++)
+			{
+				texture = document.textureList[i];
+				texture.onfocus = function(){ showTexture(this); };
+				texture.onclick = function(){ showTexture(this); return false; };
+			}
+
+			if (document.addEventListener) document.addEventListener('keypress', scrollWithArrows, true);
+			else if (document.attachEvent) document.attachEvent('onkeydown', scrollWithArrows);
+
+			restoreViewMode();
+		}
+	</script>
+
+	<script type="text/javascript">
+		/* Generic helper functions */
+		function getCookie(name)
+		{
+			var cookie = document.cookie.split("; ");
+			for (var i = 0; i < cookie.length; i++)
+			{
+				var crumb = cookie[i].split("=");
+				if (name == crumb[0]) return unescape(crumb[1]);
+			}
+			return null;
+		}
+
+		function setCookie(name, value)
+		{
+			date = new Date();
+			date.setMonth(date.getMonth() + 1);	//increment the month by one
+
+			document.cookie = name + "=" + escape(value) + "; expires=" + date.toGMTString();
+		}
+
+		function getArrayIndex(array, entry)
+		{
+			for (var i = 0; i < array.length; i++) { if (array[i] == entry) return i; }
+			return false;
+		}
+	</script>
+</head>
+<body onload="initPage()">
+	<h1>Metal texture family</h1>
+	<ul id="family_details">
+		<li id="version"><a href="http://www.washboardabs.net/thief/textures/metal/" title="Click here to check my website for a newer version of this family">Version 2.0 <span id="release_date">(September 01, 2005)</span></a></li>
+		<li id="viewmode"><label for="viewmode_control">View gallery:</label> <select id="viewmode_control" onchange="switchViewMode(this.options[this.selectedIndex].value)">
+			<option value="Grouped by style" selected="selected">grouped by style</option>
+			<option value="Filmstrip">as filmstrip</option>
+			<option value="Thumbnails">as thumbnails</option>
+		</select></li>
+	</ul>
+
+	<div id="preview" class="hide">
+		<h2 id="preview_title"></h2>
+		<img id="preview_image" src="" alt="" />
+		<ul>
+			<li id="preview_assetname"></li>
+			<li id="preview_dimensions"><span id="preview_width"></span>&times;<span id="preview_height"></span></li>
+		</ul>
+	</div>
+
+	<div id="thumbnail_pane">
+		<p id="thumbnail_tip">Click on a thumbnail to view the fullsize texture.
+			<span id="thumbnail_controls">
+				<a href="#" onclick="showPreviousTexture(); return false;" title="Previous texture (left arrow key)">&laquo;Prev</a> | 
+				<a href="#" onclick="showNextTexture(); return false;" title="Next texture (right arrow key)">Next &raquo;</a>
+			</span>
+		</p>
+
+		<div id="thumbnails">
+			<div class="section" id="metal1">
+				<h3>Slimy metal</h3>
+				<ul class="gallery">
+					<li><a href="adb_metal_2/metal1.gif"><img src="adb_metal_2/metal1.gif" alt="Slimy metal" class="width-128 height-128" /></a></li>
+					<li><a href="adb_metal_2/metal1_pipe.gif"><img src="adb_metal_2/metal1_pipe.gif" alt="Pipe" class="width-64 height-128" /></a></li>
+					<li><a href="adb_metal_2/girder.gif"><img src="adb_metal_2/girder.gif" alt="Thin girder" class="width-64 height-128" /></a></li>
+					<li><a href="adb_metal_2/girder.gif"><img src="adb_metal_2/girder_lg.gif" alt="Wide girder" class="width-128 height-128" /></a></li>
+				</ul>
+			</div>
+
+			<div class="section" id="metal2">
+				<h3>Brass</h3>
+				<ul class="gallery">
+					<li><a href="adb_metal_2/metal2.gif"><img src="adb_metal_2/metal2.gif" alt="Brass" class="width-128 height-128" /></a></li>
+					<li><a href="adb_metal_2/metal2_pipe.gif"><img src="adb_metal_2/metal2_pipe.gif" alt="Brass pipe" class="width-128 height-128" /></a></li>
+				</ul>
+			</div>
+
+			<div class="section" id="metal3">
+				<h3>Rusty metal</h3>
+				<ul class="gallery">
+					<li><a href="adb_metal_2/metal3.gif"><img src="adb_metal_2/metal3.gif" alt="Rusty metal" class="width-256 height-256" /></a></li>
+					<li><a href="adb_metal_2/metal3_scr.gif"><img src="adb_metal_2/metal3_scr.gif" alt="Rusty metal with scratches" class="width-256 height-256" /></a></li>
+					<li><a href="adb_metal_2/metal3_pipe.gif"><img src="adb_metal_2/metal3_pipe.gif" alt="Rusty metal pipe" class="width-256 height-256" /></a></li>
+				</ul>
+			</div>
+			<div class="section" id="misc">
+				<h3>Miscellaneous</h3>
+				<ul class="gallery">
+					<li><a href="adb_metal_2/step.gif"><img src="adb_metal_2/step.gif" alt="Metal step" class="width-128 height-64" /></a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

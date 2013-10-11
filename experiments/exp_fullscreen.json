@@ -1,0 +1,24 @@
+{
+  "elements": [
+      {
+        "className":"FullScreenImage", 
+        "name":"Image00",
+        "s_url":"Elements/Game/models/textures/text.tga",
+        "f_scale":[0.9,0.9],
+        "f_timeout":5
+      },
+      {
+        "className":"FullScreenImage",
+        "name":"Image11",
+        "s_url":"Elements/Game/models/textures/text.tga",
+        "f_scale":[1.0,1.0],
+        "f_timeout":5
+      }
+   ],
+  "transitions": [
+     { "trans": "start @ Image00:auto" },
+     { "trans": "Image00 @ Image11:auto" },
+     { "trans": "Image11 @ end:auto" }
+    ]
+}
+ 

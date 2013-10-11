@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<experiments>
+    <!-- 
+         Element names BEGIN with a capital letter, and have a unique
+         id which represents a state in a FSM.
+
+         ALL Elements MUST inherit from the Element class (Element.py)
+
+         BEWARE that a given Element subclass may try to access to a particular
+         atributte, causing an exception in run-time if the attribute hasn't been
+         defined here in the Element description!
+         Elements can define default arguments for missing values if they are not
+         critical for their functionality!.
+
+         Transitions between elements in the experiment define the FSM.
+         If no transitions are given, an implicit linear sequence is assumed.
+         Else, each transition from one element to another is triggered by a
+         particular asynchronous event. Events can be queued and make the FSM
+         to flow from one state to another based on these queued events.
+    -->
+    <experiment id="0">
+        <element className="FullScreenImage" name="Image00">
+            <arg name="s_url" value="models/textures/text.tga"/>
+            <arg name="f_scale" value="0.9,0.9"/>
+            <arg name="f_timeout" value="5"/>
+        </element>
+        <element className="FullScreenImage" name="Image11">
+            <arg name="s_url" value="models/textures/text.tga"/>
+            <arg name="f_scale" value="0.5,0.5"/>
+            <arg name="f_timeout" value="5"/>
+        </element>
+        <element className="Game" name="Game">
+            <arg name="s_config"       value="config/gameConfig.xml"/>
+            <arg name="s_config_json"  value="config/gameConfig.json"/>
+            <arg name="s_saveReplay"   value="run/replayLog.txt,w"/>
+            <arg name="s_logFile"      value="run/gameLog.txt,a"/>
+        </element>
+
+<!--
+   -        <element className="Calib" name="Calibration">
+   -            <arg name="s_config"     value="config/calconfig.xml"/>
+   -        </element>
+   -
+   -->
+
+
+        <!-- Using ":auto" defines the default transition, if nothing
+             else is defined. -->
+        <transitions>
+            <transition start='start' end='Image00:auto'/>
+            <transition start='Image00' end='Image11:auto'/>
+            <transition start='Image11' end='Game:auto'/> 
+            <transition start='Game' end='end:auto'/> 
+        </transitions>
+     </experiment>
+
+    <experiment id='5'>
+        <element className="FullScreenImage" name="Image0">
+            <arg name="s_url" value="models/textures/text.tga"/>
+            <arg name="f_scale" value="0.9,0.9"/>
+            <arg name="f_timeout" value="5"/>
+        </element>
+        <element className="FullScreenImage" name="Image1">
+            <arg name="s_url" value="models/textures/soldiers/new/soldierRed_50pct.png"/>
+            <arg name="f_scale" value="0.3,0.3"/>
+            <arg name="i_count" value="2"/>
+            <arg name="f_timeout" value="5"/>
+        </element>
+        <transitions>
+            <!-- Transitions, have a start and end node, and an event -->
+            <!-- You can specify more ends as a comma separated list -->
+            <transition start='start' end='Image0:auto'/>
+            <transition start='Image0' end='Image1:auto'/>
+            <transition start='Image1' end='Image0:auto'/>
+            <transition start='Image1' end='end:NoMoreImages'/>
+        </transitions>
+    </experiment>
+        
+    <experiment id="1"> 
+        <element className="ImageChoice" name="Compare1"> 
+            <!-- i_slots indicate how many images we are comparing side by side-->
+            <!-- s_images is a csv file with the images, row by row -->
+            <arg name="i_slots"   value="3" />
+            <arg name="s_images"  value="config/Compare1.csv"/>
+            <arg name="r_scale"   value="High,Medium,Low"/>
+            <arg name="s_layout"  value="horizontal" />
+            <!-- mix image positions on the screen -->
+            <arg name="b_random"  value="True"/>
+            <arg name="f_scale"   value="0.3,0.3"/>
+            <arg name="f_horgap"  value="0.2"/>
+            <arg name="f_timeout" value="50"/>
+        </element>
+        <element className="ScreenText" name="IntroText"> 
+            <arg name="s_config"     value="config/text.xml"/>
+            <arg name="s_text" value="pilotIntro"/>
+            <arg name="s_lang" value="english"/>
+            <arg name="f_timeout" value="5"/>
+        </element>
+        <element className="FullScreenImage" name="Image1">
+            <arg name="s_url" value="models/textures/soldiers/new/soldierRed_50pct.png"/>
+            <arg name="f_scale" value="0.3,0.3"/>
+            <arg name="f_timeout" value="5"/>
+        </element>
+         <element className="ScreenText" name="ThanksText"> 
+            <arg name="s_config"     value="config/text.xml"/>
+            <arg name="s_text" value="pilotThanks"/>
+            <arg name="f_timeout" value="5"/>
+        </element>
+        <transitions>
+            <!-- Transitions, have a start and end node, and an event -->
+            <!-- You can specify more ends as a comma separated list -->
+            <transition start='start' end='Compare1:auto'/>
+            <transition start='Compare1' end='IntroText:auto'/>
+            <transition start='IntroText' end='Compare1:moreImages,IntroText:auto'/>
+            <transition start='IntroText' end='ThanksText:auto'/>
+        </transitions>
+    </experiment>
+    
+    <experiment id="3"> 
+        <element className="Replay" name="Replay">
+            <!-- needed for the game object -->
+            <arg name="s_config"     value="config/gameConfig.xml"/>
+            <arg name="s_replayLog" value="run/replayLog.txt,w"/>
+        </element>
+        <!-- using default transitions here -->
+    </experiment>
+
+    <experiment id="4">
+        <element className="Pilot" name="Pilot">
+            <arg name="s_config"   value="config/gameConfig.xml"/>
+            <arg name="s_pilotLog" value="run/pilotLog.txt,a"/>
+        </element>
+        <!-- using default transitions here -->
+    </experiment>
+</experiments>
+
