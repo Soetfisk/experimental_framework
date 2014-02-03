@@ -1,5 +1,5 @@
 {
-"_global_keys":["Directly specify hooks in the World object (METHODS) for keys"],
+"_global_keys":["Directly specify hooks in the World object (METHODS) for keys, this keys should not be overidden by Elements"],
 "global_keys":
     [
       { "key":"v", "callback":"toggleVerbose", "comment":"Toggles verbose mode"},

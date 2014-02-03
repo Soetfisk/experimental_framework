@@ -111,13 +111,13 @@
             },
             "_blendtype": "change from 1 to 4 directly or in 4 steps -- direct, steps",
             "textures": [
-               { "level":"0", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_50pct.png" },
-               { "level":"1", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_30pct.png" },
-               { "level":"2", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_25pct.png" },
-               { "level":"3", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_20pct.png" },
-               { "level":"4", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_15pct.png" },
-               { "level":"5", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_10pct.png" },
-               { "level":"6", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_5pct.png" }
+               { "level":"0", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_pct50.png" },
+               { "level":"1", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_pct30.png" },
+               { "level":"2", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_pct25.png" },
+               { "level":"3", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_pct20.png" },
+               { "level":"4", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_pct15.png" },
+               { "level":"5", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_pct10.png" },
+               { "level":"6", "name":"Elements/Game/models/textures/soldiers/new/soldierRed_pct5.png" }
             ],
             "models": [
              { "level":"0", "name":"para01.egg" },
@@ -142,8 +142,7 @@
                { "level":"2", "name":"Elements/Game/models/textures/soldiers/new/soldierBlue_25pct.png" },
                { "level":"3", "name":"Elements/Game/models/textures/soldiers/new/soldierBlue_20pct.png" },
                { "level":"4", "name":"Elements/Game/models/textures/soldiers/new/soldierBlue_15pct.png" },
-               { "level":"5", "name":"Elements/Game/models/textures/soldiers/new/soldierBlue_10pct.png" },
-               { "level":"6", "name":"Elements/Game/models/textures/soldiers/new/soldierBlue_5pct.png" }
+               { "level":"5", "name":"Elements/Game/models/textures/soldiers/new/soldierBlue_10pct.png" }
             ],
             "models": [
              { "level":"0", "name":"para01.egg" },
@@ -151,8 +150,7 @@
              { "level":"2", "name":"para01.egg" },
              { "level":"3", "name":"para01.egg" },
              { "level":"4", "name":"para01.egg" },
-             { "level":"5", "name":"para01.egg" },
-             { "level":"6", "name":"para01.egg" }
+             { "level":"5", "name":"para01.egg" }
             ]
          },
          { "index":"2", 

@@ -1,6 +1,7 @@
 {
   "elements": [
       {
+        "module":"DataForm",
         "className":"DataForm",
         "name":"Questionnaire",
         "s_config_json":"Elements/DataForm/userDataForm.json"

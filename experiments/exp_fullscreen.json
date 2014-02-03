@@ -1,6 +1,7 @@
 {
   "elements": [
       {
+        "module":"FullScreenImage",
         "className":"FullScreenImage", 
         "name":"Image00",
         "s_url":"Elements/Game/models/textures/text.tga",
@@ -8,10 +9,11 @@
         "f_timeout":5
       },
       {
+        "module":"FullScreenImage",
         "className":"FullScreenImage",
         "name":"Image11",
         "s_url":"Elements/Game/models/textures/text.tga",
-        "f_scale":[1.0,1.0],
+        "f_scale":[1.5,1.5],
         "f_timeout":5
       }
    ],
