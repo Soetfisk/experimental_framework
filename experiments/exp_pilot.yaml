@@ -1,0 +1,53 @@
+elements:
+ - className: ScreenText
+   name: IntroScreen
+   plain_text: PilotData/introPilot.txt
+
+ - className: EmptyState
+   name: start
+   timeout: 1.0
+
+ - className: EmptyState
+   name: end
+
+ - className: DataForm
+   name: UserInfo
+   s_config_json: PilotData/pilotDataForm.yaml
+
+ - className: HUDText
+   name: Timer
+   text: "0.0"
+   topLeft: [10, 10]
+
+ - module: ScreenText
+   className: ScreenText
+   name: PrePilotScreen
+   plain_text: PilotData/prePilot.txt
+
+ - className: Pilot
+   name: Pilot
+   s_config_json: PilotData/pilotConfig.yaml
+   s_saveReplay: PilotData/run/replayLogA.txt,w
+   s_logFile: PilotData/run/pilot.txt,a
+
+ - module: DataForm
+   className: DataForm
+   name: PilotQuestionnaire
+   s_config_json: PilotData/pilotQuestionnaire.yaml
+
+ - module: ScreenText
+   className: ScreenText
+   name: FinalScreen
+   plain_text: PilotData/finalText.txt
+
+transitions:
+ - trans: 'start @ IntroScreen'
+ - trans: 'IntroScreen @ UserInfo'
+ - trans: 'UserInfo @ PrePilotScreen : exitDataForm'
+ # Here Pilot will trigger the start of Timer also.
+ - trans: 'PrePilotScreen @ Pilot : auto'
+ - trans: 'PrePilotScreen @ Timer : auto'
+ - trans: 'Pilot @ PilotQuestionnaire : exitPilot'
+ - trans: 'Timer @ PilotQuestionnaire : exitPilot'
+ - trans: 'PilotQuestionnaire @ FinalScreen : exitDataForm'
+ - trans: 'FinalScreen @ end : auto'

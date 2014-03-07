@@ -27,23 +27,23 @@ from PositionGenerator import PositionGenerator
 #   floor:
 #       - if it's the target, it has to appear up again
 #       - if it's not, add a new random.
+
 class Parachute(DirectObject):
     # class attribute to store textures
     texDict = {}
     parachuteTex = None
-
     # name: name for this instance of Parachute
     # parConf: config coming from JSON
     # posGen: reference to position generation manager
     # falltime: fall time for this parachute
-    def __init__(self, name, parConf, game, falltime, scale, collisions=True):
+    def __init__(self, name, parConf, game, posGen, falltime, scale, collisions=True):
         # grab a reference to the class!, to use
         # class attributes, this is python :|
         cls = self.__class__
 
         self.name = name
         self.game = game
-        self.posGen = game.posGen
+        self.posGen = posGen
         self.falltime = falltime
         self.changeStep = parConf.blendtype.blendfunction
         self.collisions = collisions

@@ -113,7 +113,7 @@ class Calib(Element):
     def setupKeys(self):
         # global setup keys
         k = self.kbd
-        k.registerKey('o',self.advanceCalTarget, False,[])
+        k.registerKey('o','EyeTracker', self.advanceCalTarget, False, [])
         # calibration
     #    if (s == "calibrationScreen"):
     #        self.accept("m", self.moveTarget)

@@ -1,0 +1,87 @@
+# configuration for the camera.
+# the application expects the following values.
+# [] are lists, {} are dicts, and so on.
+# the whole file is a dictionary
+# { 'cameraConfig': xxx, 'keys': xxx, and so on }
+
+# this dictionary entry is another dictionary
+#cameraConfig:
+#  pos: [0.0,-110.0,7.0]
+#  lookAt: [0.0,0.0,20.0]
+#  fov: 60.0
+#  screenWidth: 1280
+#  screenHeight: 800
+#  parDistCam: 250.0
+
+# Keyboard callbacks, execute only once or many and arguments
+# this is an entry which is a LIST of dictionaries
+keys:
+ - key: z
+   callback: startPilot
+   comment: Start the pilot
+   once: true
+ - key: x
+   callback: sendMessage
+   comment: send termina message
+   once: false
+   args: ['exitPilot']
+ - key: p
+   callback: printSize
+   comment: ""
+ - key: i
+   callback: move
+   args: [0,0,5]
+ - key: j
+   callback: move
+   args: [-5,0,0]
+ - key: k
+   callback: move
+   args: [0,0,-5]
+ - key: l
+   callback: move
+   args: [5,0,0]
+ - key: a
+   callback: adjustScale
+   args: [128]
+
+# This seems not to be used atm
+# this is a dictionary
+validation:
+  parachutesId: 0
+  fallSpeed: 8
+  distBetween: 10
+  levelsTest: [0,1,2,3,4,5,6]
+
+# description of the parachutes models and textures.
+parachutes:
+  falltime: 6
+  scale: 20
+  modelname: PilotData/models/para02.egg
+  parachuteTex: PilotData/models/textures/para_tex.png
+  defaultIdx: 0
+  # list of dictionaries!
+  textures:
+    - index: 0
+      name: Red
+      texturePrefix: PilotData/textures/soldierRed_
+      textureMinLevel: 10
+      textureMaxLevel: 100
+      texturePostFix: .png
+    - index: 1
+      name: Blue
+      texturePrefix: PilotData/textures/soldierBlue_
+      textureMinLevel: 10
+      textureMaxLevel: 100
+      texturePostFix: .png
+    - index: 2
+      name: Green
+      texturePrefix: PilotData/textures/soldierGreen_
+      textureMinLevel: 10
+      textureMaxLevel: 100
+      texturePostFix: .png
+    - index: 3
+      name: Magenta
+      texturePrefix: PilotData/textures/soldierBlue_
+      textureMinLevel: 10
+      textureMaxLevel: 100
+      texturePostFix: .png

@@ -3,26 +3,46 @@
       {
         "className":"ScreenText",
         "name":"IntroScreen",
-        "plain_text":"Elements/ScreenText/text1.txt"
+        "plain_text":"PilotData/introPilot.txt"
       },
       {
+        "className":"DataForm",
+        "name":"UserInfo",
+        "s_config_json":"PilotData/pilotDataForm.json"
+      },
+      {
+        "module":"ScreenText",
         "className":"ScreenText",
-        "name":"EndScreen",
-        "plain_text":"Elements/ScreenText/text2.txt"
+        "name":"PrePilotScreen",
+        "plain_text":"PilotData/prePilot.txt"
       },
       {
         "className":"Pilot",
         "name":"Pilot",
-        "s_config_json":"Elements/Pilot/pilotConfig.json",
-        "s_saveReplay":"run/replayLogA.txt,w",
-        "s_logFile":"run/gameLogA.txt,a"    
+        "s_config_json":"PilotData/pilotConfig.yaml",
+        "s_saveReplay":"PilotData/run/replayLogA.txt,w",
+        "s_logFile":"PilotData/run/pilot.txt,a"
+      },
+      {
+          "module":"DataForm",
+          "className":"DataForm",
+          "name":"PilotQuestionnaire",
+          "s_config_json":"PilotData/pilotQuestionnaire.json"
+      },
+      {
+        "module":"ScreenText",
+        "className":"ScreenText",
+        "name":"FinalScreen",
+        "plain_text":"PilotData/finalText.txt"
       }
       ],
   "transitions": [
-     { "trans": "start @ IntroScreen:auto" },
-     { "trans": "IntroScreen @ Pilot:auto" },
-     { "trans": "Pilot @ EndScreen:auto" },
-     { "trans": "EndScreen @ end:auto" }
-    ]
+     { "trans": "start @ Pilot" },
+     { "trans": "IntroScreen @ UserInfo" },
+     { "trans": "UserInfo @ PrePilotScreen" },
+     { "trans": "PrePilotScreen @ Pilot" },
+     { "trans": "Pilot @ end" },
+     { "trans": "PilotQuestionnaire @ FinalScreen" },
+     { "trans": "FinalScreen @ end" }
+  ]
 }
- 

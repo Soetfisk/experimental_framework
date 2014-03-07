@@ -13,8 +13,8 @@ class DataForm(Element):
     """Class to display a form on screen and
     capture user data. The form is constructed
     dynamically from a JSON description.
-    The class provides a service, to serve this
-    user data as a dictionary to anyone that
+    The class provides a service, to serve the
+    answers as a dictionary to anyone that
     posseses a hook"""
     def __init__(self, **kwargs):
         """
@@ -22,16 +22,23 @@ class DataForm(Element):
         """
         # build basic element
         super(DataForm, self).__init__(**kwargs)
-        printOut("Element for DataForm constructed",1)
-        # the config is loaded by Element automatically into self.jsonConfig
+        printOut("Element for DataForm constructed", 1)
+        # the config is loaded by Element automatically into self.config
         self.setupGUI()
-        printOut("DataForm GUI constructed",1)
+        printOut("DataForm GUI constructed", 1)
         # create a simple service that can be queried in different ways,
         # pass (serverName, serviceName, callback)
-        self.createService('userdata0','UserData', self.getUserData)
-        printOut("Service userdata0 for dataform created",1)
+        # TODO
+        # self.createService('userdata0','UserData', self.getUserData)
+        # printOut("Service userdata0 for dataform created",1)
+
         # in this dictionary we will keep the inputs from the form.
         self.userInput = {}
+
+    def needsToSaveData(self):
+        return True
+    def saveUserData(self):
+        self.saveInputs()
 
     def getUserData(self, input=[]):
         """Service published by this element,
@@ -58,9 +65,9 @@ class DataForm(Element):
         # background colour
         colour = (0.2,0.2,0.2,1)
         # guiLabels colour
-        labelColour = self.jsonConfig.settings.labelcolour
+        labelColour = self.config.settings.labelcolour
         # global scale of the frame
-        scale    = self.jsonConfig.settings.scale
+        scale    = self.config.settings.scale
         # canvas with scrolling capabilities
         self.myFrame = DirectScrolledFrame ( canvasSize=( frameSize[0], frameSize[1], 50*frameSize[2],
                               frameSize[3]), frameColor = colour, frameSize  = frameSize, pos = pos )
@@ -68,7 +75,7 @@ class DataForm(Element):
         self.myFrame.reparentTo(self.hudNP)
 
         # read title or set to a default value
-        title = getattr(self.jsonConfig.settings,"title", "Introduce your data")
+        title = getattr(self.config.settings,"title", "Introduce your data")
 
         # title of the frame
         label = OnscreenText( text = title,
@@ -78,20 +85,20 @@ class DataForm(Element):
         label.reparentTo(self.myFrame.getCanvas())
 
         # max length in characters of a label (will split in lines if bigger)
-        maxLabel = self.jsonConfig.settings.maxlabel
+        maxLabel = self.config.settings.maxlabel
         maxwidth=0
         # position of the first label and widget
         lastYpos = frameSize[3] - scale*4
 
-        for count,i in enumerate(self.jsonConfig.input):
+        for count,i in enumerate(self.config.input):
 
             # create label in several lines up to 15 chars
             # split the string in several lines up to 15 chars
             printOut("Creating element: %s" % i.label, 2)
-            splitWords = splitString( str(i.label) + ':', 10 )
+            splitWords = splitString( str(i.label) + ':', maxLabel  )
             for s in splitWords:
                 lastYpos -= 1.1*scale
-                label2 = OnscreenText(text = i.label, pos = (0,lastYpos),scale = scale, fg=labelColour,
+                label2 = OnscreenText(text = s, pos = (0,lastYpos),scale = scale, fg=labelColour,
                                      align=TextNode.ARight, mayChange=1)
                 bounds = label2.getTightBounds()
                 width = abs(bounds[0][0]-bounds[1][1])
@@ -166,7 +173,7 @@ class DataForm(Element):
     #def clearButton(self):
     #    self.clearInputs()
     def nextPressed(self):
-      self.world.advanceFSM()
+      self.world.advanceFSM('exitDataForm')
 
 
     def saveInputs(self):
@@ -176,12 +183,12 @@ class DataForm(Element):
         otherwise the value is saved a string. TickBox is always boolean.
         """
         # Internal comment:
-        # self.jsonConfig.input has the same order as self.guiLabels and self.focusOrder
+        # self.config.input has the same order as self.guiLabels and self.focusOrder
         # self.focusOrder is a list with each widget (with or without focus!)
         # Use datatype specified in the JSON to convert the values, if no datatype
         # is specified, assume string
 
-        for i,w in zip(self.jsonConfig.input, self.focusOrder):
+        for i,w in zip(self.config.input, self.focusOrder):
             datatypes=('int','float','str','bool')
 
             if (i.type == 'TickBox'):
@@ -249,6 +256,10 @@ class DataForm(Element):
 
     #def directEntryClearText(self):
     #    pass
+
+    def enterState(self):
+        Element.enterState(self)
+        #self.world.stopKeyboard()
 
     def exitState(self):
         # exit state

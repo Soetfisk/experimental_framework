@@ -5,26 +5,30 @@ from pandac.PandaModules import loadPrcFileData
 # pandaConfig defines a list of options to setup Panda3D
 import pandaConfig
 for o in pandaConfig.options:
-    loadPrcFileData('',o)
+    loadPrcFileData('', o)
 
 # rest of config files are stored in JSON format
 try:
     import json
 except ImportError:
     import simplejson as json
+import yaml
+
+from Utils.FiniteStateMachine import *
 
 # basic Panda3D imports
 import direct.directbase.DirectStart
 from direct.showbase.DirectObject import DirectObject
 from direct.gui.OnscreenText import OnscreenText
 from panda3d.core import TextNode
+from panda3d.core import WindowProperties
 
 # for finite state machines
 from direct.fsm.FSM import FSM
 
 # python imports
 from math import sin, cos, pi, ceil
-import sys,os
+import sys, os
 import time
 from time import ctime
 
@@ -37,7 +41,7 @@ from Logger import Logger
 # debug class
 from Utils.Debug import printOut, verbosity
 # services management class
-from ServiceMgr import *
+# from ServiceMgr import *
 
 # some misc useful functions
 from Utils.Utils import *
@@ -66,8 +70,8 @@ class World(DirectObject):
 
         # get global keys configuration
         # this keys are always available application wide
-        json_keys = json.load(open("config/globalKeys.json"))
-
+        # self.json_keys = json.load(open("config/globalKeys.json"))
+        self.keyConfig = yaml.load(open("config/globalKeys.yaml"))
 
         # This class inherits from DirectObject, and Keyboard
         # will get a reference to the messenger from us
@@ -76,17 +80,20 @@ class World(DirectObject):
         # display attached to Aspect2D
         self.screenText = {}
         # set very basic keys, and removes any event hook
-        printOut("Reseting keys",3)
-        self.resetKeys(json_keys)
-
-        # for the Eye-tracker
-        self.tracker = Tracker()
+        printOut("Reseting keys", 3)
+        self.resetKeys()
 
         # do some basic setup common to the whole framework
         self.generalSetup()
 
+        # for the Eye-tracker
+        self.tracker = Tracker()
+
         # build FSM of the experiment
         self.fsm = self.setupFSM(experiment)
+
+        # enter into the START state
+        self.elements['start'].enterState()
 
 
 
@@ -97,70 +104,92 @@ class World(DirectObject):
     def setupFSM(self, experiment):
         """
             Constructs a FSM where each node is one element in the
-            experiment. Based on events, the FSM can be non-deterministic.
-            See experimentXXX.json, where transitions are defined as
+            experiment. Based on events, the FSM can be non-deterministic,
+            and it can also allow for SIMULTANEOUS transitions, meaninng that
+            the FSM will have concurrent states executing.
+            See experiments/exp_XXX.yaml, where transitions are defined as
             A@B:event to specify a transition from A to B when event event
-            has happened.
+            has happened. If no event is specified an "auto" event is created.
         """
 
         # experiment configuration
         # dictionary form
         printOut("Loading json experiment: %s" %experiment,2)
-        json_exp = json.load(open(experiment))
-
+        if ('json' in experiment):
+            exp = json.load(open(experiment))
+        elif ('yaml' in experiment):
+            exp = yaml.load(open(experiment))
 
         # create an empty FSM object
-        fsm = FSM('TheIncredibleMachine')
+        # fsm = FSM('TheIncredibleMachine')
         # keep track of transitions in a separate dictionary
+        # the transitions are a nested dictionary
+        # { 'stateA': { 'event1':['stateB'] } }
         fsmTransitions = {}
 
-        # grab JSON transitions dictionary or assign a linear
+        # grab transitions dictionary or assign a linear
         # sequence based in order of appareance of the nodes
         try:
-            transitions = json_exp['transitions']
+            transitions = exp['transitions']
             printOut("Custom transitions defined for this experiment",2)
-        except KeyError,a:
+        except KeyError, a:
             transitions = []
             printOut("Default transitions (linear sequence)",2)
 
         for t in transitions:
-            start = t['trans'].split('@')[0].strip()
-            end = t['trans'].split('@')[1].split(':')[0].strip()
-            evt = t['trans'].split('@')[1].split(':')[1].strip()
-            if (start not in fsmTransitions.keys()):
-                fsmTransitions[start] = {}
-            fsmTransitions[start][evt] = end
-            # accept a message with the event evt to jump to end
-            if (evt!='auto'):
-                # the event handler will jump to the right state in the FSM
-                self.accept( evt, self.FsmEventHandler )
+            if ':' in t['trans']:
+                evt = t['trans'].split(':')[1].strip()
+            else:
+                evt = 'auto'
+            # parse the transition "fromA @ toB : whenEvt"
+            fromState, toState = t['trans'].split('@')
+            fromState = fromState.strip()
+            toState = toState.split(':')[0].strip()
 
+            # is this the first time this element is seen in the FSM
+            if fromState not in fsmTransitions.keys():
+                fsmTransitions[fromState] = {}
+
+            if evt not in fsmTransitions[fromState].keys():
+                # this is a list, because we want to support concurrent
+                # state changes.
+                fsmTransitions[fromState][evt] = []
+
+            # this is a list, because we want to support concurrent
+            fsmTransitions[fromState][evt] += [toState]
+            # accept a message with the event evt to jump to end
+            self.accept(evt, self.FsmEventHandler)
+            #if evt is not 'auto':
+                # the event handler will jump to the right state in the FSM
 
         # For each element in the experiment, try to import the corresponding
         # module and construct the object passing all arguments.
         # used if default transitions have to be created.
-        last = 'start'
+        next = 'start'
 
-        for n,el in enumerate(json_exp['elements']):
+        for n, el in enumerate(exp['elements']):
             try:
-                module = el['module']
                 className = el['className']
+                if 'module' in el.keys():
+                    module = el['module']
+                else:
+                    module = className
                 name = el['name']
 
                 # load the Python Module for this element
-                mod = __import__('Elements.'+module+'.'+module,globals(),locals(),[className],-1)
+                mod = __import__('Elements.'+module+'.'+module,
+                                 globals(), locals(), [className], -1)
                 # get a reference to the class based on className
                 myElementClass = getattr(mod, className)
                 # build dictionary with ALL the arguments for this element
                 # INCLUDING a reference to SELF (World) object to access Panda3d.
                 # Default arguments:
-                # BE CAREFUL!, JSON RETURNS UNICODE STRINGS, NOT STRINGS
-                kwargs = dict ( el.items() + {"world":self}.items() )
+                kwargs = dict(el.items() + {"world": self}.items())
                 # create an instance of this Class
-                printOut("Building from class %s with arguments: "%className,2)
-                printOut(str(kwargs),2)
+                printOut("Building from class %s with arguments: " % className, 2)
+                printOut(str(kwargs), 2)
                 state_obj = myElementClass(**kwargs)
-                printOut("Instance of class "+ className + " created",2)
+                printOut("Instance of class "+ className + " created", 2)
 
                 # pass keyboard reference so it can register its own keyboard
                 # events
@@ -171,46 +200,46 @@ class World(DirectObject):
                 # have to exist in the class we are constructing.
                 # we use 'name' so each element is unique even if the
                 # class is re-used.
-                setattr(fsm, 'enter'+name, state_obj.enterState)
-                setattr(fsm, 'exit'+name, state_obj.exitState)
+                #
+                #setattr(fsm, 'enter'+name, state_obj.enterState)
+                #setattr(fsm, 'exit'+name, state_obj.exitState)
                 # keep a reference to the element by its unique NAME
+
                 self.elements[name] = state_obj
 
                 # if no CUSTOM transitions were defined
                 # add automatic transitions as a simple sequence from the file
-                if (len(transitions)==0):
-                    fsmTransitions[last] = { 'auto': name }
-                    last = name
-                    # if last, add exit
-                    if (len(exp['elements'])==n+1):
-                        fsmTransitions[last] = {'auto':'end'}
+                #if len(transitions) == 0:
+                #    fsmTransitions[next] = {'auto': name}
+                #    next = name
+                #    # if last, add exit
+                #    if len(exp['elements']) == n+1:
+                #        fsmTransitions[next] = {'auto': 'end'}
 
-            except ImportError,i:
+            except ImportError, i:
                 printOut("Error importing module, missing file or wrong className",0)
                 print className
                 print i
                 sys.exit()
-            except ValueError,v:
+            except ValueError, v:
                 # if the name cannot be split in two pieces by the dot
                 #printOut("Missing or extra dots in the name of :" + s,0)
                 print v
                 sys.exit()
-            except Exception,e:
-                printOut("Exception building state: " + el['name'],0)
+            except Exception, e:
+                printOut("Exception building state: " + el['name'], 0)
                 print e
                 sys.exit()
-        # return constructed fsm
-        fsm.transitions = fsmTransitions
-        # after all elements have been built and all transitions also, make a last
-        # check to see if all the transitions have their elements, this is because the
-        # way the FSM is implemented by Panda3D is hard to debug errors when changing states
-        for k in fsm.transitions.keys():
-            if (k!='start' and k not in self.elements.keys()):
-                printOut("Error, element %s is referenced in a transition but has not been created"%k,0)
-                self.quit()
-        return fsm
+        return FiniteStateMachine(fsmTransitions, self.elements)
 
-    def advanceFSM(self):
+    def advanceFSM(self, event):
+        self.fsm.processEvent(event)
+        self.createTextKeys()
+        if self.fsm.hasDone():
+            # the simulation has finished.
+            self.quit()
+
+    def advanceFSM2(self):
         """
         In order to advance to the next state, we check the state we are currently,
         and the queue of events in case the FSM is not deterministic. If no event
@@ -219,7 +248,7 @@ class World(DirectObject):
         the same event!.
         """
         # shortname
-        trans = self.fsm.transitions
+        trans = self.fsm.getTransitions()
 
         # current node
         curr = self.fsm.state
@@ -228,6 +257,16 @@ class World(DirectObject):
             curr = 'start'
 
         self.log.logEvent("Leaving state %s\n"%curr,time.time())
+
+        if (curr != 'start' and curr!='Off'):
+            element = self.elements[curr]
+            if (element.needsToSaveData()):
+                element.saveUserData()
+                t = time.time()
+                self.log.logEvent("User data: %s\n"%element.name,t)
+                d = element.getUserData()
+                for k,v in d.items():
+                    self.log.logEvent("%s:%s\n"%(k,str(v)), t)
 
         # retrieve possible events at this node
         events = trans[curr].keys()
@@ -262,15 +301,16 @@ class World(DirectObject):
             self.log.logEvent("Entering state %s\n"%nextState,time.time())
             self.fsm.request(nextState)
 
-    def FsmEventHandler(self,event):
+    def FsmEventHandler(self, event):
         """This method is used to capture events triggered by
         any state in the FSM"""
+        self.advanceFSM(event)
         # at this stage, we can't really do anything, an event has
         # to be queued because the FSM could have a loop farther away
         # from this point in the FSM therefore this event cannot be
         # handled right now...It will be handled in the advanceFSM method
-        printOut("Received event at FsmEventHandler: %s"%event,2)
-        self.eventQueue.append(event)
+        #printOut("Received event at FsmEventHandler: %s"%event,2)
+        #self.eventQueue.append(event)
 
 
 #=========================================================================================
@@ -283,15 +323,16 @@ class World(DirectObject):
         """
         # general configuration lies in this JSON file
         # such as camera settings, etc.
-        configDict = json.load(open("config/config.json"))
+        configDict = yaml.load(open("config/config.yaml"))
+
         # create an object from dictionary to simplify usage
         self.config = objFromDict(configDict)
 
         # file describing all the service templates available
-        self.services = objFromDict(json.load(open('config/services.json')))
+        # self.services = objFromDict(json.load(open('config/services.json')))
         # create Service manager
-        self.serviceMgr = ServiceMgr(self.services)
-        printOut("Service Manager created",1)
+        # self.serviceMgr = ServiceMgr(self.services)
+        # printOut("Service Manager created",1)
 
         # create general log file
         genLog=self.config.simulationLog
@@ -359,8 +400,8 @@ class World(DirectObject):
         #base.camLens.setFar(200)
 
         #wp = WindowProperties()
-        #wp.setSize(cam.screenWidth, cam.screenHeight)
         #wp.setFullscreen(True)
+        #wp.setSize(cam.screenWidth, cam.screenHeight)
         #base.win.requestProperties(wp)
         #print "Size: %d x %d\n" %(wp.getXSize(),wp.getYSize())
         # return this dictionary
@@ -376,9 +417,19 @@ class World(DirectObject):
         minX,minZ, ratio
         """
         # setup the camera based purely on the JSON configuration
+
         camera = self.config.cameraConfig
 
-        setattr(camera,'ratio',camera.screenWidth / float(camera.screenHeight))
+        # override screenWidth,screenHeight
+        for o in pandaConfig.options:
+            if 'win-size' in o:
+                # "win-size 1280 800"
+                w,h = o.split(' ')[1:]
+                printOut("Saving window config: %s %s" % (w,h),0)
+                self.config.cameraConfig.screenWidth = int(w)
+                self.config.cameraConfig.screenHeight= int(h)
+
+        setattr(camera, 'ratio', camera.screenWidth / float(camera.screenHeight))
         fovRads = (camera.fov * pi / 180.0)
 
         # make a triangle rectangle, from camera pos to the plane
@@ -387,27 +438,29 @@ class World(DirectObject):
         hip = camera.parDistCam / cos(fovRads / 2)
 
         # (sine(fov/2) * length) is the minX
-        setattr( camera, 'minX', -hip*sin(fovRads/2.0) )
+        setattr(camera, 'minX', -hip*sin(fovRads/2.0) )
 
         # the heigth is simply derived from the aspect ratio
         # of the screen, should match assuming a perspective frustrum
         #setattr( camera, 'minZ', -hip*sin(fovRads/2.0) )
-        setattr( camera, 'minZ', camera.ratio-hip*sin(fovRads/2.0) )
+        setattr(camera, 'minZ', camera.ratio-hip*sin(fovRads/2.0))
         self.camera = camera
 
     def windowEventHandler(self, window=None):
         """Function to handle window resize events"""
-        const_wp = window.getProperties()
-        w = const_wp.getXSize()
-        wp = WindowProperties()
-        wp.setSize(w,int(w/1.333))
-        base.win.requestProperties(wp)
+        #const_wp = window.getProperties()
+        #w = const_wp.getXSize()
+        #h = const_wp.getYSize()
+
+        #wp = WindowProperties()
+        #wp.setSize(w, int(w/h))
+        #base.win.requestProperties(wp)
         # trying to keep the same size in objects regardless of the size of the window
         # or the size of the screen.
-        base.camLens.setFov(w * 65.0 / 1280.0)
-        taskMgr.doMethodLater(0.1, self.realignTextKeys, 'realign text', extraArgs=[])
+        #base.camLens.setFov(w * 65.0 / 1280.0)
+        #taskMgr.doMethodLater(0.1, self.realignTextKeys, 'realign text', extraArgs=[])
 
-    def addNode(self,npath,place='3d'):
+    def addNode(self, npath, place='3d'):
         """
         Attach node to "render" or to "aspect2d"
         and adds it to the scenes dictionary
@@ -415,16 +468,19 @@ class World(DirectObject):
         :param npath: nodepath to attach
         :param place: place where to attach, can be 3d or HUD
         """
-        parent=render
-        if (place=='HUD'):
-            parent=aspect2d
+        parent = render
+        if place == 'HUD':
+            parent = aspect2d
         npath.reparentTo(parent)
 
 #=========================================================================================
 #========== KEYBOARD - KEYS HANDLING =====================================================
 #=========================================================================================
 
-    def resetKeys(self,global_keys):
+    def stopKeyboard(self):
+        self.keyboard.clearKeys()
+
+    def resetKeys(self):
         """clears all key bindings and links the global keys specified
         in config/globalKeys.json"""
         # shorter name
@@ -432,25 +488,40 @@ class World(DirectObject):
         # clean up events (ALL EVENTS) on World
         k.clearKeys()
         # add a basic key to display/toggle help
-        k.registerKey('h',self.toggleTextKeys,"Shows/Hides this help")
-        for key_record in global_keys['global_keys']:
+
+        if not k.registerKey('control-h', 'World', self.toggleTextKeys, "Shows/Hides this help"):
+            self.fatal("Error registering key h for World, check you are not using this key"
+                  "for any purpose as it is reserved")
+
+        for key_record in self.keyConfig['global_keys']:
             try:
                 # try and see if the callback exists
                 method = getattr(self, key_record['callback'])
-                if (key_record.has_key('comment')): comment = key_record['comment']
-                else: comment = ""
-                k.registerKey(key_record['key'],method,comment)
+                args = []
+                comment = ""
+                if key_record.has_key('args'):
+                    args = key_record['args']
+                if key_record.has_key('comment'):
+                    comment = key_record['comment']
+                if not k.registerKey(key_record['key'], 'World', method, comment, False, args):
+                    self.fatal("Error registering key h for World, check you "
+                               "are not using this key for any purpose as it "
+                               "is reserved")
 
             except Exception, e:
                 print e
-                printOut("Error, no method found for callback: %s" % key_record['callback'],0)
-                printOut("Ignoring this key binding",0)
+                printOut("Error, no method found for callback: %s" % key_record['callback'], 0)
+                printOut("Ignoring this key binding", 0)
 
         self.cursorHidden=False
         # called when resizing the Panda window.
         self.accept('window-event', self.windowEventHandler)
         self.createTextKeys()
         return
+
+    def fatal(self, message):
+        printOut(message,0)
+        self.quit()
 
     def createTextKeys(self):
         """Shows/hides keyboard bindings"""
@@ -470,7 +541,7 @@ class World(DirectObject):
 
     def realignTextKeys(self):
         """Realign the text keys if the window has been resized"""
-        printOut("Realign text on window resize",0)
+        #printOut("Realign text on window resize",0)
         for (key,val) in self.screenText.items():
             val.setX(base.a2dLeft)
 
@@ -492,11 +563,11 @@ class World(DirectObject):
         self.tracker.stopTrack()
         sys.exit()
 
-    def _quit(self):
+#    def _quit(self):
         # this will implicitly quit, but each state will have
         # the opportunity to clear out the logs
-        self.fsm.request("Off")
-        self.quit()
+        #self.fsm.request("Off")
+#        self.quit()
         #while(True):
         #    self.advanceFSM()
 

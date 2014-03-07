@@ -1,3 +1,5 @@
+__author__ = 'Francholi'
+
 # panda imports
 from direct.gui.DirectGui import *
 from direct.task.Task import *
@@ -7,57 +9,56 @@ from Element import *
 #sys utils
 import sys
 
-class ScreenText(Element):
+class HUDText(Element):
     """
-    Class to display a text node
-    Will get some configuration from JSON configuration.
+    Class to display a single piece of text
+    The text to display will be specified in a text attribute
+    in the Element description in the experiment
     """
 
     def __init__(self, **kwargs):
         """
         world is a reference to the main class
-        text: is the name of the node in the XML config
         """
         # build basic element
-        super(ScreenText, self).__init__(**kwargs)
+        super(HUDText, self).__init__(**kwargs)
         # this defines:
         # self.sceneNP and self.hudNP
 
-        text = getattr(self, 'plain_text', None)
+        text = getattr(self, 'text', None)
         if text is None:
-            printOut("Missing reference to what text to display when building ScreenText!", 0)
+            printOut("Missing 'text' attribute in experiment file", 0)
             sys.exit()
 
-        margin = 0.9 # used as a %
-
-        # text is hung by the aspect2D, which is -1 to 1 in height and w/h in width.
+        # text is hung by the aspect2D, which is -1 to 1
+        # in height and w/h in width.
         leftBorder = - self.world.camera.screenWidth / float(self.world.camera.screenHeight)
-        print "width: " + str(self.world.camera.screenWidth)
-        leftBorder = leftBorder * margin
 
-        topBorder = 1.0 * margin
-
-        tN = TextNode(text)
+        tN = TextNode(self.name)
         tN.setAlign(TextNode.ALeft)
-        tN.setWordwrap(25)
         tNP = NodePath(tN)
-        tNP.setName("plain_text")
-        tNP.setPos(leftBorder,0.0,topBorder)
+        tNP.setName(self.name)
         tNP.setScale(0.09)
-
-        lines = open(text).read()
-        tN.setText(lines)
+        tNP.setPos(leftBorder, 0, 0.6)
+        tN.setText(self.text)
         # attach the text node to the HUD section
         tNP.reparentTo(self.hudNP)
         # hide the whole node
+        self.textNode = tN
         self.hideElement()
 
     def enterState(self):
         # print "entering ScreenText"
         # super class enterState
         Element.enterState(self)
+        taskMgr.add(self.updateTimer, "onScreenTimer", sort=2)
 
     def exitState(self):
         # print "leaving state ScreenText"
         Element.exitState(self)
+        taskMgr.remove("onScreenTimer")
+
+    def updateTimer(self, task):
+        self.textNode.setText("%.0f" % task.time)
+        return task.cont
 

@@ -4,8 +4,9 @@
     [
       { "key":"v", "callback":"toggleVerbose", "comment":"Toggles verbose mode"},
       { "key":"q", "callback":"quit","comment":"Quit the experiment"},
-      { "key":"0", "callback":"advanceFSM","comment":"Advance State Machine" },
-      { "key":"m", "callback":"toggleMouseCursor","comment":"Show/Hide mouse cursor" }
+      { "key":"0", "callback":"advanceFSM","comment":"Advance State Machine","args":["auto"] },
+      { "key":"m", "callback":"toggleMouseCursor","comment":"Show/Hide mouse cursor" },
+      { "key":"g", "callback":"advanceFSM","comment":"Advance State Machine","args":["finish"] }
     ]
 }
  

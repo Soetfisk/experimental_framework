@@ -54,7 +54,8 @@ class Game(Element):
         # Its a simple service registered by the name 'UserData' that
         # returns the input in the form.
         # We will use it in a blocking call here, so no need for a callback.
-        service = self.world.serviceMgr.getService('UserData')
+        # TODO
+#        service = self.world.serviceMgr.getService('UserData')
         if (service):
             userData = service.service()
         else:
@@ -114,10 +115,10 @@ class Game(Element):
         # references to the sequences in the config file
         self.seqs = {}          # sequences by id.
         try:
-            sequences = self.jsonConfig.targetSequences.sequences
+            sequences = self.config.targetSequences.sequences
             for s in sequences:
                 self.seqs[s.id] = map(str.upper, map(str, s.seq))
-            self.currSeq = self.seqs[self.jsonConfig.targetSequences.use]
+            self.currSeq = self.seqs[self.config.targetSequences.use]
         except Exception, e:
             print "Error loading target sequence from JSON file"
             print e
@@ -126,7 +127,7 @@ class Game(Element):
         # creates LOD manager (implements Observer pattern)
         lm = LodManager()
         # gets the different LOD events that should be considered
-        lodEvents = self.jsonConfig.LODEvents.lodEvents
+        lodEvents = self.config.LODEvents.lodEvents
         for l in lodEvents:
             try:
                 handler = getattr(lm, l.handler)
@@ -136,7 +137,7 @@ class Game(Element):
                 print "Trying to register a non-existent handler, check JSON gameConfig and LodManager class"
 
 
-        parConfNode = self.jsonConfig.parachutes
+        parConfNode = self.config.parachutes
         targetnames = self.currSeq  # target names
 
         # how many at the same time will fall and at what speed
@@ -164,7 +165,7 @@ class Game(Element):
                 nameId = color + "_" + str(i)
 
                 # creates parachute object
-                obj = Parachute(nameId, p, self, falltime, parConfNode.scale, not self.isReplay)
+                obj = Parachute(nameId, p, self, self.posGen, falltime, parConfNode.scale, not self.isReplay)
 
                 obj.modelNP.reparentTo(self.sceneNP)
                 self.parachutes[nameId] = obj
@@ -292,10 +293,10 @@ class Game(Element):
                   'i':[2],'i-up':[6],
                   'k':[3],'k-up':[7]}
         for key,value in keyValue.items():
-            k.registerKey(key,self.arrowKey,"",False,value,False)
+            k.registerKey(key,self.name, self.arrowKey,"",False,value,False)
             self.event_keys.append(key)
 
-        k.registerKey("w", self.shoot,"shoot!", False,[],False)
+        k.registerKey("w", self.name, self.shoot,"shoot!", False,[],False)
         self.event_keys.append("w")
 
     #=============================================
@@ -339,7 +340,7 @@ class Game(Element):
         # THIS IS VERY TIME CONSUMING TASK!, and should be implemented in C
         # OR REWRITTEN
         Ypos = cam.pos[1] + cam.parDistCam
-        maxPar = self.jsonConfig.parachutes.simultaneous
+        maxPar = self.config.parachutes.simultaneous
         self.posGen = PositionGenerator(
                       topLeft=Vec3(cam.minX + cam.delta, Ypos, -cam.minZ),
                       topRight=Vec3(-cam.minX - cam.delta, Ypos, -cam.minZ),
@@ -390,7 +391,7 @@ class Game(Element):
     def setupMousePlaneHit(self):
         # sets up a plane to test hits against the mouse...
         # this is used to control the crosshair with the mouse.
-        distance = self.jsonConfig.shooter.focusplane
+        distance = self.config.shooter.focusplane
         self.hitPlane = Plane(Vec3(0,1,0), Point3(0,distance,0))
         cm = CardMaker("hitting plane")
         cm.setFrame(-100,100,-100,100)
@@ -402,7 +403,7 @@ class Game(Element):
         Setup basic sounds, using the audio files described in the
         JSON config file
         """
-        soundsCfg = self.jsonConfig.soundsConfig
+        soundsCfg = self.config.soundsConfig
         self.sndEnabled = soundsCfg.enabled
         if (not soundsCfg.enabled):
             return
@@ -431,7 +432,7 @@ class Game(Element):
 
     def setupPointsHUD(self):
         r = self.world.camera.ratio
-        self.pointsHUD = pointsHUD(self.jsonConfig.pointsHUD,
+        self.pointsHUD = pointsHUD(self.config.pointsHUD,
                                    Vec3(-r+0.05,0,0.90))
         self.pointsHUD.getNP().reparentTo(self.hudNP)
         self.setPoints(0)
@@ -480,7 +481,7 @@ class Game(Element):
         # put crosshair in the middle of the screen
         self.aimAtXY(0.0,0.0)
         # set cross hair controller (keyboard)
-        shooter = self.jsonConfig.shooter
+        shooter = self.config.shooter
         if (shooter.control == 'keyboard'):
             self.setChByKeyboard()
         elif (shooter.control == 'mouse'):
@@ -749,7 +750,7 @@ class Game(Element):
         """ Sets up cannon 3d model, bullets models, crossHair model,
         a task to update the crossHair"""
 
-        shooter = self.jsonConfig.shooter
+        shooter = self.config.shooter
 
         # to keep track of time for the task
         # that updates crossHair

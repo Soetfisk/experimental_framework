@@ -1,0 +1,35 @@
+keys: {
+ - key: b
+   callback: pressedKey
+   comment: just testing callbacks
+   once: false
+   args: [1,2,3]
+ - key: g
+   callback: pressedKey
+   comment: another callback testing
+   once: true
+   args: [1]
+}
+
+settings: {
+    formId: userdata
+    scale: 0.06
+    maxlabel: 10
+    labelcolour: [1.0,0.5,0.5,1.0]
+    title: 'Por favor ingresa tus datos:'
+}
+
+input: {
+ - label: Nombre
+   type: TextEntry
+   default: ""
+ - label: Apellido
+   type: TextEntry
+   default: ""
+ - label: Sexo
+   type: Option
+   values: ["Masculino","Femenino"]
+ - label: Edad
+   type: TextEntry
+   default: 0
+}

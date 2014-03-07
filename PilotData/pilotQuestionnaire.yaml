@@ -1,0 +1,14 @@
+settings:
+    formId: questionnaire
+    scale: 0.06
+    maxlabel: 10
+    labelcolour: [1.0,0.5,0.5,1.0]
+    title: 'Por favor responde a las siguientes preguntas:'
+
+input:
+ - label: This is a question color color
+   type: TextEntry
+   default: ""
+ - label: Como cree usted que blah blah...
+   type: Option
+   values: ['Bueno', 'Muy Bueno', 'Pesimo']
