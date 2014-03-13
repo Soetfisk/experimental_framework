@@ -1,0 +1,12 @@
+# Keyboard callbacks, execute only once or many and arguments
+# this is an entry which is a LIST of dictionaries
+keys:
+ - key: escape
+   callback: sendMessage
+   once: true
+   args: ['auto']
+ - key: n
+   callback: sendMessage
+   once: true
+   args: ['auto']
+

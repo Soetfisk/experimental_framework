@@ -1,6 +1,6 @@
 from direct.showbase.DirectObject import DirectObject
 
-from Utils.Debug import printOut, verbosity
+from Utils.Debug import printOut
 
 from threading import Thread
 from time import sleep

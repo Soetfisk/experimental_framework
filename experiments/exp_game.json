@@ -4,7 +4,7 @@
         "module":"Game",
         "className":"Game",
         "name":"GameA",
-        "s_config_json":"Elements/Game/gameConfig.json",
+        "config_json":"Elements/Game/gameConfig.json",
         "s_saveReplay":"run/replayLogA.txt,w",
         "s_logFile":"run/gameLogA.txt,a"
       }

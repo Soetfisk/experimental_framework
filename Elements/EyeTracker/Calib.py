@@ -12,8 +12,7 @@ from random import *
 from Element import *
 from CalPoint import calStimuli
 
-from Debug import printOut, verbosity
-
+from Debug import printOut
 class Calib(Element):
     """This class will implement a calibration Scene, displaying some
     targets and performing the calibration with the eye-tracker.

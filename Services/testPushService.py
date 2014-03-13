@@ -3,7 +3,7 @@ from panda3d.core import *
 from Element import *
 
 import sys
-from Debug import printOut, verbosity
+from Debug import printOut
 from Utils import splitString
 from Service import *
 

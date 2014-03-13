@@ -7,6 +7,7 @@ import pandaConfig
 for o in pandaConfig.options:
     loadPrcFileData('', o)
 
+
 # rest of config files are stored in JSON format
 try:
     import json
@@ -39,7 +40,7 @@ from Tracker import Tracker
 # logger class
 from Logger import Logger
 # debug class
-from Utils.Debug import printOut, verbosity
+from Utils.Debug import printOut
 # services management class
 # from ServiceMgr import *
 
@@ -177,7 +178,7 @@ class World(DirectObject):
                 name = el['name']
 
                 # load the Python Module for this element
-                mod = __import__('Elements.'+module+'.'+module,
+                mod = __import__('Elements.'+module+'.'+className,
                                  globals(), locals(), [className], -1)
                 # get a reference to the class based on className
                 myElementClass = getattr(mod, className)
@@ -226,10 +227,15 @@ class World(DirectObject):
                 #printOut("Missing or extra dots in the name of :" + s,0)
                 print v
                 sys.exit()
+            except AttributeError, e:
+                printOut("Attribute error when building " + el['name'],0)
+                printOut("Most likely there is a mismatch between the code and the config file",0)
+                printOut("%s" % e, 0)
+                self.quit()
             except Exception, e:
                 printOut("Exception building state: " + el['name'], 0)
-                print e
-                sys.exit()
+                print str(e.__class__)
+                self.quit()
         return FiniteStateMachine(fsmTransitions, self.elements)
 
     def advanceFSM(self, event):
@@ -425,7 +431,7 @@ class World(DirectObject):
             if 'win-size' in o:
                 # "win-size 1280 800"
                 w,h = o.split(' ')[1:]
-                printOut("Saving window config: %s %s" % (w,h),0)
+                printOut("Saving window config: %s %s" % (w,h),4)
                 self.config.cameraConfig.screenWidth = int(w)
                 self.config.cameraConfig.screenHeight= int(h)
 

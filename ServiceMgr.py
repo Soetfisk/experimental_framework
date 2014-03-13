@@ -1,4 +1,4 @@
-from Utils.Debug import printOut, verbosity
+from Utils.Debug import printOut
 # some useful functions
 from Utils.Utils import *
 from Service import *

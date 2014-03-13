@@ -32,7 +32,6 @@ class ScreenText(Element):
 
         # text is hung by the aspect2D, which is -1 to 1 in height and w/h in width.
         leftBorder = - self.world.camera.screenWidth / float(self.world.camera.screenHeight)
-        print "width: " + str(self.world.camera.screenWidth)
         leftBorder = leftBorder * margin
 
         topBorder = 1.0 * margin

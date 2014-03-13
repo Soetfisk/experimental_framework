@@ -1,6 +1,6 @@
 from panda3d.core import *
 import sys
-from Utils.Debug import printOut, verbosity
+from Utils.Debug import printOut
 from Utils.Utils import *
 try:
     import json
@@ -42,10 +42,10 @@ class Element(object):
 
         # load an additional config file for the element, and leave it
         # available for the subclass to do whatever it wants.
-        # TODO: PORTIG FROM JSON TO YAML
-        c = getattr(self,'s_config_json',None)
+        # TODO: PORTING FROM JSON TO YAML
+        c = getattr(self,'config_json',None)
         if (c is None):
-            c = getattr(self,'s_config_yaml',None)
+            c = getattr(self,'config_yaml',None)
 
         # TODO: PORTIG FROM JSON TO YAML
         try:
@@ -55,14 +55,17 @@ class Element(object):
                 elif 'json' in c:
                     dictionary = json.load(open(c))
                 else:
-                    printOut("config file format not supported!",0)
+                    printOut("config file format not supported!", 0)
+                    self.world.quit()
                 self.config = objFromDict(dictionary)
-                printOut("CONFIG LOADED FOR %s" % self.name, 1)
+                printOut("CONFIG LOADED FOR %s" % self.name, 4)
         except Exception,e:
             print e
-            print "Fatal error loading config file "+ c
-            print "Check experiments.json"
+            printOut("Fatal error loading config file "+ c, 0)
             self.world.quit()
+
+
+
         self.registeredKeys = []
 
     def setKeyboard(self, keyboard):
@@ -76,46 +79,54 @@ class Element(object):
 
 #===============================================================================
     def registerKeys(self):
-        """Try to setup some keys to callbacks using the JSON file
-        specific for this element, if the JSON is not defined then 
-        simply skip this method"""
+        """Try to setup some keys to callbacks using the YAML file
+        specific for this element, or the keys dictionary key if exists
+        in the Element description"""
 
-        # is there a specific configuration ?
-        config = getattr(self, "config", None)
-        if (config):
-            printOut("Custom config file for element %s" % self.name,1)
-            # does it contain a list called 'keys' made of
-            # of dicts {'key':'a','comment':'comment','callback':method} 
-            config_keys = getattr(config, 'keys', None)
-            if config_keys:
-                printOut("Registering keys for the current element", 1)
-                for k in config_keys:
-                    comment = getattr(k, 'comment', '')
-                    cb = getattr(self, k.callback, None)
-                    key = getattr(k, 'key', None)
-                    once = getattr(k, 'once', False)
-                    args = getattr(k, 'args', [])
-                    # force args to be a list...
-                    if not isinstance(args, list):
-                        args = [args]
-                    if key is None or cb is None:
-                        printOut('Error!, key or callback missing in when '
-                                 'setting up %s' % self.name, 0)
-                        printOut('Ignoring that keybinding', 0)
-                        self.world.quit()
+        # Keys defined in the EXPERIMENT FILE, when the Element is created
+        temp_keys = getattr(self,"keys",[])
+        exp_keys = []
+        for k in temp_keys:
+            exp_keys.append(objFromDict(k))
 
-                    if self.kbd.registerKey(key, self.name, cb, comment, once, args):
-                        self.registeredKeys.append(key)
-            else:
-                printOut("No keys added by element %s" % self.name, 1)
+        # Keys defined in the specific configuration file for this
+        # instance of the element
+        config = getattr(self, "config",None)
+        if config:
+            config_keys = getattr(config, 'keys',[])
+        else:
+            config_keys = []
+        # add both lists of keys, first one will prevail if they repeat.
+        keys = exp_keys + config_keys
+
+        printOut("Registering keys for the current element", 4)
+        for k in keys:
+            comment = getattr(k, 'comment', '')
+            cb = getattr(self, k.callback, None)
+            key = getattr(k, 'key', None)
+            once = getattr(k, 'once', False)
+            args = getattr(k, 'args', [])
+            # force args to be a list...
+            if not isinstance(args, list):
+                args = [args]
+            if key is None or cb is None:
+                printOut('Error!, key or callback missing in when '
+                         'setting up %s' % self.name, 0)
+                printOut('Ignoring that keybinding', 0)
+                self.world.quit()
+            # this could return false in case the key has already been registered
+            if self.kbd.registerKey(key, self.name, cb, comment, once, args):
+                self.registeredKeys.append(key)
+        else:
+            printOut("No keys added by element %s" % self.name, 1)
 
     def unregisterKeys(self):
-        printOut("De-registering keys for the current element", 1)
+        printOut("De-registering keys for the current element", 4)
         for k in self.registeredKeys:
             if self.kbd.unregKey(k):
-                printOut("Unregistered key from %s: %s" % (self.name, k), 1)
+                printOut("Unregistered key from %s: %s" % (self.name, k), 4)
             else:
-                printOut("Unable to unregister key from %s: %s" % (self.name, k), 1)
+                printOut("Unable to unregister key from %s: %s" % (self.name, k), 0)
 
     def needsToSaveData(self):
         return False
@@ -128,7 +139,6 @@ class Element(object):
         self.sceneNP.hide()
 
     def showElement(self):
-        printOut("SHOW ELEMENT IN Element.py",3)
         self.hudNP.show()
         self.sceneNP.show()
 
@@ -140,7 +150,7 @@ class Element(object):
         This method will be executed when the Finite State Machine
         enters into this state
         """
-        printOut("Entering state %s" % self.name, 2)
+        printOut("Entering state %s" % self.name, 1)
         #self.world.resetKeys()
         self.showElement()
         self.registerKeys()

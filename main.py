@@ -6,19 +6,20 @@ def printUsage():
     print "Usage: ppython main.py exp=experimentFile.json [debug=0] [channels=all]"
     sys.exit()
 
-if (__name__=='__main__'):
+if __name__=='__main__':
     # extract experiment file from command line
     experiment='none'
     try:
         for arg in sys.argv:
-            if ('exp=' in arg):
+            if 'exp=' in arg:
                 experiment = arg.split('=')[1]
                 continue
-            if ('debug=' in arg):
+            if 'debug=' in arg:
                 # debug verbosity is 0 (minimum)
-                debug.verbosity = int(arg.split('=')[1])
+                verb = int(arg.split('=')[1])
+                debug.curr_verb = min(verb, debug.max_verb)
                 continue
-            if ('channels=' in arg):
+            if 'channels=' in arg:
                 debug.channels = arg.split('=')[1]
                 continue
     except IndexError,e:

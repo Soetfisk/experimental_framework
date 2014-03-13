@@ -8,7 +8,7 @@
       {
         "className":"DataForm",
         "name":"UserInfo",
-        "s_config_json":"PilotData/pilotDataForm.json"
+        "config_json":"PilotData/pilotDataForm.json"
       },
       {
         "module":"ScreenText",
@@ -19,7 +19,7 @@
       {
         "className":"Pilot",
         "name":"Pilot",
-        "s_config_json":"PilotData/pilotConfig.yaml",
+        "config_json":"PilotData/pilotConfig.yaml",
         "s_saveReplay":"PilotData/run/replayLogA.txt,w",
         "s_logFile":"PilotData/run/pilot.txt,a"
       },
@@ -27,7 +27,7 @@
           "module":"DataForm",
           "className":"DataForm",
           "name":"PilotQuestionnaire",
-          "s_config_json":"PilotData/pilotQuestionnaire.json"
+          "config_json":"PilotData/pilotQuestionnaire.json"
       },
       {
         "module":"ScreenText",

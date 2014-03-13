@@ -1,4 +1,4 @@
-from Utils.Debug import printOut, verbosity
+from Utils.Debug import printOut
 
 class Keyboard():
     """trivial wrapper around the panda messenger focused on keyboard handling"""

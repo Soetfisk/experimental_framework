@@ -14806,17 +14806,17 @@ printObjsOfType	/Developer/Panda3D/lib/direct/showbase/ObjectReport.py	/^    def
 printOut	/Developer/Panda3D/lib/direct/showbase/ObjectPool.py	/^    def printOut(self, full=False):$/;"	m	class:Diff
 printOut	Element.py	/^from Utils.Debug import printOut, verbosity$/;"	i
 printOut	Elements/DataForm/DataForm.py	/^from Utils.Debug import printOut, verbosity$/;"	i
-printOut	Elements/EyeTracker/Calib.py	/^from Debug import printOut, verbosity$/;"	i
-printOut	Elements/EyeTracker/Tobii.py	/^from Debug import printOut, verbosity$/;"	i
-printOut	Elements/FullScreenImage/FullScreenImage.py	/^from Utils.Debug import printOut, verbosity$/;"	i
-printOut	Elements/Game/Game.py	/^from Utils.Debug import printOut, verbosity$/;"	i
-printOut	Elements/Pilot/Pilot.py	/^from Utils.Debug import printOut, verbosity$/;"	i
-printOut	Keyboard.py	/^from Utils.Debug import printOut, verbosity$/;"	i
-printOut	Service.py	/^from Utils.Debug import printOut, verbosity$/;"	i
-printOut	ServiceMgr.py	/^from Utils.Debug import printOut, verbosity$/;"	i
-printOut	Services/testPushService.py	/^from Debug import printOut, verbosity$/;"	i
+printOut	Elements/EyeTracker/Calib.py	/^from Debug import printOut$/;"	i
+printOut	Elements/EyeTracker/Tobii.py	/^from Debug import printOut$/;"	i
+printOut	Elements/FullScreenImage/FullScreenImage.py	/^from Utils.Debug import printOut$/;"	i
+printOut	Elements/Game/Game.py	/^from Utils.Debug import printOut$/;"	i
+printOut	Elements/Pilot/Pilot.py	/^from Utils.Debug import printOut$/;"	i
+printOut	Keyboard.py	/^from Utils.Debug import printOut$/;"	i
+printOut	Service.py	/^from Utils.Debug import printOut$/;"	i
+printOut	ServiceMgr.py	/^from Utils.Debug import printOut$/;"	i
+printOut	Services/testPushService.py	/^from Debug import printOut$/;"	i
 printOut	Utils/Debug.py	/^def printOut( message, level, channel='all' ):$/;"	f
-printOut	World.py	/^from Utils.Debug import printOut, verbosity$/;"	i
+printOut	World.py	/^from Utils.Debug import printOut$/;"	i
 printParameters	/Developer/Panda3D/lib/direct/directscripts/gen_boost_python.py	/^def printParameters(handle, wrapper):$/;"	f
 printParameters	/Developer/Panda3D/lib/direct/directscripts/gen_pybindgen.py	/^def printParameters(handle, wrapper):$/;"	f
 printParams	/Developer/Panda3D/lib/direct/particles/ForceGroup.py	/^    def printParams(self, file = sys.stdout, targ = 'self'):$/;"	m	class:ForceGroup
@@ -18406,19 +18406,19 @@ vecAsString	/Developer/Panda3D/lib/direct/directtools/DirectSelection.py	/^    d
 vector_expr	/Developer/Panda3D/lib/Pmw/Pmw_1_3/lib/PmwBlt.py	/^def vector_expr(expression):$/;"	f
 vector_int	/Developer/Panda3D/lib/direct/dcparser/primeNumberGenerator.h	/^typedef vector<int> vector_int;$/;"	t
 vector_names	/Developer/Panda3D/lib/Pmw/Pmw_1_3/lib/PmwBlt.py	/^def vector_names(pattern = None):$/;"	f
-verbosity	Element.py	/^from Utils.Debug import printOut, verbosity$/;"	i
-verbosity	Elements/DataForm/DataForm.py	/^from Utils.Debug import printOut, verbosity$/;"	i
-verbosity	Elements/EyeTracker/Calib.py	/^from Debug import printOut, verbosity$/;"	i
-verbosity	Elements/EyeTracker/Tobii.py	/^from Debug import printOut, verbosity$/;"	i
-verbosity	Elements/FullScreenImage/FullScreenImage.py	/^from Utils.Debug import printOut, verbosity$/;"	i
-verbosity	Elements/Game/Game.py	/^from Utils.Debug import printOut, verbosity$/;"	i
-verbosity	Elements/Pilot/Pilot.py	/^from Utils.Debug import printOut, verbosity$/;"	i
-verbosity	Keyboard.py	/^from Utils.Debug import printOut, verbosity$/;"	i
-verbosity	Service.py	/^from Utils.Debug import printOut, verbosity$/;"	i
-verbosity	ServiceMgr.py	/^from Utils.Debug import printOut, verbosity$/;"	i
-verbosity	Services/testPushService.py	/^from Debug import printOut, verbosity$/;"	i
+verbosity	Element.py	/^from Utils.Debug import printOut$/;"	i
+verbosity	Elements/DataForm/DataForm.py	/^from Utils.Debug import printOut$/;"	i
+verbosity	Elements/EyeTracker/Calib.py	/^from Debug import printOut$/;"	i
+verbosity	Elements/EyeTracker/Tobii.py	/^from Debug import printOut$/;"	i
+verbosity	Elements/FullScreenImage/FullScreenImage.py	/^from Utils.Debug import printOut$/;"	i
+verbosity	Elements/Game/Game.py	/^from Utils.Debug import printOut$/;"	i
+verbosity	Elements/Pilot/Pilot.py	/^from Utils.Debug import printOut$/;"	i
+verbosity	Keyboard.py	/^from Utils.Debug import printOut$/;"	i
+verbosity	Service.py	/^from Utils.Debug import printOut$/;"	i
+verbosity	ServiceMgr.py	/^from Utils.Debug import printOut$/;"	i
+verbosity	Services/testPushService.py	/^from Debug import printOut$/;"	i
 verbosity	Utils/Debug.py	/^verbosity = 0$/;"	v
-verbosity	World.py	/^from Utils.Debug import printOut, verbosity$/;"	i
+verbosity	World.py	/^from Utils.Debug import printOut$/;"	i
 verified_cert_text	/Developer/Panda3D/lib/direct/plugin/p3dCert.cxx	/^verified_cert_text[] =$/;"	v	file:
 verified_cert_text	/Developer/Panda3D/lib/direct/plugin/p3dCert_wx.cxx	/^verified_cert_text =$/;"	v	file:
 verify	/Developer/Panda3D/lib/direct/directutil/Verify.py	/^def verify(assertion):$/;"	f

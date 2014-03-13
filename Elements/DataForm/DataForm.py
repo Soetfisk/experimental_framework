@@ -6,7 +6,7 @@ from Element import *
 
 import sys
 from Utils.Utils import splitString
-from Utils.Debug import printOut, verbosity
+from Utils.Debug import printOut
 from Service import *
 
 class DataForm(Element):

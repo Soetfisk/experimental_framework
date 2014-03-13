@@ -1,1 +1,14 @@
-Hello, this is the first screen of the Pilot.
+
+
+This experiment has been designed by the following researchers:
+
+Lopez Luro Francisco - flopezluro@gmail.com
+Sunstedt Veronica - veronicamail
+Ramon Molla - ramonmail
+
+Before starting the experiment, we need your consent to participate (next screen), and also we need to perform a quick check on colour blindness to ensure the validity of the results.
+
+For additional information on the experiment please contact:
+flopezluro@gmail.com
+
+press 'escape' key to advance...

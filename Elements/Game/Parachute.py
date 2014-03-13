@@ -14,7 +14,7 @@ from direct.interval.FunctionInterval import *
 from direct.interval.IntervalGlobal import *
 from direct.particles.ParticleEffect import ParticleEffect
 
-from Utils.Debug import printOut, verbosity
+from Utils.Debug import printOut
 
 # utility classes
 from PositionGenerator import PositionGenerator

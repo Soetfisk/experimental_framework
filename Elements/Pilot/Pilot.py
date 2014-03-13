@@ -1,42 +1,28 @@
-# panda imports
-from direct.gui.DirectGui import *
-from direct.task.Task import *
-from panda3d.core import *
-
-#sys utils
-from time import ctime
 import sys
 from random import *
+from time import ctime
 
-#game imports
+# panda imports
+from direct.gui.DirectGui import *
+from panda3d.core import *
 from World import *
-from Element import *
-from Utils.Debug import printOut, verbosity
-
-from direct.directtools.DirectGrid import DirectGrid
-
-
 from PilotParachute import PilotParachute
 
 class Pilot(Element):
     """This class implements the functionality
-    of the pilot for the study, showing parachutes side
-    by side and recording the selections of which one
-    looks better"""
+    of the pilot that compares two images side by side,
+    picking from a range of a set of qualities defined
+    in a config file (specified in the experiment file)"""
 
     def __init__(self, **kwargs):
-        """Constructor, calls super constructor for common
-        initialization, writes to outfile a mark for a new
-        participant and timestamp, then loads the introduction
-        screen and sets some basic keys to start the pilot"""
-        
         # call super (Element) constructor
         super(Pilot,self).__init__(**kwargs)
 
         # create BASIC LOG
         ts = time.time()
-
-        l = getattr(self, 's_pilotlog', 'nolog,w').split(',')
+        l = getattr(self, 'pilotLog', 'nolog,w').split(',')
+        if l is 'nolog,w':
+            printOut("-- Warning -- logging for the Pilot disabled",0)
         self.pilotLog = Logger(l[0],l[1]) 
         self.pilotLog.startLog(ts)
         
@@ -53,8 +39,10 @@ class Pilot(Element):
     def setupParachutes(self):
         """Creates parachutes objects needed for the pilot, loads textures and all..."""
         # references to all the Parachute objects created
-        self.parachutes = {}    # dict of PilotParachute objects
+        self.parachutes = {}
+        # all textures for a given colour
         self.textures = {}
+        # YAML config
         parConfNode = self.config.parachutes
         # common to all parachute objects
         falltime = parConfNode.falltime
@@ -66,7 +54,9 @@ class Pilot(Element):
         scale = parConfNode.scale
 
         # only setup the default COLOUR
-        # p contains ALL the textures available.
+        # to know which is the default colour, check the config file
+        # for "defaultIdx", which relates to the list of parachutes
+        # (each of which has a colour)
         p = parConfNode.textures[parConfNode.defaultIdx]
         color = str(p.name.upper())
 
@@ -83,18 +73,14 @@ class Pilot(Element):
             t.setAnisotropicDegree(2)
             self.textures[i] = t
 
-        #printOut("Total memory used by textures in Mbytes: %s\n" % str(totalMemory/(1024*1024)), 1)
-        #printOut("Aspect ratio: %f" % base.getAspectRatio(), 0)
+        printOut("Total memory used by textures in Mbytes: %s\n" % str(totalMemory/(1024*1024)), 5)
         # load texture for the actual parachute
         texture = loader.loadTexture(parachuteTex)
         texture.setMinfilter(Texture.FTLinearMipmapLinear)
         texture.setAnisotropicDegree(2)
 
-        text128 = loader.loadTexture("PilotData/textures/red128.png")
-        text64  = loader.loadTexture("PilotData/textures/red64.png")
-
+        paraModels = {}
         for n in ['left', 'right']:
-            # empty node!
             node = NodePath(n + "_parachute")
             node.setTransparency(1)
             node.setScale(float(scale))
@@ -108,87 +94,98 @@ class Pilot(Element):
                 node.setPos(20, Ypos, 100)
 
             # parachute model
-            #paraModel  = loader.loadModel(modelName)
-            #paraModel.setScale(Vec3(0.3, 0.000001, 0.2))
-            #paraModel.setPos(Vec3(0, 0.15, 1.2))
-            #paraModel.setName("parachute")
-            #paraModel.setTexture(texture)
+            paraModel  = loader.loadModel(modelName)
+            # TODO: Make this scale a factor of the overall scale!
+            paraModel.setScale(Vec3(0.3, 0.000001, 0.2))
+            paraModel.setPos(Vec3(0, 0.15, 1.2))
+            paraModel.setName("parachute")
+            paraModel.setTexture(texture)
+            paraModels[n] = paraModel
+            # this is added at the very end of this function
             #paraModel.reparentTo(node)
 
             # bill board (plane) model
             bodyModel = loader.loadModel("Elements/Game/models/plane")
             bodyModel.setName("body")
             bodyModel.setPos(Vec3(0, 0, -0.5))
-            bodyModel.setScale(1.05)
+            #bodyModel.setScale(1.05)
             bodyModel.setTransparency(1)
-            if n == 'left':
-                bodyModel.setTexture(text64)
-            else:
-                bodyModel.setTexture(self.textures[19])
-            #bodyModel.setTexture(self.textures[len(self.textures)],1)
-            if n == 'left':
-                bodyModel.reparentTo(node)
+            bodyModel.setTexture(self.textures[len(self.textures)-1], 1)
+            bodyModel.reparentTo(node)
+
             node.reparentTo(self.sceneNP)
-            if n == 'left':
-                self.leftModel = node
-            #grid = DirectGrid( parent=render, planeColor=(0.5, 0.5, 0.5, 0.5) )
             self.parachutes[n] = PilotParachute(self.world, node, self.textures, parConfNode)
 
-    def printSize(self):
-        (width,height) = self.onScreenSize(self.leftModel)
-        print "Parachute takes (%s,%s) pixels" % (width,height)
+        self.adjustScale(parConfNode.targetScreenSize)
+        # now that we have adjusted the scale with only the BODY model, lets attach
+        # also the parachute to each model (left and right).
+        for n in ['left', 'right']:
+            paraModels[n].reparentTo(self.parachutes[n].node)
 
-    def move(self, x,y,z):
-        self.leftModel.setPos( self.leftModel.getPos()+Point3(x,y,z))
-        self.printSize()
+    def printSize(self):
+        left = self.parachutes['left'].node
+        parConfNode = self.config.parachutes
+        (width, height) = self.onScreenSize(left)
+        print "Parachute takes (%s,%s) pixels" % (width, height)
+        #self.adjustScale(parConfNode.targetScreenSize)
+        #(width, height) = self.onScreenSize(left)
+        #print "Parachute takes (%s,%s) pixels" % (width, height)
+
+    def translate(self, x,y,z):
+        node = self.parachutes['left']
+        node.setPos(node.getPos()+Point3(x,y,z))
+        #self.printSize()
 
     def adjustScale(self, size):
         # rescale the object so it takes the closest value to size
         # in pixels with an error of +-2 pixels
+        left = self.parachutes['left'].node
+        right= self.parachutes['right'].node
+        scale = self.adjustScaleNodes([left, right], size)
+
+    def adjustScaleNodes(self, nodes, size):
+        adjustScale = 1.0
         while(True):
-            current = max(self.onScreenSize(self.leftModel))
-            if int(current) - size > 2:
-                self.leftModel.setScale(self.leftModel.getScale()*0.90)
-            elif int(current) - size < -2:
-                self.leftModel.setScale(self.leftModel.getScale()*1.10)
-            else:
-                return
+           current = max(self.onScreenSize(nodes[0]))
+           # 2 pixels difference!
+           if int(current) - size > 2:
+               scale = 0.9
+           elif int(current) - size < -2:
+               scale = 1.10
+           else:
+               adjustScale = nodes[0].getScale()
+               break
+           for n in nodes:
+               n.setScale(n.getScale()*scale)
+        return adjustScale
 
     def onScreenSize(self, node):
         """Returns the screen size in pixels for a given node that
         projects on the screen (is in front of the camera)"""
         nodeMin = Point3()
         nodeMax = Point3()
-        node.showTightBounds()
+        #node.showTightBounds()
         if node.calcTightBounds(nodeMin, nodeMax):
-            #print nodeMin, nodeMax
             # from local to camera coordinates
             camMin = base.camera.getRelativePoint(render, nodeMin)
             camMax = base.camera.getRelativePoint(render, nodeMax)
-            print camMin,camMax
-
             render2dMin = Point2()
             render2dMax = Point2()
+            # from camera to project space
             base.camLens.project(camMin, render2dMin)
             base.camLens.project(camMax, render2dMax)
-
-            print render2dMin, render2dMax
-
+            # from screen to aspect2d range (aspect,-aspect,1,-1)
             aspectMin = aspect2d.getRelativePoint(render2d,
                                                   Point3(render2dMin[0],0,render2dMin[1]))
             aspectMax = aspect2d.getRelativePoint(render2d,
                                                   Point3(render2dMax[0],0,render2dMax[1]))
-
-            print aspectMax, aspectMin
-
+            # measure width and height
             nodeWidth = abs(aspectMax[0] - aspectMin[0])
             nodeHeight = abs(aspectMax[2] - aspectMin[2])
 
-            print nodeWidth
-            print nodeHeight
-
-            pixWidth = nodeWidth * (self.world.camera.screenHeight / 2.0)
-            pixHeight= nodeHeight * (self.world.camera.screenHeight / 2.0)
+            # calculate pixels on screen using the size of the screen
+            pixWidth = nodeWidth * self.world.camera.screenHeight * 0.5
+            pixHeight = nodeHeight * self.world.camera.screenHeight * 0.5
 
             return (pixWidth ,pixHeight)
 

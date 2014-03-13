@@ -31,7 +31,7 @@
         </element>
         <element className="Game" name="Game">
             <arg name="s_config"       value="config/gameConfig.xml"/>
-            <arg name="s_config_json"  value="config/gameConfig.json"/>
+            <arg name="config_json"  value="config/gameConfig.json"/>
             <arg name="s_saveReplay"   value="run/replayLog.txt,w"/>
             <arg name="s_logFile"      value="run/gameLog.txt,a"/>
         </element>

@@ -2,6 +2,29 @@ elements:
  - className: ScreenText
    name: IntroScreen
    plain_text: PilotData/introPilot.txt
+   config_yaml: PilotData/introScreen.yaml
+
+ - module: DataForm
+   className: ConsentForm
+   name: consentForm
+   config_yaml: PilotData/consentForm.yaml
+
+ - className: ScreenText
+   name: colourBlindText
+   plain_text: PilotData/colourBlindText.txt
+
+ - module: FullScreenImage
+   className: ImageQuery
+   name: colourBlindCheck
+   imageNameStr: PilotData/colorblind/plate%d.png
+   imageStrArgs: [1,2,3,4,5,6,7,8,9,10]
+   imageAnswers: [1,2,3,4,5,6,7,8,9,10]
+   images: exp range(1,39)
+   scale: [0.5,0.5]
+   keys:
+    - key: n
+      callback: nextImage
+      once: false
 
  - className: EmptyState
    name: start
@@ -12,7 +35,7 @@ elements:
 
  - className: DataForm
    name: UserInfo
-   s_config_json: PilotData/pilotDataForm.yaml
+   config_json: PilotData/pilotDataForm.yaml
 
  - className: HUDText
    name: Timer
@@ -30,14 +53,14 @@ elements:
    # what to look for and use. The code must be prone error!, and explain
    # the user when a possible attribute has not been found.
    pilotLog: run/pilotLog.txt,a
-   s_config_json: PilotData/pilotConfig.yaml
+   config_json: PilotData/pilotConfig.yaml
    s_saveReplay: PilotData/run/replayLogA.txt,w
    s_logFile: PilotData/run/pilot.txt,a
 
  - module: DataForm
    className: DataForm
    name: PilotQuestionnaire
-   s_config_json: PilotData/pilotQuestionnaire.yaml
+   config_json: PilotData/pilotQuestionnaire.yaml
 
  - module: ScreenText
    className: ScreenText
@@ -45,13 +68,20 @@ elements:
    plain_text: PilotData/finalText.txt
 
 transitions:
- - trans: 'start @ IntroScreen'
- - trans: 'IntroScreen @ UserInfo'
- - trans: 'UserInfo @ PrePilotScreen : exitDataForm'
+ - trans: 'start @ colourBlindCheck'
+ #- trans: 'start @ IntroScreen'
+# - trans: 'IntroScreen @ UserInfo'
+ - trans: 'IntroScreen @ consentForm'
+ - trans: 'consentForm @ colourBlindText:YES'
+ - trans: 'colourBlindText @ colourBlindCheck'
+ - trans: 'colourBlindCheck @ end'
+# comment.
+ - trans: 'consentForm @ end:NO'
+# - trans: 'UserInfo @ PrePilotScreen : exitDataForm'
  # Here Pilot will trigger the start of Timer also.
- - trans: 'PrePilotScreen @ Pilot : auto'
- - trans: 'PrePilotScreen @ Timer : auto'
- - trans: 'Pilot @ PilotQuestionnaire : exitPilot'
- - trans: 'Timer @ PilotQuestionnaire : exitPilot'
- - trans: 'PilotQuestionnaire @ FinalScreen : exitDataForm'
- - trans: 'FinalScreen @ end : auto'
+# - trans: 'PrePilotScreen @ Pilot : auto'
+# - trans: 'PrePilotScreen @ Timer : auto'
+# - trans: 'Pilot @ PilotQuestionnaire : exitPilot'
+# - trans: 'Timer @ PilotQuestionnaire : exitPilot'
+# - trans: 'PilotQuestionnaire @ FinalScreen : exitDataForm'
+# - trans: 'FinalScreen @ end : auto'

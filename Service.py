@@ -21,7 +21,7 @@
 
 from panda3d.core import *
 from direct.stdpy.threading import Thread
-from Utils.Debug import printOut, verbosity
+from Utils.Debug import printOut
 
 class Service(object):
     """ Basic class to extend for Service providers """

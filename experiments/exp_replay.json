@@ -13,7 +13,7 @@
         "className":"Replay",
         "name":"ReplayA",
         "replay":true,
-        "s_config_json":"Elements/ReplayModule/replayConfig.json",
+        "config_json":"Elements/ReplayModule/replayConfig.json",
         "s_replayLog":"run/replayLogA.txt"
       }
       ],

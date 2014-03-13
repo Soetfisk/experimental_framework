@@ -19,7 +19,7 @@
       {
         "className":"Game",
         "name":"Game",
-        "s_config_json":"config/gameConfig.json",
+        "config_json":"config/gameConfig.json",
         "s_saveReplay":"run/replayLog.txt,w",
         "s_logFile":"run/gameLog.txt,a"
       }

@@ -13,7 +13,7 @@ from direct.interval.MetaInterval import *
 from direct.interval.FunctionInterval import *
 from direct.interval.IntervalGlobal import *
 
-from Utils.Debug import printOut, verbosity
+from Utils.Debug import printOut
 
 class PilotParachute(DirectObject):
     # class attribute to store textures

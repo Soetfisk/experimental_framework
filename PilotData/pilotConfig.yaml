@@ -29,20 +29,20 @@ keys:
    callback: printSize
    comment: ""
  - key: i
-   callback: move
+   callback: translate
    args: [0,0,5]
  - key: j
-   callback: move
+   callback: translate
    args: [-5,0,0]
  - key: k
-   callback: move
+   callback: translate
    args: [0,0,-5]
  - key: l
-   callback: move
+   callback: translate
    args: [5,0,0]
  - key: a
    callback: adjustScale
-   args: [128]
+   args: [50]
 
 # This seems not to be used atm
 # this is a dictionary
@@ -55,7 +55,8 @@ validation:
 # description of the parachutes models and textures.
 parachutes:
   falltime: 6
-  scale: 20
+  scale: 1
+  targetScreenSize: 80
   modelname: PilotData/models/para02.egg
   parachuteTex: PilotData/models/textures/para_tex.png
   defaultIdx: 0

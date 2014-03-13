@@ -9,7 +9,7 @@ from Parachute import *
 from LodManager import *
 from Element import *
 
-from Utils.Debug import printOut, verbosity
+from Utils.Debug import printOut
 
 try:
         import json

@@ -1,5 +1,7 @@
 import time
 
+from Utils.Debug import printOut
+
 class Logger(object):
     """simple class to dump timestamps and
     events from the game"""
@@ -12,20 +14,20 @@ class Logger(object):
         # set this to -1 until we start logging
         self.baseTime = 0.0
 
-        if (fileName is not 'nolog'):
+        if fileName is not 'nolog':
             try:
                 f = open(fileName,mode)
                 self.logging = True
                 self.outfile = f
-                print "Logging on " + fileName
+                printOut("Logging on " + fileName, 4)
                 # we will store in memory the log, until the end.
                 self.logList = []
             except Exception,e:
-                print "Warning: Failed generating log file %s" % fileName
-                print "Warning: Will continue, but no log will be generated"
+                printOut("Warning: Failed generating log file %s" % fileName, 0)
+                printOut("Warning: Will continue, but no log will be generated", 0)
                 print e
 
-        if (self.logging is False):
+        if self.logging is False:
             # avoid any call to this functions with a dummy function
             self.startLog = self._noLog
             self.logEvent = self._noLog
@@ -48,7 +50,6 @@ class Logger(object):
         An event is a timestamp, a colon (:), an event
         key and arguments or extra description of the event
         if necessary"""
-        # print "logging " + event
         # format output...
         ts2 = "%7.3f:" % (ts - self.baseTime)
         new_line = ts2+event
@@ -59,8 +60,8 @@ class Logger(object):
 
     def closeLog(self, ts):
         if (self.baseTime==-1):
-            print "Warning: closing log before starting the timers"
-            print "Warning: timestamps will not make sense"
+            printOut("Warning: closing log before starting the timers",1)
+            printOut("Warning: timestamps will not make sense",1)
             self.baseTime=0
 
         #print "Closing log on " + str(self.outfile)

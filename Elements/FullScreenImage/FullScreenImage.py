@@ -7,7 +7,7 @@ from direct.gui.OnscreenImage import OnscreenImage
 
 #sys utils
 import sys
-from Utils.Debug import printOut, verbosity
+from Utils.Debug import printOut
 
 class FullScreenImage(Element):
     """

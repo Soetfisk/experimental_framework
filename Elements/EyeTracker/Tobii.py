@@ -31,8 +31,7 @@ except:
     pass
 
 from direct.showbase.DirectObject import DirectObject
-from Debug import printOut, verbosity
-
+from Debug import printOut
 class TobiiEyeTracker(DirectObject, simul=True):
     def __init__(self):
         """ constructor for the EyeTracker class """
