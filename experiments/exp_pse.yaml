@@ -1,4 +1,9 @@
 elements:
+
+ - className: EmptyState
+   name: start
+   timeout: 1.0
+
  - className: ScreenText
    name: IntroScreen
    plain_text: PilotData/introPilot.txt
@@ -12,13 +17,19 @@ elements:
  - className: ScreenText
    name: colourBlindText
    plain_text: PilotData/colourBlindText.txt
+   keys:
+    - key: escape
+      callback: sendMessage
+      args: [auto]
 
  - module: FullScreenImage
    className: ImageQuery
    name: colourBlindCheck
    imageNameStr: PilotData/colorblind/plate%d.png
-   imageStrArgs: [1,2,3,4,5,6,7,8,9,10]
-   imageAnswers: [1,2,3,4,5,6,7,8,9,10]
+#   imageStrArgs: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
+   imageStrArgs: [1,2,3]
+#   imageAnswers: [12,8,6,29,57,5,3,15,74,2,6,97,45,5,7,16,73]
+   imageAnswers: [12,8,6]
    images: exp range(1,39)
    scale: [0.5,0.5]
    keys:
@@ -26,9 +37,69 @@ elements:
       callback: nextImage
       once: false
 
- - className: EmptyState
-   name: start
-   timeout: 1.0
+ - className: ScreenText
+   name: colourBlindProblem
+   plain_text: PilotData/colourBlindProblem.txt
+
+ - module: Pilot
+   className: ScreenAdjustment
+   name: rescaleScreen
+   modelName: "PilotData/models/plane"
+   texture: "PilotData/textures/soldierRed_100.png"
+   config_yaml: PilotData/screenAdjust.yaml
+   # distance of the parachute from camera
+   parDistCam: 250.0
+   readFromGlobals: {
+    rescaleFactor: 1.0
+   }
+   keys:
+    - key: escape
+      callback: sendMessage
+      args: ['auto']
+      once: true
+
+ - className: ScreenText
+   name: gameIntroText
+   plain_text: PilotData/gameIntroText.txt
+   keys:
+    - key: n
+      callback: sendMessage
+      args: ['auto']
+
+ - className: Game
+   name: thegame
+   config_yaml: PilotData/gameConfig.yaml
+   saveReplay: PilotData/run/replayLogA.txt,w
+   logFile: PilotData/run/gameLogA.txt,a
+   parDistCam: 250.0
+   keys:
+    - key: escape
+      callback: sendMessage
+      args: ['auto']
+#    - key: j
+#      callback: moveGround
+#      args: [0, -1]
+#    - key: l
+#      callback: moveGround
+#      args: [0, 1]
+#    - key: i
+#      callback: moveGround
+#      args: [1, 1]
+#    - key: k
+#      callback: moveGround
+#      args: [1, -1]
+#    - key: w
+#      callback: moveGround
+#      args: [2, 1]
+#    - key: s
+#      callback: moveGround
+#      args: [2,-1]
+#    - key: u
+#      callback: rotate
+#      args: -1
+#    - key: o
+#      callback: rotate
+#      args: 1
 
  - className: EmptyState
    name: end
@@ -46,16 +117,18 @@ elements:
    className: ScreenText
    name: PrePilotScreen
    plain_text: PilotData/prePilot.txt
+   keys:
+    - key: escape
+      callback: sendMessage
+      args: ['auto']
 
  - className: Pilot
    name: Pilot
-   # attribute names are arbitrary!, so it is up to the class (Pilot)
-   # what to look for and use. The code must be prone error!, and explain
-   # the user when a possible attribute has not been found.
    pilotLog: run/pilotLog.txt,a
-   config_json: PilotData/pilotConfig.yaml
+   config_yaml: PilotData/pilotConfig.yaml
    s_saveReplay: PilotData/run/replayLogA.txt,w
    s_logFile: PilotData/run/pilot.txt,a
+   parDistCam: 250.0
 
  - module: DataForm
    className: DataForm
@@ -68,20 +141,31 @@ elements:
    plain_text: PilotData/finalText.txt
 
 transitions:
- - trans: 'start @ colourBlindCheck'
- #- trans: 'start @ IntroScreen'
-# - trans: 'IntroScreen @ UserInfo'
- - trans: 'IntroScreen @ consentForm'
- - trans: 'consentForm @ colourBlindText:YES'
- - trans: 'colourBlindText @ colourBlindCheck'
- - trans: 'colourBlindCheck @ end'
-# comment.
- - trans: 'consentForm @ end:NO'
-# - trans: 'UserInfo @ PrePilotScreen : exitDataForm'
- # Here Pilot will trigger the start of Timer also.
-# - trans: 'PrePilotScreen @ Pilot : auto'
-# - trans: 'PrePilotScreen @ Timer : auto'
-# - trans: 'Pilot @ PilotQuestionnaire : exitPilot'
-# - trans: 'Timer @ PilotQuestionnaire : exitPilot'
-# - trans: 'PilotQuestionnaire @ FinalScreen : exitDataForm'
-# - trans: 'FinalScreen @ end : auto'
+# INTRO
+ #- trans: 'start @ IntroScreen:auto'
+ - trans: 'start @ thegame:auto'
+ - trans: 'IntroScreen @ consentForm:auto'
+ # CONSENT
+ - trans: 'consentForm @ UserInfo:consentYes'
+ - trans: 'consentForm @ end:consentNo'
+ # USER INFO
+ - trans: 'UserInfo @ colourBlindText:auto'
+ # COLOUR BLIND
+ - trans: 'colourBlindText @ colourBlindCheck:auto'
+ - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
+ - trans: 'colourBlindCheck @ rescaleScreen:imageQueryOk'
+ - trans: 'colourBlindProblem @ end:auto'
+ # RESCALE SCREEN
+ - trans: 'rescaleScreen @ gameIntroText:auto'
+ # GAME
+ - trans: 'gameIntroText @ thegame:auto'
+ # GAME QUESTIONNAIRE
+ # PILOT
+ - trans: 'thegame @ PrePilotScreen:auto'
+ - trans: 'PrePilotScreen @ Pilot:auto'
+ - trans: 'Pilot @ PilotQuestionnaire: auto'
+ # UPLOAD RESULTS
+ - trans: 'PilotQuestionnaire @ ResultsUploader: auto'
+ - trans: 'ResultsUploader @ FinalScreen: auto'
+ # THE END
+ - trans: 'FinalScreen @ end:auto'

@@ -64,12 +64,13 @@ class Element(object):
             printOut("Fatal error loading config file "+ c, 0)
             self.world.quit()
 
-
-
         self.registeredKeys = []
 
     def setKeyboard(self, keyboard):
         self.kbd = keyboard
+
+    def log(self, message):
+        self.world.logEvent(message)
 
     def setTimeOut(self,time):
         # after 'time' a message 'timeout' will be send to the message manager,
@@ -114,9 +115,11 @@ class Element(object):
                          'setting up %s' % self.name, 0)
                 printOut('Ignoring that keybinding', 0)
                 self.world.quit()
-            # this could return false in case the key has already been registered
-            if self.kbd.registerKey(key, self.name, cb, comment, once, args):
-                self.registeredKeys.append(key)
+            # this will give us back a [] even if no 'commas' are found
+            for eachKey in key.split(','):
+                # this could return false in case the key has already been registered
+                if self.kbd.registerKey(eachKey, self.name, cb, comment, once, args):
+                    self.registeredKeys.append(eachKey)
         else:
             printOut("No keys added by element %s" % self.name, 1)
 
@@ -130,6 +133,7 @@ class Element(object):
 
     def needsToSaveData(self):
         return False
+
     def saveUserData(self):
         return
 
@@ -169,6 +173,18 @@ class Element(object):
         #self.world.createTextKeys()
         self.active = True
 
+        # check if we need to load values from globals! or set them
+        # to the defaults specified in the configuration of the Element
+        # check the experiment!
+        globals = getattr(self, 'readFromGlobals', None)
+        if globals:
+            for g in globals:
+                if g in self.world.globals:
+                    setattr(self, g, self.world.globals[g])
+                else:
+                    setattr(self, g, globals[g])
+
+
     def exitState(self):
         """
         This method will be executed when the Finite State Machine
@@ -180,6 +196,13 @@ class Element(object):
         printOut("Leaving state %s" % self.name,2)
 #        self.world.createTextKeys()
         self.active = False
+
+        # save globals if we have them.
+        globals = getattr(self, 'saveGlobals', None)
+        if globals:
+            for g in globals:
+                localValue = getattr (self, g, globals[g])
+                self.world.globals[g] = localValue
 
     def isActive(self):
         return self.active

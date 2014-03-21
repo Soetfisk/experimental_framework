@@ -51,6 +51,8 @@ class ScreenText(Element):
         # hide the whole node
         self.hideElement()
 
+        self.rescaleFactor=10.0
+
     def enterState(self):
         # print "entering ScreenText"
         # super class enterState

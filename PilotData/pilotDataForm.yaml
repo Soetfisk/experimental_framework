@@ -1,32 +1,23 @@
-keys:
-  - key: control-1
-    callback: pressedKey
-    comment: just testing callbacks
-    once: false
-    args: [1,2,3]
-  - key: control-2
-    callback: pressedKey
-    comment: another callback testing
-    once: true
-    args: [1]
+#keys:
+#
 
 settings:
     formId: userdata
     scale: 0.06
     maxlabel: 10
     labelcolour: [1.0,0.5,0.5,1.0]
-    title: 'Por favor ingresa tus datos:'
+    title: 'Please provide us with some information about you:'
 
 input:
- - label: Nombre
-   type: TextEntry
-   default: ""
- - label: Apellido
-   type: TextEntry
-   default: ""
- - label: Sexo
+ - label: Gender
    type: Option
-   values: ["Masculino","Femenino"]
- - label: Edad
+   values: ["Male","Female"]
+ - label: Do you have vision problems
+   type: Option
+   values: ["Yes","No"]
+ - label: Do you have experience playing games
+   type: Option
+   values: ["Yes","No"]
+ - label: Age
    type: TextEntry
    default: 0

@@ -1,20 +1,18 @@
 # main configuration file for the framework.
-cameraConfig: {
-  pos: [0.0,-110.0,7.0],
-  lookAt: [0.0,0.0,20.0],
-#  pos: [0.0,-10.0,0.0],
-#  lookAt: [0.0,0.0,0.0],
-  fov: 60.0,
+cameraConfig:
+  pos: [0.0,0.0,0.0]
+#  pos: [0.0,-110.0,7.0],
+# lookAt: [0.0,0.0,20.0],
+  lookAt: [0.0,1.0,0.0]
+  fov: 60.0
   # dimensions of the screen
-  screenWidth: 1280,
-  screenHeight: 800,
+  screenWidth: 1280
+  screenHeight: 800
   # distance of the plane of parachutes from the camera
-  parDistCam: 250.0,
-  delta: 0
-}
+  # parDistCam: 250.0,
+  # delta: 0
 
-simulationLog: {
+simulationLog:
   # main log for the framework.
   outfile: run/worldlog.txt,
   mode: a
-}

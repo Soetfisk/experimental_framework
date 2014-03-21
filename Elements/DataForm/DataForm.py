@@ -173,8 +173,7 @@ class DataForm(Element):
     #def clearButton(self):
     #    self.clearInputs()
     def nextPressed(self):
-      self.world.advanceFSM('exitDataForm')
-
+        self.sendMessage('auto')
 
     def saveInputs(self):
         """
@@ -259,18 +258,11 @@ class DataForm(Element):
 
     def enterState(self):
         Element.enterState(self)
-        #self.world.stopKeyboard()
+       #self.world.stopKeyboard()
 
     def exitState(self):
         # exit state
         self.saveInputs()
         Element.exitState(self)
 
-    def pressedKey(self, *args):
-        """Example callback with arguments..."""
-        return
-
-    def pressedKeyC(self):
-        """Example callbacks without arguments..."""
-        pass
 

@@ -8,5 +8,5 @@ keys:
  - key: n
    callback: sendMessage
    once: true
-   args: ['auto']
+   args: ['AUTO']
 

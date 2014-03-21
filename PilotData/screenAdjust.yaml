@@ -1,0 +1,49 @@
+# configuration for the camera.
+# the application expects the following values.
+# [] are lists, {} are dicts, and so on.
+# the whole file is a dictionary
+# { 'cameraConfig': xxx, 'keys': xxx, and so on }
+
+# this dictionary entry is another dictionary
+#cameraConfig:
+#  pos: [0.0,-110.0,7.0]
+#  lookAt: [0.0,0.0,20.0]
+#  fov: 60.0
+#  screenWidth: 1280
+#  screenHeight: 800
+#  parDistCam: 250.0
+
+# Keyboard callbacks, execute only once or many and arguments
+# this is an entry which is a LIST of dictionaries
+keys:
+ # two keys (events) mapped to the same callback!
+ - key: w,w-repeat
+   callback: scale
+   args: [1.1]
+   once: false
+
+ - key: s,s-repeat
+   callback: scale
+   args: [0.9]
+   once: false
+
+ - key: e,e-repeat
+   callback: scale
+   args: [1.01]
+   once: false
+
+ - key: d,d-repeat
+   callback: scale
+   args: [0.99]
+   once: false
+
+# description of the parachutes models and textures.
+parachute:
+  scale: 1
+  modelname: PilotData/models/para02.egg
+  parachuteTex: PilotData/models/textures/para_tex.png
+  # list of dictionaries!
+  texture:
+    - index: 0
+      name: Red
+      textureName: PilotData/textures/soldierRed_100.png

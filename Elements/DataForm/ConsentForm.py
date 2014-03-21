@@ -84,12 +84,12 @@ class ConsentForm(Element):
 
 
     def yesPressed(self):
-        self.answer = 'YES'
-        self.sendMessage('YES')
+        self.answer = 'yes'
+        self.sendMessage('consentYes')
 
     def noPressed(self):
-        self.answer = 'NO'
-        self.sendMessage('NO')
+        self.answer = 'no'
+        self.sendMessage('consentNo')
 
     def enterState(self):
         Element.enterState(self)

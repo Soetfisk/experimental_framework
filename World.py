@@ -235,6 +235,7 @@ class World(DirectObject):
             except Exception, e:
                 printOut("Exception building state: " + el['name'], 0)
                 print str(e.__class__)
+                print e
                 self.quit()
         return FiniteStateMachine(fsmTransitions, self.elements)
 
@@ -352,8 +353,17 @@ class World(DirectObject):
 
         self.setupCamera()
         self.setupPandaCamera()
+
+        # dictionary with key values for Elements to communicate.
+        # between each other.
+        # They can save values here and use them, ideally using
+        # saveGlobals and readFromGlobals in the configuration file.
+        self.globals = {}
         return
 
+    def logEvent(self, message):
+        t = time.time()
+        self.log.logEvent(message, t)
 
 #=========================================================================================
 #========== INPUT HANDLING ===============================================================
@@ -388,7 +398,7 @@ class World(DirectObject):
         the camera, setup the Panda camera through the object base
         from panda API"""
         # handy reference
-        cam = self.camera
+        #cam = self.camera
 
         # drive mode to position the camera
         # base.useDrive()
@@ -398,9 +408,9 @@ class World(DirectObject):
         base.disableMouse()
 
         # set Panda basic camera
-        base.camera.setPos(cam.pos[0], cam.pos[1], cam.pos[2])
-        base.camera.lookAt(cam.lookAt[0], cam.lookAt[1], cam.lookAt[2])
-        base.camLens.setFov(cam.fov)
+        #base.camera.setPos(cam.pos[0], cam.pos[1], cam.pos[2])
+        #base.camera.lookAt(cam.lookAt[0], cam.lookAt[1], cam.lookAt[2])
+        #base.camLens.setFov(cam.fov)
         #base.camLens.setNear(10)# equiv to:
         #base.cam.node().getLens().setNear()
         #base.camLens.setFar(200)
@@ -418,39 +428,39 @@ class World(DirectObject):
         """
         Attributes:
         screenWidth, screenHeight
-        pos, lookAt, fov
-        delta, parDistCam
-        minX,minZ, ratio
+        pos, lookAt, fov, ratio
         """
         # setup the camera based purely on the JSON configuration
 
-        camera = self.config.cameraConfig
+        self.camera = self.config.cameraConfig
 
+        # ==========================================================
         # override screenWidth,screenHeight
+        # from pandaConfig.py if they have been defined
         for o in pandaConfig.options:
             if 'win-size' in o:
                 # "win-size 1280 800"
-                w,h = o.split(' ')[1:]
-                printOut("Saving window config: %s %s" % (w,h),4)
+                w, h = o.split(' ')[1:]
+                printOut("Saving window config: %s %s" % (w, h), 4)
                 self.config.cameraConfig.screenWidth = int(w)
-                self.config.cameraConfig.screenHeight= int(h)
+                self.config.cameraConfig.screenHeight = int(h)
+        # ===========================================================
 
-        setattr(camera, 'ratio', camera.screenWidth / float(camera.screenHeight))
-        fovRads = (camera.fov * pi / 180.0)
+        setattr(self.camera, 'ratio', self.camera.screenWidth / float(self.camera.screenHeight))
+        fovRads = (self.camera.fov * pi / 180.0)
 
         # make a triangle rectangle, from camera pos to the plane
         # where the parachutes fall. The hiphotenuse is the length of the
         # line from the camera to the top of this plane
-        hip = camera.parDistCam / cos(fovRads / 2)
+        # hip = camera.parDistCam / cos(fovRads / 2)
 
         # (sine(fov/2) * length) is the minX
-        setattr(camera, 'minX', -hip*sin(fovRads/2.0) )
+        # setattr(camera, 'minX', -hip*sin(fovRads/2.0) )
 
         # the heigth is simply derived from the aspect ratio
         # of the screen, should match assuming a perspective frustrum
         #setattr( camera, 'minZ', -hip*sin(fovRads/2.0) )
-        setattr(camera, 'minZ', camera.ratio-hip*sin(fovRads/2.0))
-        self.camera = camera
+        # setattr(camera, 'minZ', camera.ratio-hip*sin(fovRads/2.0))
 
     def windowEventHandler(self, window=None):
         """Function to handle window resize events"""

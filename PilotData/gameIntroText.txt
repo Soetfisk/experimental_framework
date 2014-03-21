@@ -1,0 +1,6 @@
+
+This is the game introduction and explanation.
+All the details about how to play the game have to
+be described here.
+
+press 'n' key to advance...

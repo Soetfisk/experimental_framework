@@ -22,88 +22,91 @@ class Game(Element):
        for the keyboard and for the Camera which I should separate
        in classes"""
 
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         """by default is play mode, and no replay log file"""
         # this sets all the attributes specified in the generic JSON
-        super(Game,self).__init__(**kwargs)
-        self.isReplay = self.className=='Replay'
+        super(Game, self).__init__(**kwargs)
+        #self.isReplay = self.className == 'Replay'
+        self.isReplay = False
 
         # builds two Logger objects, one for replay capabilities
         # and the other one as a general log of the game
         self.setupLog()
 
-
         # setup the main components in the game
         self.setupGame()
-
 
     #=============================================
     def setupLog(self):
         # creating logger for the replay
         # the string will look like "filename,mode"
         # if no value is found, 'nolog,w' is returned.
-        rl = getattr(self,'s_saveReplay','nolog,w').split(',')
-        self.replayLog = Logger(rl[0],rl[1])
+        rl = getattr(self, 'saveReplay', 'nolog,w').split(',')
+        self.replayLog = Logger(rl[0], rl[1])
         # creating logger for the game
         # the string will look like "filename,mode"
-        gl = getattr(self,'s_logFile','nolog,a').split(',')
-        self.gameLog = Logger( gl[0],gl[1])
+        gl = getattr(self, 'logFile', 'nolog,a').split(',')
+        self.gameLog = Logger(gl[0], gl[1])
 
     def readUserData(self):
+        pass
         # Uses a service provided by DataForm.
         # Its a simple service registered by the name 'UserData' that
         # returns the input in the form.
         # We will use it in a blocking call here, so no need for a callback.
         # TODO
-#        service = self.world.serviceMgr.getService('UserData')
-        if (service):
-            userData = service.service()
-        else:
-            userData = None
-
+        # service = self.world.serviceMgr.getService('UserData')
+        #if service:
+        #    userData = service.service()
+        #else:
+        #    userData = None
         # this can be None or the Dictionary, depending if the user already
         # entered the data
-        return userData
-
+        #return userData
+    #=============================================
     def startLogging(self):
         t = time.time()
         self.gameLog.startLog(t)
         self.gameLog.logEvent("==== new game participant ====\n", t)
 
         # process user data if present (from a previous form)
-        if self.userData:
-            for k, v in self.userData.items():
-                self.gameLog.logEvent("== UI ==  %s: %s\n" % (k,v),t)
+        #if self.userData:
+        #    for k, v in self.userData.items():
+        #        self.gameLog.logEvent("== UI ==  %s: %s\n" % (k, v), t)
 
         self.gameLog.logEvent("date: " + ctime() + "\n", t)
         self.gameLog.logEvent("game start\n", t)
-
     #=============================================
-
     def stopLogging(self):
         self.gameLog.stopLog()
         self.replayLog.stopLog()
-
     #=============================================
-
     def setupTerrain(self):
         """Sets terrain model, attaching it to the scene nodepath"""
         # transform to position the ground model
         self.groundTransform = NodePath("groundTransform")
-        self.groundTransform.setHpr(120, 0, 0)
+        self.groundTransform.setHpr(130, 7, 7)
         # ground model
         self.ground = loader.loadModel("Elements/Game/models/terrain/master")
-        self.ground.setPos(78, -100, 0)
+        self.ground.setPos(213, -179, -5)
         self.ground.reparentTo(self.groundTransform)
         # ground model is only shown in the gamePlay tree.
         self.groundTransform.reparentTo(self.sceneNP)
         return
-
     #=============================================
+    # DEBUGING PURSPOSES -- I WANT A GUI!!!
+    def moveGround(self,axis,amount):
+        pos = self.ground.getPos()
+        pos[axis] += amount
+        self.ground.setPos(pos[0],pos[1],pos[2])
+        print pos
+    def rotate(self, amount):
+        self.groundTransform.setH(self.groundTransform.getH() + amount)
+        print "Heading: " + str(self.groundTransform.getH())
+    #==============================================
 
     def setupParachutes(self):
         """Creates parachutes objects needed for the game, loads textures and all..."""
-
         # references to all the Parachute objects created
         self.parachutes = {}    # dict of parachute objects
         # more references to parachutes, this time by semantics
@@ -136,7 +139,6 @@ class Game(Element):
             except:
                 print "Trying to register a non-existent handler, check JSON gameConfig and LodManager class"
 
-
         parConfNode = self.config.parachutes
         targetnames = self.currSeq  # target names
 
@@ -145,8 +147,7 @@ class Game(Element):
         falltime = parConfNode.falltime
 
         # how many parachutes of each color, based on the max
-        each = int(ceil(float(parachutesCount) / len(parConfNode.parachutes)) )
-
+        each = int(ceil(float(parachutesCount) / len(parConfNode.parachutes.names)) )
         # check that 1 of each of the next 3 targets exists in upper
         # third of the screen
         self.centerFirstThird = (-2*self.world.camera.minZ)/3.0
@@ -154,16 +155,16 @@ class Game(Element):
 
         self.non_targets_cnt = []
 
-        for p in parConfNode.parachutes:
-            color = str(p.name.upper())
-            # for each colour create 6 parachutes, so to cover three colours
-            # in a row.
-            for i in range(6):
+        for color in parConfNode.names:
+
+            levels = parConfNode.textures.levels
+            for l in levels:
+
+            #for i in range(6):
                 # only 2 of each non-target
                 if (i > 2 and color not in targetnames):
                     pass
                 nameId = color + "_" + str(i)
-
                 # creates parachute object
                 obj = Parachute(nameId, p, self, self.posGen, falltime, parConfNode.scale, not self.isReplay)
 
@@ -196,9 +197,9 @@ class Game(Element):
 
         # try and read user data from the form.
         # example of a blocking call
-        self.userData = self.readUserData()
-        printOut("From GAME, just read user data from the form",1)
-        printOut(str(self.userData),1)
+        #self.userData = self.readUserData()
+        #printOut("From GAME, just read user data from the form",1)
+        #printOut(str(self.userData),1)
 
         # as we need to wait for the async call, we have to start
         # the logging in the callback.
@@ -206,7 +207,7 @@ class Game(Element):
 
         # eyeTracker task
         self.lastEyeSample = None
-        self.world.tracker.connect()
+        #self.world.tracker.connect()
 
     #=============================================
 
@@ -218,12 +219,12 @@ class Game(Element):
         # specifics
         self.stopLogging()
         # remove all tasks!!!
-        taskMgr.remove("addParachutes")
+        #taskMgr.remove("addParachutes")
         self.sceneNP.removeNode()
         self.hudNP.removeNode()
 
-        self.world.tracker.stopTrack()
-        taskMgr.remove("readTrackerGaze")
+        #self.world.tracker.stopTrack()
+        #taskMgr.remove("readTrackerGaze")
 
     #=============================================
 
@@ -334,20 +335,39 @@ class Game(Element):
         # keys and interaction in the game
         self.mapkeys = [0, 0, 0, 0]
 
+
+        # director vector from camera to lookAt point
+        camLookAt = Vec3(cam.lookAt[0]-cam.pos[0],
+                         cam.lookAt[1]-cam.pos[1],
+                         cam.lookAt[2]-cam.pos[2])
+        camLookAt.normalize()
+        # director vector scaled up to reflect the distance from
+        # the camera to the plane where Parachutes are falling
+        camLookAt = camLookAt * self.parDistCam
         # creates a Random position generator class helper
         # to generate new positions for the parachutes
         # left and right corners.
         # THIS IS VERY TIME CONSUMING TASK!, and should be implemented in C
         # OR REWRITTEN
-        Ypos = cam.pos[1] + cam.parDistCam
+
+        # field of view in RADIANS
+        fovRads = (cam.fov * pi / 180.0)
+        # HIPOTHENUSE of the triangle from camera to parDistCam
+        hip = self.parDistCam / cos(fovRads / 2)
+        # Minimum X value within the viewing volume
+        minX = -hip*sin(fovRads/2.0)
+        minZ = cam.ratio-hip*sin(fovRads/2.0)
+
+
+        Ypos = cam.pos[1] + self.parDistCam
         maxPar = self.config.parachutes.simultaneous
         self.posGen = PositionGenerator(
-                      topLeft=Vec3(cam.minX + cam.delta, Ypos, -cam.minZ),
-                      topRight=Vec3(-cam.minX - cam.delta, Ypos, -cam.minZ),
+                      topLeft=Vec3(minX, Ypos, -minZ),
+                      topRight=Vec3(-minX, Ypos, -minZ),
                       memory=maxPar, world=self )
 
         # number of cycles after changing quality
-        # self.cycles = 0
+        self.cycles = 0
 
         # to start the timer immediately
         self.lastGetParT = -2
@@ -355,14 +375,14 @@ class Game(Element):
         # loads the 3d terrain (3d scene)
         self.setupTerrain()
         # generates ALL the parachutes, and some extra stuff
-        self.setupParachutes()
+        # self.setupParachutes()
         # activates particles in Panda
         base.enableParticles()
         # enables collisions
         if not self.isReplay:
-            self.setupCollisions()
+             self.setupCollisions()
         # sets up the HUD for the targets
-        self.setupTargetsHUD()
+        # self.setupTargetsHUD()
         # sets up the HUD for the points
         self.setupPointsHUD()
         # sets up the cannon
@@ -380,10 +400,15 @@ class Game(Element):
         self.event_keys = []
 
         # particle system for explosions
-        self.nodeExplosions = NodePath("particlesExplosion")
-        self.nodeExplosions.reparentTo(render)
-        self.nodeExplosions.setBin("fixed", 0)
-        #p.setDepthWrite(False)
+        # self.nodeExplosions = NodePath("particlesExplosion")
+        # self.nodeExplosions.reparentTo(render)
+        # self.nodeExplosions.setBin("fixed", 0)
+        ## p.setDepthWrite(False)
+
+        self.currController = 0
+        self.controllers = [self.setChByKeyboard,
+                            self.setChByMouse]
+
         return
 
     #=============================================
@@ -396,7 +421,6 @@ class Game(Element):
         cm = CardMaker("hitting plane")
         cm.setFrame(-100,100,-100,100)
         self.sceneNP.attachNewNode(cm.generate()).lookAt(0,-1,0)
-
 
     def setupSounds(self):
         """
@@ -452,6 +476,10 @@ class Game(Element):
     #=============================================
     # CHANGE HOW WE CONTROL THE CROSSHAIR
     #=============================================
+    def changeCrossHairControl(self):
+        self.currController = (self.currController + 1) % len(self.controllers)
+        self.controllers[self.currController]()
+
     def setChByTracker(self):
         self.chController = 'tracker'
         taskMgr.remove("chController")
@@ -482,6 +510,7 @@ class Game(Element):
         self.aimAtXY(0.0,0.0)
         # set cross hair controller (keyboard)
         shooter = self.config.shooter
+
         if (shooter.control == 'keyboard'):
             self.setChByKeyboard()
         elif (shooter.control == 'mouse'):
@@ -489,30 +518,34 @@ class Game(Element):
         elif (shooter.control == 'tracker'):
             self.setChByTracker()
 
-        taskMgr.add(self.addParachutes, "addParachutes", sort=1)
+        #taskMgr.add(self.addParachutes, "addParachutes", sort=1)
 
         # this is going to call this function every frame.
         # so we check to avoid adding the task, but it not really
         # needed, since replayLog has dummy functions that log nothing
         # in case the logging is disabled.
-        if (self.replayLog.logging):
-            t = time.time()
-            self.replayLog.startLog(t)
-            taskMgr.add(self.logFrameTask, "logFrameTask", sort=5)
+        #if (self.replayLog.logging):
+        #    t = time.time()
+        #    self.replayLog.startLog(t)
+        #    taskMgr.add(self.logFrameTask, "logFrameTask", sort=5)
 
         self.setupCannonKeys()
 
         # start tracking
-        self.world.tracker.track()
+        # self.world.tracker.track()
         return
 
 
     def aimAtXY(self,x,y):
         """Generic function that moves the chrosshairNP to
-        the XY position on screen"""
+        the XY position on screen and rotates the cannon
+        accordingly"""
 
+        # where is the cross hair on the screen
         pos = Point2(x,y)
         pos3d = Point3()
+
+        # frustrum points
         nearPoint = Point3()
         farPoint = Point3()
         base.camLens.extrude(pos, nearPoint, farPoint)
@@ -523,18 +556,24 @@ class Game(Element):
             #print "intersection at: ", pos3d
             self.crosshairNP.setX(pos3d.getX())
             # 5 is the limit to not go below the ground with the crosshair.
-            self.crosshairNP.setZ(max(pos3d.getZ(),5.0))
+            self.crosshairNP.setZ(max(pos3d.getZ(),-45.0))
+            #self.crosshairNP.setZ(pos3d.getZ())
+            print self.crosshairNP.getZ()
             # set here the crosshair...
 
         # make X between [-1,1] approx
-        normX = self.crosshairNP.getX() / 137
+        normX = self.crosshairNP.getX() / 140.0
         newH = 180.0 - (normX * 40)
         self.cannon.setH(newH)
+
         # assume 45 degrees is the maximum Heading angle of the turret
         # make Z between [-1,1] approx
-        normZ = self.crosshairNP.getZ() / 125
-        newP = -normZ * 40
+        #print "Z:" + str(self.crosshairNP.getZ())
+        normZ = (self.crosshairNP.getZ() + 45.0) / (80.0+45.0)
+        #print "normZ:" + str(normZ)
+        newP = -normZ * 25.0
         self.cannon.setP(newP)
+        #self.cannon.setP(0)
     #=============================================
     #=============================================
     # TASKS
@@ -542,6 +581,7 @@ class Game(Element):
     def crossHairMouse(self,task):
         if base.mouseWatcherNode.hasMouse():
             mpos = base.mouseWatcherNode.getMouse()
+            self.cursorX,self.cursorY = mpos
             self.aimAtXY(mpos.x,mpos.y)
         return task.again
 
@@ -567,10 +607,10 @@ class Game(Element):
         """
         updates cross hair and cannon using arrow keys
         """
-        ts = time.time()
-        hpr = self.cannon.getHpr()
-        dt = t.time - self.lastCH
-        self.lastCH = t.time
+        #ts = time.time()
+        #hpr = self.cannon.getHpr()
+        #dt = t.time - self.lastCH
+        #self.lastCH = t.time
         s = self.crosshairSpeed
 
         # 0 is left, 2 is right,
@@ -580,25 +620,30 @@ class Game(Element):
         #        'l-up':[5],'i':[2],'i-up':[6],
         #        'k':[3],'k-up':[7]}
 
-        dx = -self.mapkeys[0]*s + self.mapkeys[1]*s
-        dz = self.mapkeys[2]*s - self.mapkeys[3]*s
+        dx = (-self.mapkeys[0]*s + self.mapkeys[1]*s)
+        dz = (self.mapkeys[2]*s - self.mapkeys[3]*s)
 
-        if ((dx > 0 and hpr[0] > 135) or (dx < 0 and hpr[0] < 225)):
-            self.crosshairNP.setX(self.crosshairNP.getX()+dx)
-            # assume 45 degrees is the maximum Heading angle of the turret
-            newH = 180.0 - (self.crosshairNP.getX() * 45 / 137)
-            self.cannon.setH(newH)
-            # CONDITIONAL LOG
-            self.replayLog.logEvent("L:"+str(newH)+"\n",ts)
-        if ((dz < 0 and hpr[1] < -5.0) or (dz > 0 and hpr[1] > -45)):
-            self.crosshairNP.setZ(self.crosshairNP.getZ()+dz)
-            # assume 45 degrees is the maximum Heading angle of the turret
-            newP = -self.crosshairNP.getZ() * 45 / 125
-            self.cannon.setP(newP)
-
-            # CONDITIONAL LOG
-            self.replayLog.logEvent("M:"+str(newP)+"\n",ts)
+        self.cursorX = min(1,max(self.cursorX + dx, -1.0))
+        self.cursorY = min(1,max(self.cursorY + dz, -0.55))
+        self.aimAtXY(self.cursorX, self.cursorY)
         return Task.cont
+
+#        if ((dx > 0 and hpr[0] > 135) or (dx < 0 and hpr[0] < 225)):
+#            self.crosshairNP.setX(self.crosshairNP.getX()+dx)
+#            # assume 45 degrees is the maximum Heading angle of the turret
+#            newH = 180.0 - (self.crosshairNP.getX() * 45 / 137)
+#            self.cannon.setH(newH)
+#            # CONDITIONAL LOG
+#            self.replayLog.logEvent("L:"+str(newH)+"\n",ts)
+#        if ((dz < 0 and hpr[1] < 15.0) or (dz > 0 and hpr[1] > -45)):
+#            self.crosshairNP.setZ(self.crosshairNP.getZ()+dz)
+#            # assume 45 degrees is the maximum Heading angle of the turret
+#            newP = -self.crosshairNP.getZ() * 45 / 180
+#            self.cannon.setP(newP)
+#
+#            # CONDITIONAL LOG
+#            self.replayLog.logEvent("M:"+str(newP)+"\n",ts)
+#        return Task.cont
 
     def addParachutes(self, t):
         """this is the most consuming task of the game, which
@@ -750,6 +795,9 @@ class Game(Element):
         """ Sets up cannon 3d model, bullets models, crossHair model,
         a task to update the crossHair"""
 
+        self.cursorX = 0
+        self.cursorY = 0
+
         shooter = self.config.shooter
 
         # to keep track of time for the task
@@ -772,7 +820,6 @@ class Game(Element):
         self.tip0 = True
         self.cannon = loader.loadModel(shooter.cannonModel)
         self.cannon.reparentTo(cannonNP)
-        #self.cannon.reparentTo(gamePlay3dNode)
 
         # position the cannon relative to camera position
         self.cannon.setScale(0.2)
@@ -785,7 +832,7 @@ class Game(Element):
         self.cannon.setPos(camera.getPos() + Vec3(0, Y, Z))
         # position to match initial pos of the crosshair
         # TODO - fix these constants!
-        self.cannon.setHpr(180, -4.68, 0)
+        self.cannon.setHpr(180, 0, 0)
         self.lastHpr = self.cannon.getHpr()
 
         self.cannonTip0 = NodePath("tip0")

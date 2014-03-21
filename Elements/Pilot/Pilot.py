@@ -53,6 +53,7 @@ class Pilot(Element):
         # adjust scale factor
         scale = parConfNode.scale
 
+
         # only setup the default COLOUR
         # to know which is the default colour, check the config file
         # for "defaultIdx", which relates to the list of parachutes
@@ -83,11 +84,17 @@ class Pilot(Element):
         for n in ['left', 'right']:
             node = NodePath(n + "_parachute")
             node.setTransparency(1)
-            node.setScale(float(scale))
+            if getattr(self, 'rescaleFactor', None):
+                printOut("Warning, using rescale factor of %"%self.rescaleFactor, 0)
+                node.setScale(float(self.rescaleFactor))
+            else:
+                printOut("Warning, rescaleFactor was not found!",0)
+                node.setScale(1.0)
+
             node.setPos(Vec3(-1000, 40, 0))
 
             cam = self.world.camera
-            Ypos = cam.pos[1] + cam.parDistCam
+            Ypos = cam.pos[1] + self.parDistCam
             if n == 'left':
                 node.setPos(-20, Ypos, 100)
             else:
@@ -326,7 +333,7 @@ class Pilot(Element):
         # Ypos is the DISTANCE FROM THE CAMERA, in DEPTH
         cam = self.world.camera
         #Ypos = self.cameraDict['pos'][1] + self.cameraDict['parDistCam']
-        Ypos = cam.pos[1] + cam.parDistCam
+        Ypos = cam.pos[1] + self.parDistCam
         # HEIGHT, in World coordinates
         #minZ = self.cameraDict['minZ']
         minZ = cam.minZ

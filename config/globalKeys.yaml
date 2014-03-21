@@ -7,14 +7,14 @@ global_keys:
   - key: control-q
     callback: quit
     comment: Quit the experiment
-  - key: escape
-    callback: advanceFSM
-    comment: Advance State Machine
-    args: ["auto"]
+#  - key: escape
+#    callback: advanceFSM
+#    comment: Advance State Machine
+#    args: ["auto"]
   - key: control-m
     callback: toggleMouseCursor
     comment: Show/Hide mouse cursor
-  - key: control-g
-    callback: advanceFSM
-    comment: Advance State Machine
-    args: ["exitPilot"]
+#  - key: control-g
+#    callback: advanceFSM
+#    comment: Advance State Machine
+#    args: ["exitPilot"]
