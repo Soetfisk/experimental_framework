@@ -26,7 +26,7 @@ class Calib(Element):
         super(Calib,self).__init__(**kwargs)
 
         # window ratio set during World constructor.
-        window_ratio = self.world.camera.ratio
+        window_ratio = self.config.world.camera.ratio
 
         # speed from point to point
         self.moveSpeed = float(self.xmlConfig.moveSpeed)

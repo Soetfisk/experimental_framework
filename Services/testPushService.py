@@ -22,12 +22,12 @@ class testPushService(Element):
     def createService(self):
         """ Creates and register a service in the service manager to handle
         queries of data obtained in the data form """
-        service = self.world.serviceMgr.createFromTemplate( 'UserData' )
+        service = self.config.world.serviceMgr.createFromTemplate( 'UserData' )
         service.setServerName('userdata0')
 
         service.setServiceImp( self.getUserData )
         # register service
-        self.world.serviceMgr.registerService ( service )
+        self.config.world.serviceMgr.registerService ( service )
 
     def setupGUI(self):
         """ Builds the GUI based on the XML description """

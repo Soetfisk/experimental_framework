@@ -1,0 +1,33 @@
+settings:
+    formId: gameQuestionnaire
+    scale: 0.06
+    maxlabel: 10
+    labelcolour: [1.0,0.5,0.5,1.0]
+    title: 'Please answer the following questions:'
+    background: [0.2,0.2,0.2,1]
+
+questions:
+ - text: another question
+   order: 0
+   answerType: Option
+   answerOptions: ['uno','dos','tres']
+
+ - text: this is a question
+   order: 1
+   answerType: TextEntry
+
+ - text: What is the difference between this and that? and other interesting things
+   order: 2
+   answerType: TextEntry
+
+ - text: Como cree usted que blah blah... y ademas este nodo colapsa con el texto
+   order: 3
+   answerType: Option
+   answerOptions: ['Bueno', 'Muy Bueno', 'Pesimo']
+   graphics:
+    - image: PilotData/textures/red64.png
+      pos: [-0.3,0,-0.5]
+      scale: 0.3
+    - image: PilotData/textures/red128.png
+      pos: [0.3,0,-0.5]
+      scale: 0.3

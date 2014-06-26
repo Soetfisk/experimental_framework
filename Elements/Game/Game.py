@@ -8,6 +8,7 @@ from PositionGenerator import PositionGenerator
 from Parachute import *
 from LodManager import *
 from Element import *
+import random
 
 from Utils.Debug import printOut
 
@@ -41,11 +42,11 @@ class Game(Element):
         # creating logger for the replay
         # the string will look like "filename,mode"
         # if no value is found, 'nolog,w' is returned.
-        rl = getattr(self, 'saveReplay', 'nolog,w').split(',')
+        rl = getattr(self.config, 'saveReplay', 'nolog,w').split(',')
         self.replayLog = Logger(rl[0], rl[1])
         # creating logger for the game
         # the string will look like "filename,mode"
-        gl = getattr(self, 'logFile', 'nolog,a').split(',')
+        gl = getattr(self.config, 'logFile', 'nolog,a').split(',')
         self.gameLog = Logger(gl[0], gl[1])
 
     def readUserData(self):
@@ -55,7 +56,7 @@ class Game(Element):
         # returns the input in the form.
         # We will use it in a blocking call here, so no need for a callback.
         # TODO
-        # service = self.world.serviceMgr.getService('UserData')
+        # service = self.config.world.serviceMgr.getService('UserData')
         #if service:
         #    userData = service.service()
         #else:
@@ -108,92 +109,134 @@ class Game(Element):
     def setupParachutes(self):
         """Creates parachutes objects needed for the game, loads textures and all..."""
         # references to all the Parachute objects created
+        # actual Parachutes objects
         self.parachutes = {}    # dict of parachute objects
-        # more references to parachutes, this time by semantics
-        # how can we generalize these semantics about the game!
-        self.targets = {}       # parachutes that are targets
-        self.non_targets = {}   # parachutes that are no targets.
+        self.parachutesFalling = {}
+
+        # bad guys (just names)
+        self.targets = []       # parachutes that are targets
+        # good guys (just names)
+        self.non_targets = []   # parachutes that are no targets.
 
         # load sequences
         # references to the sequences in the config file
-        self.seqs = {}          # sequences by id.
-        try:
-            sequences = self.config.targetSequences.sequences
-            for s in sequences:
-                self.seqs[s.id] = map(str.upper, map(str, s.seq))
-            self.currSeq = self.seqs[self.config.targetSequences.use]
-        except Exception, e:
-            print "Error loading target sequence from JSON file"
-            print e
-            sys.exit()
+        #self.seqs = {}          # sequences by id.
+        #try:
+        #    sequences = self.config.targetSequences.sequences
+        #    for s in sequences:
+        #        self.seqs[s.id] = map(str.upper, map(str, s.seq))
+        #    self.currSeq = self.seqs[self.config.targetSequences.use]
+        #except Exception, e:
+        #    print "Error loading target sequence from JSON file"
+        #    print e
+        #    sys.exit()
 
         # creates LOD manager (implements Observer pattern)
-        lm = LodManager()
+        # lm = LodManager()
         # gets the different LOD events that should be considered
-        lodEvents = self.config.LODEvents.lodEvents
-        for l in lodEvents:
-            try:
-                handler = getattr(lm, l.handler)
-                lm.registerHandler(l.evtType, handler, l)
-                printOut("registering %s\n" % l.evtType, 1)
-            except:
-                print "Trying to register a non-existent handler, check JSON gameConfig and LodManager class"
+        # lodEvents = self.config.LODEvents.lodEvents
+        #for l in lodEvents:
+        #    try:
+        #        handler = getattr(lm, l.handler)
+        #        lm.registerHandler(l.evtType, handler, l)
+        #        printOut("registering %s\n" % l.evtType, 1)
+        #    except:
+        #        print "Trying to register a non-existent handler, check JSON gameConfig and LodManager class"
 
         parConfNode = self.config.parachutes
-        targetnames = self.currSeq  # target names
 
-        # how many at the same time will fall and at what speed
-        parachutesCount = parConfNode.simultaneous
-        falltime = parConfNode.falltime
+        for id0, color in enumerate(parConfNode.targets):
+            for id1, q in enumerate(parConfNode.targetsQ):
+                badGuy = parConfNode.texturePrefix + str(q) + parConfNode.texturePostfix
+                # take the color name, but without the last two chars "_1"
+                badGuy = badGuy.replace("Color", color)
+                # add unique id per color and quality
+                pos = badGuy.rfind("/") + 1
+                uniqueName = badGuy[pos:]
+                uniqueName = str(id0)+"."+str(id1)+"."+uniqueName
+                # remove the prefix with the path
+
+                self.targets.append(uniqueName)
+                obj = Parachute(world=self, name=uniqueName, textureName=badGuy,
+                                conf=parConfNode, collisions=True)
+                obj.modelNP.reparentTo(self.sceneNP)
+                obj.isTarget = True
+                obj.ignoreHit = False
+                self.parachutes[uniqueName] = obj
+
+        for id0, color in enumerate(parConfNode.nonTargets):
+            for id1, q in enumerate(parConfNode.nonTargetsQ):
+                goodGuy = parConfNode.texturePrefix + str(q) + parConfNode.texturePostfix
+                # take the color name, but without the last two chars "_1"
+                goodGuy = goodGuy.replace("Color", color)
+                pos = goodGuy.rfind("/") + 1
+                uniqueName = goodGuy[pos:]
+                uniqueName = str(id0)+"."+str(id1)+"."+uniqueName
+
+                self.non_targets.append(uniqueName)
+                obj = Parachute(world=self, name=uniqueName, textureName=goodGuy,
+                                conf=parConfNode, collisions=True)
+                obj.modelNP.reparentTo(self.sceneNP)
+                obj.isTarget = False
+                obj.ignoreHit = True
+                self.parachutes[uniqueName] = obj
+
+        #targetnames = self.currSeq  # target names
 
         # how many parachutes of each color, based on the max
-        each = int(ceil(float(parachutesCount) / len(parConfNode.parachutes.names)) )
+        #each = int(ceil(float(parachutesCount) / len(parConfNode.parachutes.names)) )
         # check that 1 of each of the next 3 targets exists in upper
         # third of the screen
-        self.centerFirstThird = (-2*self.world.camera.minZ)/3.0
-        self.firstThirdSize = self.centerFirstThird
+        #self.centerFirstThird = (-2*self.config.world.camera.minZ)/3.0
+        #self.firstThirdSize = self.centerFirstThird
 
-        self.non_targets_cnt = []
+        #self.non_targets_cnt = []
 
-        for color in parConfNode.names:
+        #
+        #for color in parConfNode.names:
 
-            levels = parConfNode.textures.levels
-            for l in levels:
+        #    levels = parConfNode.textures.levels
+        #    for l in levels:
 
             #for i in range(6):
                 # only 2 of each non-target
-                if (i > 2 and color not in targetnames):
-                    pass
-                nameId = color + "_" + str(i)
+        #        if (i > 2 and color not in targetnames):
+        #            pass
+        #        nameId = color + "_" + str(i)
                 # creates parachute object
-                obj = Parachute(nameId, p, self, self.posGen, falltime, parConfNode.scale, not self.isReplay)
+        #        obj = Parachute(nameId, p, self, self.posGen, falltime, parConfNode.scale, not self.isReplay)
 
-                obj.modelNP.reparentTo(self.sceneNP)
-                self.parachutes[nameId] = obj
+        #        obj.modelNP.reparentTo(self.sceneNP)
+        #        self.parachutes[nameId] = obj
 
                 # improve this registration on events
-                lm.register(obj, ["CYCLE"])
+        #        lm.register(obj, ["CYCLE"])
 
-                if (color not in targetnames):
-                    obj.isTarget = False
-                    obj.ignoreHit = True
-                    self.non_targets[nameId] = obj
-                    if (color not in self.non_targets_cnt):
-                        self.non_targets_cnt.append(color)
-                else:
-                    self.targets[nameId] = obj
-                    obj.isTarget = True
-                    obj.ignoreHit = False
+        #        if (color not in targetnames):
+        #            obj.isTarget = False
+        #            obj.ignoreHit = True
+        #            self.non_targets[nameId] = obj
+        #            if (color not in self.non_targets_cnt):
+        #                self.non_targets_cnt.append(color)
+        #        else:
+        #            self.targets[nameId] = obj
+        #            obj.isTarget = True
+        #            obj.ignoreHit = False
 
         # DON'T NEED THE LIST ANYMORE!, just replace it with length.
-        self.non_targets_cnt = len(self.non_targets_cnt)
-        self.lodManager = lm
+        #self.non_targets_cnt = len(self.non_targets_cnt)
+        #self.lodManager = lm
 
     #=============================================
 
     def enterState(self):
         # call super first
         Element.enterState(self)
+
+        rescale = self.rescaleFactor
+        print rescale
+        for p in self.parachutes.values():
+            p.modelNP.setScale(rescale)
 
         # try and read user data from the form.
         # example of a blocking call
@@ -207,23 +250,24 @@ class Game(Element):
 
         # eyeTracker task
         self.lastEyeSample = None
-        #self.world.tracker.connect()
+        #self.config.world.tracker.connect()
 
     #=============================================
 
+
     def exitState(self):
-        # clear all keybindings
-        # self.cleanUpKeys()
         # call super first
         Element.exitState(self)
         # specifics
         self.stopLogging()
         # remove all tasks!!!
-        #taskMgr.remove("addParachutes")
-        self.sceneNP.removeNode()
-        self.hudNP.removeNode()
+        taskMgr.remove("addParachutes")
+        self.sceneNP.hide()
+        self.hudNP.hide()
+        #self.sceneNP.removeNode()
+        #self.hudNP.removeNode()
 
-        #self.world.tracker.stopTrack()
+        #self.config.world.tracker.stopTrack()
         #taskMgr.remove("readTrackerGaze")
 
     #=============================================
@@ -294,33 +338,44 @@ class Game(Element):
                   'i':[2],'i-up':[6],
                   'k':[3],'k-up':[7]}
         for key,value in keyValue.items():
-            k.registerKey(key,self.name, self.arrowKey,"",False,value,False)
-            self.event_keys.append(key)
+            k.registerKey(key, self.config.name, self.arrowKey,"",False,value,False)
+            self.registeredKeys.append(key)
 
-        k.registerKey("w", self.name, self.shoot,"shoot!", False,[],False)
-        self.event_keys.append("w")
+        k.registerKey("w", self.config.name, self.shoot,"shoot!", False,[],False)
+        self.registeredKeys.append("w")
 
     #=============================================
-    def cleanUpKeys(self):
-        #for k in self.event_keys:
-        #    self.kbd.unregKey(k)
-        pass
-
     def setupTargetsHUD(self):
         # this targuetGuideHUD goes into the HUD scene node
-        self.targetGuideHUD = targetGuide( self.currSeq )
-        nodePath = self.targetGuideHUD.targetsNP
-        nodePath.reparentTo(self.hudNP)
+
+        # unique list
+        bad = list(set(self.config.parachutes.targets))
+        bad = map(str.upper, bad)
+        self.targetGuideHUDLeft = targetGuide(bad, 'left',
+                                   self.config.parachutes.targetsLabel)
+
+        self.targetGuideHUDLeft.targetsNP.reparentTo(self.hudNP)
+
+        good = list(set(self.config.parachutes.nonTargets))
+        good = map(str.upper, good)
+        self.targetGuideHUDRight = targetGuide(good, 'right',
+                                               self.config.parachutes.nonTargetsLabel)
+        self.targetGuideHUDRight.targetsNP.reparentTo(self.hudNP)
+
+        # self.targetGuideHUD = targetGuide( self.currSeq )
+
+        # nodePath = self.targetGuideHUD.targetsNP
+        # nodePath.reparentTo(self.hudNP)
 
         # next three targets (to prepare the random generation)
-        self.nextThreeTargets = self.currSeq[0:3]
+        # self.nextThreeTargets = self.currSeq[0:3]
         # last target to verify if the current target has changed
         # recently
-        self.lastTarget = 0
+        # self.lastTarget = 0
         # how many cycles have been shooting targets
-        self.cyclesTargets = 0
+        # self.cyclesTargets = 0
         # current target in the sequence
-        self.currentTarget = 0
+        # self.currentTarget = 0
 
     #=============================================
 
@@ -330,20 +385,20 @@ class Game(Element):
         # when this object (Game) was constructed, some
         # default attributes were added automatically, such
         # as configuration values from Json and the World object.
-        cam = self.world.camera
+        cam = self.config.world.camera
 
         # keys and interaction in the game
         self.mapkeys = [0, 0, 0, 0]
 
 
         # director vector from camera to lookAt point
-        camLookAt = Vec3(cam.lookAt[0]-cam.pos[0],
-                         cam.lookAt[1]-cam.pos[1],
-                         cam.lookAt[2]-cam.pos[2])
-        camLookAt.normalize()
+        #camLookAt = Vec3(cam.lookAt[0]-cam.pos[0],
+        #                 cam.lookAt[1]-cam.pos[1],
+        #                 cam.lookAt[2]-cam.pos[2])
+        # camLookAt.normalize()
         # director vector scaled up to reflect the distance from
         # the camera to the plane where Parachutes are falling
-        camLookAt = camLookAt * self.parDistCam
+        # camLookAt = camLookAt * self.config.parDistCam
         # creates a Random position generator class helper
         # to generate new positions for the parachutes
         # left and right corners.
@@ -353,13 +408,13 @@ class Game(Element):
         # field of view in RADIANS
         fovRads = (cam.fov * pi / 180.0)
         # HIPOTHENUSE of the triangle from camera to parDistCam
-        hip = self.parDistCam / cos(fovRads / 2)
+        hip = self.config.parDistCam / cos(fovRads / 2)
         # Minimum X value within the viewing volume
         minX = -hip*sin(fovRads/2.0)
         minZ = cam.ratio-hip*sin(fovRads/2.0)
 
 
-        Ypos = cam.pos[1] + self.parDistCam
+        Ypos = cam.pos[1] + self.config.parDistCam
         maxPar = self.config.parachutes.simultaneous
         self.posGen = PositionGenerator(
                       topLeft=Vec3(minX, Ypos, -minZ),
@@ -369,20 +424,21 @@ class Game(Element):
         # number of cycles after changing quality
         self.cycles = 0
 
-        # to start the timer immediately
-        self.lastGetParT = -2
+        # start the timer as soon as the game starts, but the
+        # parachutes will delay a bit to show up on the screen.
+        self.lastGetParT = - self.config.parachutes.fallDelay
 
         # loads the 3d terrain (3d scene)
         self.setupTerrain()
         # generates ALL the parachutes, and some extra stuff
-        # self.setupParachutes()
+        self.setupParachutes()
         # activates particles in Panda
         base.enableParticles()
         # enables collisions
         if not self.isReplay:
              self.setupCollisions()
         # sets up the HUD for the targets
-        # self.setupTargetsHUD()
+        self.setupTargetsHUD()
         # sets up the HUD for the points
         self.setupPointsHUD()
         # sets up the cannon
@@ -409,6 +465,11 @@ class Game(Element):
         self.controllers = [self.setChByKeyboard,
                             self.setChByMouse]
 
+        # try to read pointsToEnd the game, if not set then
+        # set it to 200 points and finish.
+        if getattr(self.config, 'pointsToEnd', None) is None:
+            self.config['pointsToEnd'] = 200
+        self.finishGame = False
         return
 
     #=============================================
@@ -455,7 +516,7 @@ class Game(Element):
             print e
 
     def setupPointsHUD(self):
-        r = self.world.camera.ratio
+        r = self.config.world.camera.ratio
         self.pointsHUD = pointsHUD(self.config.pointsHUD,
                                    Vec3(-r+0.05,0,0.90))
         self.pointsHUD.getNP().reparentTo(self.hudNP)
@@ -484,22 +545,22 @@ class Game(Element):
         self.chController = 'tracker'
         taskMgr.remove("chController")
         # start tracking
-        # self.world.tracker.track()
+        # self.config.world.tracker.track()
         taskMgr.add(self.crossHairTracker, "chController", sort=2)
-        self.world.accept("mouse1", self.shoot,[])
+        self.config.world.accept("mouse1", self.shoot,[])
         printOut("Adding task to control crosshair using the EyeTracker",0)
 
     def setChByKeyboard(self):
         self.chController = 'keyboard'
         taskMgr.remove("chController")
         taskMgr.add(self.crossHairKeyboard, "chController", sort=2)
-        #self.world.ignore('mouse1-down')
+        #self.config.world.ignore('mouse1-down')
 
     def setChByMouse(self):
         self.chController = 'mouse'
         taskMgr.remove("chController")
         taskMgr.add(self.crossHairMouse, "chController", sort=2)
-        self.world.accept("mouse1", self.shoot,[])
+        self.config.world.accept("mouse1", self.shoot,[])
     #=============================================
 
     def startGame(self):
@@ -518,7 +579,7 @@ class Game(Element):
         elif (shooter.control == 'tracker'):
             self.setChByTracker()
 
-        #taskMgr.add(self.addParachutes, "addParachutes", sort=1)
+        taskMgr.add(self.addParachutes, "addParachutes", sort=1)
 
         # this is going to call this function every frame.
         # so we check to avoid adding the task, but it not really
@@ -532,7 +593,7 @@ class Game(Element):
         self.setupCannonKeys()
 
         # start tracking
-        # self.world.tracker.track()
+        # self.config.world.tracker.track()
         return
 
 
@@ -558,7 +619,7 @@ class Game(Element):
             # 5 is the limit to not go below the ground with the crosshair.
             self.crosshairNP.setZ(max(pos3d.getZ(),-45.0))
             #self.crosshairNP.setZ(pos3d.getZ())
-            print self.crosshairNP.getZ()
+            # print self.crosshairNP.getZ()
             # set here the crosshair...
 
         # make X between [-1,1] approx
@@ -588,9 +649,9 @@ class Game(Element):
     def crossHairTracker(self,task):
         #printOut("at crosshairTracker",0)
         # sample is a (x,y) tuple
-        sample = self.world.tracker.readGazeSample()
+        sample = self.config.world.tracker.readGazeSample()
         # tracker.trackerWinSize is (X,Y,W,H)
-        tws = self.world.tracker.trackerWinSize
+        tws = self.config.world.tracker.trackerWinSize
         if sample:
             # map gaze sample to Panda screen coordinates
             # assume that both windows share the same top-left
@@ -652,119 +713,179 @@ class Game(Element):
         targets to shoot at and the user doesn't have time to look
         at the other parachutes"""
 
+        if self.finishGame:
+            # returning will stop the task
+            return
+
         dt = t.time - self.lastGetParT
-        # check EVERY SECOND
-        if (dt < 1):
+        # run this method only ONCE EVERY SECOND
+        if (dt < 0.5):
             return Task.cont
 
         self.lastGetParT = t.time
 
-        needNoMoreTargets = []
-        # determine which of the next three targets need a replacement now
-        for n in self.nextThreeTargets:
-            coveredBy = None
-            candidates= []
-            for k,v in self.targets.items():
-                if (n in k and not v.falling):
-                    candidates.append(k)
-                else:
-                    if ((n in k) and (k not in needNoMoreTargets)):
-                        pos = v.modelNP.getPos()
-                        if (v.falling and pos.getZ() > 70.0):
-                            needNoMoreTargets.append(k)
-                            coveredBy = (k,v)
+        # check if there are parachutes that WERE falling and
+        # they are not falling anymore, so move them to the list
+        # of available parachutes.
+        toRemove = []
+        for p, v in self.parachutesFalling.items():
+            if v.falling:
+                continue
+            else:
+                self.parachutes[p] = v
+                toRemove.append(p)
+        for p in toRemove:
+            del(self.parachutesFalling[p])
+        # FROM THIS POINT, each parachute is the right Dictionary.
+
+
+        # list of parachutes for which I have found a free position
+        willStartFallingNow = []
+
+        for p,v in self.parachutes.items():
+            # starting position is always above the camera
+            # for 250.0 of pardistcam, with +85 in Z we can
+            # hide it
+
+            # try 10 times to find a position for each parachute
+            found = False
+            for i in range(1, 10):
+                if found:
+                    break
+                pos = Vec3(randint(-100,100),self.config.parDistCam,randint(80,100))
+                for fv in \
+                    self.parachutesFalling.values() + willStartFallingNow:
+                        if (pos - fv.modelNP.getPos()).\
+                            lengthSquared() < (40*40):
+                            # finding ONE is enough
                             break
-            if (coveredBy == None and len(candidates)>0):
-                if (self.targets[candidates[0]].newPos(0) == 1):
-                    self.targets[candidates[0]].start()
-            if (len(needNoMoreTargets) == 3): break
+                else:
+                    # Found a spot which is distant enough from
+                    # the other falling (or to fall) parachutes.
+                    found = True
+                    v.newPos(x=pos[0],y=pos[1],z=pos[2],forced=True)
+                    willStartFallingNow.append(v)
 
-        counter = 0
-        ky = self.non_targets.keys()
-        shuffle(ky)
-        active = 0
-
-        for a in self.non_targets.values():
-            if (a.falling): active+=1
-
-        for k in ky[0:5 - len(needNoMoreTargets)]:
-            if (active > 3*self.non_targets_cnt):
-                return Task.cont
-
-            t = self.non_targets[k]
-            if (not t.falling):
-                r = t.newPos(0)
-                if (r==1):
-                    t.start()
-                    active+=1
+        for w in willStartFallingNow:
+            self.parachutesFalling[w.name] = w
+            del(self.parachutes[w.name])
+            w.start()
 
         return Task.cont
 
+#        for n in self.nextThreeTargets:
+#            coveredBy = None
+#            candidates= []
+#            for k,v in self.targets.items():
+#                if (n in k and not v.falling):
+#                    candidates.append(k)
+#                else:
+#                    if ((n in k) and (k not in needNoMoreTargets)):
+#                        pos = v.modelNP.getPos()
+#                        if (v.falling and pos.getZ() > 70.0):
+#                            needNoMoreTargets.append(k)
+#                            coveredBy = (k,v)
+#                            break
+#            if (coveredBy == None and len(candidates)>0):
+#                if (self.targets[candidates[0]].newPos(0) == 1):
+#                    self.targets[candidates[0]].start()
+#            if (len(needNoMoreTargets) == 3): break
+#
+#        counter = 0
+#        ky = self.non_targets.keys()
+#        shuffle(ky)
+#        active = 0
+#
+#        for a in self.non_targets.values():
+#            if (a.falling): active+=1
+#
+#        for k in ky[0:5 - len(needNoMoreTargets)]:
+#            if (active > 3*self.non_targets_cnt):
+#                return Task.cont
+#
+#            t = self.non_targets[k]
+#            if (not t.falling):
+#                r = t.newPos(0)
+#                if (r==1):
+#                    t.start()
+#                    active+=1
+#
+#        return Task.cont
     #=============================================
 
-    def validHit(self,par_name):
+    def validHit(self, par_name):
         """ is the par_name parachute the next target (color) in the targetGuideHUD """
-        validColor = self.currSeq[self.currentTarget]
-        if (validColor not in par_name):
+        if par_name not in self.targets:
             self.addPoints(-10)
             return False
-        else:
+
+        #validColor = self.currSeq[self.currentTarget]
+        #if (validColor not in par_name):
+        #    return False
+        #else:
             # log for replay
-            if (self.replayLog):
-                ts = time.time()
-                self.replayLog.logEvent("H:[\'"+par_name+"\']\n",ts)
 
+        if self.replayLog:
+            ts = time.time()
+            self.replayLog.logEvent("H:[\'"+par_name+"\']\n",ts)
             # good hit, advance arrow
-            self.targetGuideHUD.advanceArrow()
-            self.replayLog.logEvent("A: %d\n" % self.targetGuideHUD.currentTarget, ts)
-            self.addPoints(15)
+            # self.targetGuideHUD.advanceArrow()
+            #self.replayLog.logEvent("A: %d\n" % self.targetGuideHUD.currentTarget, ts)
 
-            newTarget = (self.currentTarget+1) % len(self.currSeq)
+        self.addPoints(15)
+        return True
+
+            #newTarget = (self.currentTarget+1) % len(self.currSeq)
             # nextThreeTargets
-            ntt = self.currSeq[newTarget:newTarget+3]
+            # ntt = self.currSeq[newTarget:newTarget+3]
             # did we wrap around??
-            l = len(ntt)
-            if (l<3):
-                ntt += self.currSeq[0:3-l]
-            self.nextThreeTargets = ntt
+            # l = len(ntt)
+            #if (l<3):
+            #    ntt += self.currSeq[0:3-l]
+            #self.nextThreeTargets = ntt
 
             # new cycle ??
-            if (newTarget is 0):
-                self.cyclesTargets += 1
-                c = CycleEvent(self.cyclesTargets)
-                self.lodManager.notify(c)
+            #if (newTarget is 0):
+            #    self.cyclesTargets += 1
+            #    c = CycleEvent(self.cyclesTargets)
+            #    self.lodManager.notify(c)
 
-            self.lastTarget = self.currentTarget
-            self.currentTarget = newTarget
-            return True
+            #self.lastTarget = self.currentTarget
+            #self.currentTarget = newTarget
 
     #=============================================
 
     def setPoints(self, points):
         self.points = points
         self.pointsHUD.setPoints(points)
+        # the game ends if the user reaches pointToEnd points
+        # from the config file.
+        if self.points >= self.config.pointsToEnd:
+            self.finishGame = True
+            taskMgr.doMethodLater(2.0, self.sendMessage, 'end game', extraArgs=['endOfGame'])
 
     #=============================================
 
     def addPoints(self, points):
-        self.points += points
-        self.pointsHUD.setPoints(self.points)
+        self.setPoints( self.points + points )
 
     #=============================================
 
     def getParachutesPositions(self, type_par='targets'):
         """returns a list of 3d positions with all targets positions
            in a particular instant"""
-        temp = self.targets.items()
-        if type_par == 'non_targets':
-            temp = self.non_targets.items()
-        if type_par == 'all':
-            temp += self.non_targets.items()
+        pass
 
-        result = []
-        for k, v in temp:
-            result.append(v.modelNP.getPos())
-        return result
+#        temp = self.targets.items()
+#        if type_par == 'non_targets':
+#            temp = self.non_targets.items()
+#        if type_par == 'all':
+#            temp += self.non_targets.items()
+#
+#        result = []
+#        for k, v in temp:
+#            result.append(v.modelNP.getPos())
+#        return result
 
     #=============================================
 
@@ -822,7 +943,7 @@ class Game(Element):
         self.cannon.reparentTo(cannonNP)
 
         # position the cannon relative to camera position
-        self.cannon.setScale(0.2)
+        self.cannon.setScale(0.15)
 
         # this is trial an error for different resolutions, to get
         # the cannon in a nice place.
@@ -918,7 +1039,7 @@ class Game(Element):
                               'clearSmoke', extraArgs=[])
 
         # advance in the pool of bullets
-        idx=self.bulletIdx%self.maxbullets
+        idx = self.bulletIdx % self.maxbullets
         self.bullets[idx].setScale(self.bulletSize)
         self.bullets[idx].show()
         ##self.bullets[idx].setScale(2.0 / 10.0)
@@ -941,7 +1062,6 @@ class Game(Element):
 
         #p.reparentTo(self.bullets[idx])
         #p.start(self.bullets[idx])
-
         proj.acceptOnce(event, self.hideAndRemoveBullet, [self.bullets[idx]])
 
         self.bulletIdx+=1
@@ -993,3 +1113,10 @@ class Game(Element):
         return
 
     #=============================================
+    def pauseFall(self):
+        for p,v in self.parachutesFalling.items():
+            v.pauseFall()
+
+    def unPauseFall(self):
+        for p,v in self.parachutesFalling.items():
+            v.unPauseFall()

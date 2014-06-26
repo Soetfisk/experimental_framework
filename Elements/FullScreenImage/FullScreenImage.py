@@ -24,16 +24,16 @@ class FullScreenImage(Element):
         # this defines:
         # self.sceneNP and self.hudNP
 
-        url = getattr(self,'s_url',None)
+        url = getattr(self.config,'s_url',None)
         if (url is None):
             print "Missing url of image to display"
             sys.exit()
 
-        sx,sz = getattr(self,'f_scale',[1.0,1.0])
+        sx,sz = getattr(self.config,'f_scale',[1.0,1.0])
 
         # this is used when we EXIT the state, so we already displayed
         # once the image.
-        self.i_count = getattr(self,'i_count', None)
+        self.i_count = getattr(self.config,'i_count', None)
         if (self.i_count):
             self.i_count-=1;
 
@@ -74,7 +74,7 @@ class FullScreenImage(Element):
             print self.i_count
             if (self.i_count == 0):
                 printOut("Sending event 'NoMoreImages' from exitState of %s"
-                    % self.name, 2)
+                    % self.config.name, 2)
                 messenger.send('NoMoreImages',['NoMoreImages'])
 
         Element.exitState(self)

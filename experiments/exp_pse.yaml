@@ -1,5 +1,10 @@
 elements:
 
+# the order in which classes are defined is not important, the FSM definition
+# is going to define what is executed.
+# Nevertheless, when parsing this YAML file, every class definition found is
+# created, so if not used it is better to comment out any code with '#'
+
  - className: EmptyState
    name: start
    timeout: 1.0
@@ -7,12 +12,26 @@ elements:
  - className: ScreenText
    name: IntroScreen
    plain_text: PilotData/introPilot.txt
-   config_yaml: PilotData/introScreen.yaml
+   config: PilotData/introScreen.yaml
+
+ - className: EmptyState
+   name: ResultsUploader
 
  - module: DataForm
    className: ConsentForm
    name: consentForm
-   config_yaml: PilotData/consentForm.yaml
+   config: PilotData/consentForm.yaml
+
+ - className: ServerConfig
+   name: studyServer
+   serverName: 127.0.0.1
+   serverPort: 2357
+   keys:
+    - key: c
+      callback: getConfig
+    - key: p
+      callback: pushResults
+      args: ['this is a result']
 
  - className: ScreenText
    name: colourBlindText
@@ -46,12 +65,12 @@ elements:
    name: rescaleScreen
    modelName: "PilotData/models/plane"
    texture: "PilotData/textures/soldierRed_100.png"
-   config_yaml: PilotData/screenAdjust.yaml
+   config: PilotData/screenAdjust.yaml
    # distance of the parachute from camera
    parDistCam: 250.0
-   readFromGlobals: {
-    rescaleFactor: 1.0
-   }
+   writeToGlobals:
+     rescaleFactor: 12.0
+
    keys:
     - key: escape
       callback: sendMessage
@@ -68,50 +87,41 @@ elements:
 
  - className: Game
    name: thegame
-   config_yaml: PilotData/gameConfig.yaml
+   config: PilotData/gameConfig.yaml
    saveReplay: PilotData/run/replayLogA.txt,w
    logFile: PilotData/run/gameLogA.txt,a
-   parDistCam: 250.0
+   pointsToEnd: 30
+   readFromGlobals:
+     rescaleFactor: 12.0
    keys:
+    - key: p
+      callback: pauseFall
+    - key: o
+      callback: unPauseFall
     - key: escape
       callback: sendMessage
       args: ['auto']
-#    - key: j
-#      callback: moveGround
-#      args: [0, -1]
-#    - key: l
-#      callback: moveGround
-#      args: [0, 1]
-#    - key: i
-#      callback: moveGround
-#      args: [1, 1]
-#    - key: k
-#      callback: moveGround
-#      args: [1, -1]
-#    - key: w
-#      callback: moveGround
-#      args: [2, 1]
-#    - key: s
-#      callback: moveGround
-#      args: [2,-1]
-#    - key: u
-#      callback: rotate
-#      args: -1
-#    - key: o
-#      callback: rotate
-#      args: 1
 
  - className: EmptyState
    name: end
 
  - className: DataForm
    name: UserInfo
-   config_json: PilotData/pilotDataForm.yaml
+   config: PilotData/pilotDataForm.yaml
 
  - className: HUDText
    name: Timer
    text: "0.0"
    topLeft: [10, 10]
+
+ - className: HUDText
+   name: MessageAdjustScale
+   text: "Please use the keys 'w' (increase), 's' (decrease) to adjust the size of the \nmodel (parachute+robot) so it ocuppies exactly 5 cm on your screen. \nFor finner adjustments use 'e' and 'd' accordingly.\n\nPress the key 'n' when you have finished the adjustment"
+   topLeft: [0.1, 0.2]
+   keys:
+    - key: n
+      callback: sendMessage
+      args: ['auto']
 
  - module: ScreenText
    className: ScreenText
@@ -125,15 +135,32 @@ elements:
  - className: Pilot
    name: Pilot
    pilotLog: run/pilotLog.txt,a
-   config_yaml: PilotData/pilotConfig.yaml
+   config: PilotData/pilotConfig.yaml
    s_saveReplay: PilotData/run/replayLogA.txt,w
    s_logFile: PilotData/run/pilot.txt,a
    parDistCam: 250.0
+   readFromGlobals:
+     rescaleFactor: 12.0
 
  - module: DataForm
    className: DataForm
    name: PilotQuestionnaire
-   config_json: PilotData/pilotQuestionnaire.yaml
+   config: PilotData/pilotQuestionnaire.yaml
+
+ - module: DataForm
+   className: UserQuestionnaire
+   name: gameQuestions
+   config: PilotData/gameQuestionnaire.yaml
+   keys:
+    - key: i,i-repeat
+      callback: scale
+      args: ['up']
+    - key: k,k-repeat
+      callback: scale
+      args: ['down']
+    - key: n
+      callback: sendMessage
+      args: ['auto']
 
  - module: ScreenText
    className: ScreenText
@@ -144,8 +171,18 @@ transitions:
 # INTRO
  #- trans: 'start @ IntroScreen:auto'
  - trans: 'start @ thegame:auto'
- - trans: 'IntroScreen @ consentForm:auto'
+ - trans: 'thegame@Pilot:auto'
+ - trans: 'Pilot@end:auto'
+ #- trans: 'start @ MessageAdjustScale:auto'
+ #- trans: 'start @ studyServer:auto'
+ # - trans: 'start @ gameQuestions:auto'
+
+ # - trans: 'gameQuestions@end:auto'
+ #- trans: 'studyServer@end:auto'
+ #- trans: 'IntroScreen@end:auto'
+
  # CONSENT
+ - trans: 'IntroScreen @ consentForm:auto'
  - trans: 'consentForm @ UserInfo:consentYes'
  - trans: 'consentForm @ end:consentNo'
  # USER INFO
@@ -153,19 +190,27 @@ transitions:
  # COLOUR BLIND
  - trans: 'colourBlindText @ colourBlindCheck:auto'
  - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
- - trans: 'colourBlindCheck @ rescaleScreen:imageQueryOk'
  - trans: 'colourBlindProblem @ end:auto'
+
+# PARALLEL STATES!, JUST TO OVERLAY SOME TEXT
+ - trans: 'colourBlindCheck @ rescaleScreen:imageQueryOk'
+ - trans: 'colourBlindCheck @ MessageAdjustScale:imageQueryOk'
+
  # RESCALE SCREEN
  - trans: 'rescaleScreen @ gameIntroText:auto'
+ - trans: 'MessageAdjustScale @ gameIntroText:auto'
  # GAME
  - trans: 'gameIntroText @ thegame:auto'
  # GAME QUESTIONNAIRE
+ #- trans: 'thegame @ gameQuestions:endOfGame'
  # PILOT
- - trans: 'thegame @ PrePilotScreen:auto'
+ #- trans: 'gameQuestions @ PrePilotScreen:auto'
  - trans: 'PrePilotScreen @ Pilot:auto'
  - trans: 'Pilot @ PilotQuestionnaire: auto'
  # UPLOAD RESULTS
- - trans: 'PilotQuestionnaire @ ResultsUploader: auto'
- - trans: 'ResultsUploader @ FinalScreen: auto'
+ - trans: 'PilotQuestionnaire @ studyServer: auto'
+ - trans: 'PilotQuestionnaire @ FinalScreen: auto'
+
  # THE END
- - trans: 'FinalScreen @ end:auto'
+ - trans: 'studyServer@end: dataUploaded'
+ - trans: 'FinalScreen@end:dataUploaded'

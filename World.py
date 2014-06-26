@@ -342,7 +342,7 @@ class World(DirectObject):
         # printOut("Service Manager created",1)
 
         # create general log file
-        genLog=self.config.simulationLog
+        genLog = self.config.simulationLog
         self.log = Logger(genLog.outfile,genLog.mode)
         self.log.startLog(self.baseTime)
         t = time.time()
@@ -357,7 +357,7 @@ class World(DirectObject):
         # dictionary with key values for Elements to communicate.
         # between each other.
         # They can save values here and use them, ideally using
-        # saveGlobals and readFromGlobals in the configuration file.
+        # writeToGlobals and readFromGlobals in the configuration file.
         self.globals = {}
         return
 
@@ -447,7 +447,7 @@ class World(DirectObject):
         # ===========================================================
 
         setattr(self.camera, 'ratio', self.camera.screenWidth / float(self.camera.screenHeight))
-        fovRads = (self.camera.fov * pi / 180.0)
+        # fovRads = (self.camera.fov * pi / 180.0)
 
         # make a triangle rectangle, from camera pos to the plane
         # where the parachutes fall. The hiphotenuse is the length of the

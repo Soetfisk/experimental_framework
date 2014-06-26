@@ -101,7 +101,7 @@
     "parachutes":
     {
       "simultaneous":6,
-      "falltime":6,
+      "speed":6,
       "scale":10,
       "parachutes":
         [

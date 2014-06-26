@@ -54,7 +54,7 @@ validation:
 
 # description of the parachutes models and textures.
 parachutes:
-  falltime: 6
+  speed: 20.0
   scale: 1
   targetScreenSize: 80
   modelname: PilotData/models/para02.egg

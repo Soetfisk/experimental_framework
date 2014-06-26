@@ -13484,7 +13484,7 @@ mode	/Developer/Panda3D/lib/Pmw/Pmw_1_3/lib/PmwScrolledListBox.py	/^	mode = self
 mode	/Developer/Panda3D/lib/Pmw/Pmw_1_3/lib/PmwScrolledListBox.py	/^	mode = self['vscrollmode']$/;"	v	class:ScrolledListBox
 mode	/Developer/Panda3D/lib/Pmw/Pmw_1_3/lib/PmwScrolledText.py	/^	mode = self['hscrollmode']$/;"	v	class:ScrolledText
 mode	/Developer/Panda3D/lib/Pmw/Pmw_1_3/lib/PmwScrolledText.py	/^	mode = self['vscrollmode']$/;"	v	class:ScrolledText
-mode	/Developer/Panda3D/lib/direct/p3d/DeploymentTools.py	/^                    '.' in self.name.rsplit('\/', 1)[-1] else 0755,$/;"	v	class:TarInfoRoot
+mode	/Developer/Panda3D/lib/direct/p3d/DeploymentTools.py	/^                    '.' in self.config.name.rsplit('\/', 1)[-1] else 0755,$/;"	v	class:TarInfoRoot
 modelLoaderOptions	/Developer/Panda3D/lib/direct/actor/Actor.py	/^    modelLoaderOptions = LoaderOptions(LoaderOptions.LFSearch |$/;"	v	class:Actor
 models	/Developer/Panda3D/lib/direct/test/ModelScreenShotGlobals.py	/^models = [$/;"	v
 modified	/Developer/Panda3D/lib/direct/tkwidgets/WidgetPropertiesDialog.py	/^    def modified(self, widget, entry, property, type, fNone):$/;"	m	class:WidgetPropertiesDialog

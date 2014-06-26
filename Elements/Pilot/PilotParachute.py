@@ -15,6 +15,7 @@ from direct.interval.IntervalGlobal import *
 
 from Utils.Debug import printOut
 
+
 class PilotParachute(DirectObject):
     # class attribute to store textures
     def __init__(self, game, node, textures, parConfNode):
@@ -25,7 +26,7 @@ class PilotParachute(DirectObject):
         self.name = node.getName()
         self.node = node
         self.game = game
-        self.falltime = parConfNode.falltime
+        self.speed = parConfNode.speed
 
         self.forced = False
         self.falling = False
@@ -36,6 +37,7 @@ class PilotParachute(DirectObject):
         self.nextLod = 0
         self.lowerResolution = False
         self.forced = False
+        self.pilotPos = ''
 
     """
     def updateLod(self, anEvent):
@@ -47,9 +49,11 @@ class PilotParachute(DirectObject):
     """
 
 
-    def setTexture(self,toQ,inTime):
+    def setTexture(self, toQ):
 
-        if ((toQ >= len(self.textures)) or (toQ < 0)): return
+        #if ((toQ >= len(self.textures)) or (toQ < 0)): return
+        if toQ not in self.textures.keys():
+            return
 
         # if the change has to happen when the model
         # its renewing it's possition.
@@ -60,11 +64,11 @@ class PilotParachute(DirectObject):
 
         #self.lowerResolution = False
         model = self.node.find("body")
-        self.model.setTexture(self.textures[toQ], 1)
+        model.setTexture(self.textures[toQ], 1)
         self.currentQ = toQ
-        #self.game.replayLog.logEvent("Q:[\'"+self.name+"\',"+str(toQ)+"]\n", time.time())
+        #self.game.replayLog.logEvent("Q:[\'"+self.config.name+"\',"+str(toQ)+"]\n", time.time())
 
-    def forceTexture(self,quality):
+    def forceTexture(self, quality):
         if (quality < 0 or quality >= len(self.textures)):
             printOut("Warning, trying to set invalid quality: %s" % quality, 0)
             return
@@ -73,32 +77,32 @@ class PilotParachute(DirectObject):
         return
 
     # increase texture quality by offsetQuality
-    def increaseQ(self,offsetQuality):
-        self.setTexture( self.currentQ+offsetQuality, 1)
+    def increaseQ(self, offsetQuality):
+        self.setTexture(self.currentQ + offsetQuality, 1)
 
     # decrease texture quality by offsetQuality
     def decreaseQ(self):
-        self.setTexture( self.currentQ-offsetQuality, 1)
+        self.setTexture(self.currentQ - offsetQuality, 1)
 
-    def swingTheThing(self,t):
-        self.node.setR((self.maxangle*t - self.maxangle/2.0) *
-                           self.node.getZ()/self.maxHeight)
+    def swingTheThing(self, t):
+        self.node.setR((self.maxangle * t - self.maxangle / 2.0) *
+                       self.node.getZ() / self.maxHeight)
         return
 
-    def newPos(self, d = 0, x = 0, y = 0, z = 0, forced = False):
+    def newPos(self, d=0, x=0, y=0, z=0, forced=False):
         self.forced = forced
 
         # check if need to lower the texture
         if (not self.forced and self.lowerResolution):
-            self.setTexture(self.nextLod,1)
+            self.setTexture(self.nextLod, 1)
 
         # swipe time
         self.node.show()
         self.time = 2.0
         self.maxangle = 30.0
-        self.groundHeight = 16
+        self.groundHeight = -35
 
-        pos = Vec3(x,y,z)
+        pos = Vec3(x, y, z)
 
         self.node.setPos(pos)
         self.maxHeight = self.node.getZ()
@@ -108,21 +112,22 @@ class PilotParachute(DirectObject):
                           toData=1.0,
                           duration=self.time,
                           blendType='easeInOut',
-                          name="right_"+self.name)
+                          name="right_" + self.name)
         swing1 = LerpFunc(self.swingTheThing,
                           fromData=1.0,
                           toData=0.0,
                           duration=self.time,
                           blendType='easeInOut',
-                          name="left_"+self.name)
-        self.swingSeq = Sequence(swing0,swing1)
+                          name="left_" + self.name)
+        self.swingSeq = Sequence(swing0, swing1)
         self.swingSeq.loop()
         if (not self.forced):
-            self.swingSeq.setT(uniform(0,1))
+            self.swingSeq.setT(uniform(0, 1))
 
         # set fall time, interval and callback after fall
-        #adjustedDuration = (self.node.getZ() * self.falltime) / self.posGen.topLeft[2]
-        self.fallInterval = self.genFallDownInterval(5, self.groundHeight)
+        adjustedDuration = (z - self.groundHeight) / self.speed
+        printOut("Adjusted Duration of speed: %f" % adjustedDuration, 0)
+        self.fallInterval = self.genFallDownInterval(adjustedDuration, self.groundHeight)
 
         self.fallInterval.setDoneEvent("finishedPreFall_" + self.name)
 
@@ -143,8 +148,8 @@ class PilotParachute(DirectObject):
         #                           abs((2 * angle) / self.maxangle),
         #                           Vec3(0, 0, self.maxangle / 2),
         #                           blendType='easeOut')
-        #self.rot0.setDoneEvent("swing_" + self.name)
-        #self.acceptOnce("swing_" + self.name, self.swing)
+        #self.rot0.setDoneEvent("swing_" + self.config.name)
+        #self.acceptOnce("swing_" + self.config.name, self.swing)
 
         # adjusts a bit the parachute so it looks exactly behind the robot when
         # the parachute is in one of either sides.
@@ -155,11 +160,12 @@ class PilotParachute(DirectObject):
 
     def finishedPreFall(self):
         # dissapear!
-        fadeOut = LerpFunctionInterval(self.node.setAlphaScale,
-                toData=0.0,fromData=1.0,duration=1.0)
+        printOut("Node position: %f,%f,%f" % (self.node.getX(), self.node.getY(), self.node.getZ()), 0)
+        printOut("Node scale: %f" % (self.node.getScale()[0]), 0)
+        fadeOut = LerpFunctionInterval(self.node.setAlphaScale, toData=0.0, fromData=1.0, duration=1.0)
         fadeOut.start()
 
-        self.fallInterval2 = self.genFallDownInterval(5.0, 0)
+        self.fallInterval2 = self.genFallDownInterval(2.0, self.groundHeight - 5)
         self.fallInterval2.setDoneEvent("lastBitFall_" + self.name)
         self.acceptOnce("lastBitFall_" + self.name, self.lastBitFall)
         self.fallInterval2.start()
@@ -170,7 +176,7 @@ class PilotParachute(DirectObject):
         self.node.setAlphaScale(1.0)
 
     def lastBitFall(self):
-        self.falling=False
+        self.falling = False
         #if (not self.isTarget):
         #    self.newPos()
         #    self.start()
@@ -178,27 +184,27 @@ class PilotParachute(DirectObject):
 
     def start(self):
         #self.newPos()
-        self.falling=True
+        self.falling = True
         self.node.setAlphaScale(1.0)
         self.fallInterval.start()
 
     def updatePos(self, dt):
-        #print dt
-#        self.model.setPos(self.model.getPos() - Vec3( 0, dt, 0) )
+    #print dt
+    #        self.model.setPos(self.model.getPos() - Vec3( 0, dt, 0) )
         pass
 
-    def setPos(self,pos):
+    def setPos(self, pos):
         """sets a Vec3 to the nodepath holding the parachute"""
         self.node.setPos(pos)
 
     def printPos(self):
         print self.node.getPos()
 
-    def genFallDownInterval(self, duration,endHeight):
+    def genFallDownInterval(self, duration, endHeight):
         # adjust duration based on the actual height of the parachute.
         return LerpPosInterval(self.node,
                                duration,
                                Vec3(self.node.getX(),
-                                     self.node.getY(),
-                                     endHeight))
+                                    self.node.getY(),
+                                    endHeight))
 

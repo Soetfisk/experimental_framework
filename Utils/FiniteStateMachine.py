@@ -23,7 +23,7 @@ class FiniteStateMachine(object):
         and the only active state is the "end" state
         """
         for s in self.states.values():
-            if s.isActive() and s.name != 'end':
+            if s.isActive() and s.config.name != 'end':
                 return False
         else:
             if self.states['end'].isActive():
@@ -33,7 +33,7 @@ class FiniteStateMachine(object):
         updateLast = []
 
         for s in self.states.values():
-            sName = s.name
+            sName = s.config.name
             if sName in self.transitions.keys():
                 accepts = self.transitions[sName].keys()
                 if s.isActive() and event in accepts:
@@ -42,7 +42,7 @@ class FiniteStateMachine(object):
                     print "%s(%s) ---> %s" % (sName, event, self.transitions[sName][event])
                     # exit state, and enter in one or many more.
                     s.exitState()
-        for newState in updateLast:
+        for newState in list(set(updateLast)):
             self.states[newState].enterState()
 
     def getTransitions(self):

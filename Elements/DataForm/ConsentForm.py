@@ -28,7 +28,7 @@ class ConsentForm(Element):
         """ Builds the GUI based on the YAML description """
         # DirectFrame that will contain the GUI
         # Find out window dimensions
-        ratio = self.world.camera.ratio
+        ratio = self.config.world.camera.ratio
         frameSize = (-ratio, ratio, -1.0, 1.0)
         # centered
         pos = (0, 1.0, 0)
@@ -93,7 +93,7 @@ class ConsentForm(Element):
 
     def enterState(self):
         Element.enterState(self)
-        #self.world.stopKeyboard()
+        #self.config.world.stopKeyboard()
 
     def exitState(self):
         # exit state

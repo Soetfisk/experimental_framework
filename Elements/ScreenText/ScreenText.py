@@ -23,7 +23,7 @@ class ScreenText(Element):
         # this defines:
         # self.sceneNP and self.hudNP
 
-        text = getattr(self, 'plain_text', None)
+        text = getattr(self.config, 'plain_text', None)
         if text is None:
             printOut("Missing reference to what text to display when building ScreenText!", 0)
             sys.exit()
@@ -31,7 +31,7 @@ class ScreenText(Element):
         margin = 0.9 # used as a %
 
         # text is hung by the aspect2D, which is -1 to 1 in height and w/h in width.
-        leftBorder = - self.world.camera.screenWidth / float(self.world.camera.screenHeight)
+        leftBorder = - self.config.world.camera.screenWidth / float(self.config.world.camera.screenHeight)
         leftBorder = leftBorder * margin
 
         topBorder = 1.0 * margin
@@ -50,8 +50,6 @@ class ScreenText(Element):
         tNP.reparentTo(self.hudNP)
         # hide the whole node
         self.hideElement()
-
-        self.rescaleFactor=10.0
 
     def enterState(self):
         # print "entering ScreenText"

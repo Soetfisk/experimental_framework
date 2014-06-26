@@ -23,11 +23,11 @@ class ImageChoice(Element):
         # self.sceneNP and self.hudNP are created here
         super(ImageChoice,self).__init__(**kwargs)
 
-        s = getattr(self,'i_slots',None)
-        rating = getattr(self,'r_scale',None)
+        s = getattr(self.config,'i_slots',None)
+        rating = getattr(self.config,'r_scale',None)
         rating = rating.strip().split(',')
-        csv_path_prefix = getattr(self,'csv_path_prefix','')
-        image_path_prefix = getattr(self,'images_path_prefix','')
+        csv_path_prefix = getattr(self.config,'csv_path_prefix','')
+        image_path_prefix = getattr(self.config,'images_path_prefix','')
 
         if (not s):
             print "Missing i_slots property in ImageChoice, can't continue"
@@ -41,7 +41,7 @@ class ImageChoice(Element):
         
         # load list of images to compare from a CSV file
         # the number of files per line has to match the i_slots value
-        csvFile = getattr(self,'s_images',None)
+        csvFile = getattr(self.config,'s_images',None)
         if (csvFile):
             try:
                 f = open(csv_path_prefix + csvFile)
@@ -60,9 +60,9 @@ class ImageChoice(Element):
 
     def loadImage(self,imageUrl):
         """Loads ONE image from imageUrl into a nodepath to display as a texture image"""
-        sx,sz = getattr(self,'f_scale',[1.0,1.0])
-        horGap = getattr(self,'f_horgap',0.1)
-        vertGap = getattr(self,'f_vertgap',0.1)
+        sx,sz = getattr(self.config,'f_scale',[1.0,1.0])
+        horGap = getattr(self.config,'f_horgap',0.1)
+        vertGap = getattr(self.config,'f_vertgap',0.1)
         # the screen x coord in 2D goes from -1.6 to 1.6 (left to right horizontally)
         # the screen z coord in 2D goes from -1 to 1 (top-down vertically)
         nodepath = OnscreenImage( image = imageUrl , scale = Vec3(sx,1.0,sz))
@@ -72,9 +72,9 @@ class ImageChoice(Element):
     def loadImages(self, urls):
         nodepaths=[]
         # z is the vertical axis in the 3D world
-        sx,sz = getattr(self,'f_scale',[1.0,1.0])
-        horGap = getattr(self,'f_horgap',0.1)
-        vertGap = getattr(self,'f_vertgap',0.1)
+        sx,sz = getattr(self.config,'f_scale',[1.0,1.0])
+        horGap = getattr(self.config,'f_horgap',0.1)
+        vertGap = getattr(self.config,'f_vertgap',0.1)
 
         # for horizontal distribution
         # incX: distance between centers

@@ -35,8 +35,8 @@ class Replay(GameClass):
         # call super enterState first
         Element.enterState(self)
         self.setupReplay()
-        self.world.ignore('mouse1-down')
-        self.world.ignore('mouse1-up')
+        self.config.world.ignore('mouse1-down')
+        self.config.world.ignore('mouse1-up')
 
     def exitState(self):
         # call super first
@@ -190,13 +190,13 @@ class Replay(GameClass):
         return Task.cont
 
     def updateSlider(self):
-        #self.world.accept('mouse1-up', self.updateGame, [])
+        #self.config.world.accept('mouse1-up', self.updateGame, [])
         #if self.playing:
         #    self.stopReplay()
         pass
 
     def updateGame(self):
-        self.world.ignore('mouse1-up')
+        self.config.world.ignore('mouse1-up')
         #self.startReplay()
 
     def displayEyeGaze(self):

@@ -58,7 +58,7 @@ class DataForm(Element):
 
         # frame to hold the form (left, right, bottom, top)
         # Find out window dimensions
-        ratio = self.world.camera.ratio
+        ratio = self.config.world.camera.ratio
         frameSize = (-ratio,ratio,-1.0,1.0)
         # centered
         pos = (0,1.0,0)
@@ -168,7 +168,7 @@ class DataForm(Element):
     #    self.saveInputs()
 
     #def finishPressed(self):
-    #    self.world.advanceFSM()
+    #    self.config.world.advanceFSM()
 
     #def clearButton(self):
     #    self.clearInputs()
@@ -258,7 +258,7 @@ class DataForm(Element):
 
     def enterState(self):
         Element.enterState(self)
-       #self.world.stopKeyboard()
+       #self.config.world.stopKeyboard()
 
     def exitState(self):
         # exit state

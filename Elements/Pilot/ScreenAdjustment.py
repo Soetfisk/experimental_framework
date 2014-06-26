@@ -39,12 +39,12 @@ class ScreenAdjustment(Element):
         baseNode.setTransparency(1)
         baseNode.setScale(float(parConfNode.scale))
 
-        cam = self.world.camera
+        cam = self.config.world.camera
         camLookAt = Vec3(cam.lookAt[0]-cam.pos[0],
                          cam.lookAt[1]-cam.pos[1],
                          cam.lookAt[2]-cam.pos[2])
         camLookAt.normalize()
-        camLookAt = camLookAt * self.parDistCam
+        camLookAt = camLookAt * self.config.parDistCam
 
         # in Panda by default Y points away from the camera
         #Ypos = cam.pos[1] + cam.parDistCam
@@ -71,6 +71,11 @@ class ScreenAdjustment(Element):
         baseNode.reparentTo(self.sceneNP)
         self.baseNode = baseNode
 
+    def moveZ(self, amount):
+        pos = self.baseNode.getPos() + Vec3(0,0,amount)
+        self.baseNode.setPos( pos[0], pos[1], pos[2])
+        print pos
+
     def printSize(self):
         #left = self.parachutes['left'].node
         #parConfNode = self.config.parachutes
@@ -91,6 +96,9 @@ class ScreenAdjustment(Element):
     #=============================================
     def enterState(self):
         Element.enterState(self)
+        self.rescaleFactor = 10.0
+        self.baseNode.setScale(self.rescaleFactor)
+
     #=============================================
     def exitState(self):
         Element.exitState(self)

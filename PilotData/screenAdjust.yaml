@@ -21,17 +21,14 @@ keys:
    callback: scale
    args: [1.1]
    once: false
-
  - key: s,s-repeat
    callback: scale
    args: [0.9]
    once: false
-
  - key: e,e-repeat
    callback: scale
    args: [1.01]
    once: false
-
  - key: d,d-repeat
    callback: scale
    args: [0.99]

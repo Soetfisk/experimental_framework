@@ -33,45 +33,49 @@ class Parachute(DirectObject):
     texDict = {}
     parachuteTex = None
     # name: name for this instance of Parachute
-    # parConf: config coming from JSON
-    # posGen: reference to position generation manager
-    # falltime: fall time for this parachute
-    def __init__(self, name, parConf, game, posGen, falltime, scale, collisions=True):
+    # parConf: config coming from YAML
+    def __init__(self, world = None, name = "",
+                 textureName = None, conf = None, collisions=True):
         # grab a reference to the class!, to use
         # class attributes, this is python :|
         cls = self.__class__
 
+        if (world is None or textureName is None or
+            conf is None):
+            printOut("Bad call to create parachutes",0)
+            sys.exit()
+
         self.name = name
-        self.game = game
-        self.posGen = posGen
-        self.falltime = falltime
-        self.changeStep = parConf.blendtype.blendfunction
+        self.game = world
+        self.posGen = world.posGen
+        self.speed = conf.speed
+        self.changeStep = conf.blendtype.blendfunction
         self.collisions = collisions
 
         self.forced = False
-        self.falling  = False
-        self.textures = {}
+        self.falling = False
+        # self.textures = {}
         # load textures for this model, unless it was loaded
         # before. All textures go to a class attribute.
-        textures = parConf.textures
-        for tex in textures:
-            if (tex.name not in cls.texDict):
-                t = loader.loadTexture(tex.name)
-                t.setWrapU(Texture.WMClamp)
-                t.setWrapV(Texture.WMClamp)
-                t.setMinfilter(Texture.FTLinearMipmapLinear)
-                t.setAnisotropicDegree(2)
-                self.textures[int(tex.level)] = t
-                cls.texDict[tex.name] = t
-            else:
-                self.textures[int(tex.level)] = cls.texDict[tex.name]
 
+        if (textureName not in cls.texDict):
+            t = loader.loadTexture(textureName)
+            t.setWrapU(Texture.WMClamp)
+            t.setWrapV(Texture.WMClamp)
+            t.setMinfilter(Texture.FTLinearMipmapLinear)
+            t.setAnisotropicDegree(2)
+            #self.textures[int(tex.level)] = t
+            self.texture = t
+            cls.texDict[textureName] = t
+        else:
+            self.texture = cls.texDict[textureName]
+            #self.textures[int(tex.level)] = cls.texDict[tex.name]
         # when set to True, it will change it's resolution
         # depending on delay, immediately or after it gets
         # a new position.
-        self.delayLodChange  = True
-        self.lowerResolution = False
-        self.nextLod = 0
+        #self.delayLodChange  = True
+        #self.lowerResolution = False
+        #self.nextLod = 0
 
         self.isTarget = False
 
@@ -88,18 +92,18 @@ class Parachute(DirectObject):
         # self.particleNode.reparentTo(self.modelNP)
 
         # manual adjustments...
-        self.modelNP.setScale(1.4*float(scale))
+        # self.modelNP.setScale(self.game.rescaleFactor)
 
         # put the model anywhere hidden from the camera!!!
         self.modelNP.setPos(Vec3(-1000, 40, 0))
 
         # parachuteTex is a class attribute!
-        if (cls.parachuteTex == None):
-            cls.parachuteTex = loader.loadTexture("Elements/Game/models/textures/para_tex.png")
+        if cls.parachuteTex is None:
+            cls.parachuteTex = loader.loadTexture("PilotData/models/textures/para_tex.png")
             cls.parachuteTex.setMinfilter(Texture.FTLinearMipmapLinear)
             cls.parachuteTex.setAnisotropicDegree(2)
 
-        self.paraModel = loader.loadModel("Elements/Game/models/para02.egg")
+        self.paraModel = loader.loadModel("PilotData/models/para02.egg")
         self.paraModel.setScale(Vec3(0.3, 0.2, 0.2))
         self.paraModel.setPos(Vec3(0, 0.15, 1.2))
 
@@ -109,7 +113,6 @@ class Parachute(DirectObject):
 
         # assign texture
         self.paraModel.setTexture(cls.parachuteTex)
-
         self.paraModel.reparentTo(self.modelNP)
 
         # parachute is a billboard
@@ -120,15 +123,17 @@ class Parachute(DirectObject):
         #self.model.setBillboardAxis()
         self.model.setTransparency(1)
         # set texture with maximum quality.
-        self.model.setTexture(self.textures[self.currentQ], 1)
-        self.game.replayLog.logEvent("Q:[\'"+self.name+"\',"+str(self.currentQ)+"]\n", 0.0)
+        #self.model.setTexture(self.textures[self.currentQ], 1)
+        self.model.setTexture(self.texture, 1)
+
+        #self.game.replayLog.logEvent("Q:[\'"+self.config.name+"\',"+str(self.currentQ)+"]\n", 0.0)
         self.model.reparentTo(self.modelNP)
 
         if self.collisions:
             # add collision sphere to modelNP
-            colSolid = CollisionSphere(0,0,0,0.5)
+            colSolid = CollisionSphere(0, 0, 0, 0.5)
             colNP = self.modelNP.attachNewNode(CollisionNode(self.name))
-            colNP.setPos(0,0,-0.5)
+            colNP.setPos(0, 0 ,-0.5)
             colNP.setCollideMask(BitMask32(0x80))
             colNP.node().addSolid(colSolid)
 
@@ -136,7 +141,6 @@ class Parachute(DirectObject):
             self.accept('hit-'+self.name, self.hit)
         #self.accept('b', self.decreaseQ)
         #self.accept('m', self.increaseQ)
-
 
     """
     def updateLod(self, anEvent):
@@ -208,18 +212,26 @@ class Parachute(DirectObject):
                            self.modelNP.getZ()/self.maxHeight)
         return
 
+    def pauseFall(self):
+        if self.falling:
+            self.fallInterval.pause()
+
+    def unPauseFall(self):
+        if self.falling:
+            self.fallInterval.start()
+
     def newPos(self, d = 0, x = 0, y = 0, z = 0, forced = False):
         self.forced = forced
 
         # check if need to lower the texture
-        if (not self.forced and self.lowerResolution):
-            self.setTexture(self.nextLod,1)
+        #if (not self.forced and self.lowerResolution):
+        #    self.setTexture(self.nextLod,1)
 
         # swipe time
         self.modelNP.show()
         self.time = 2.0
         self.maxangle = 30.0
-        self.groundHeight = 16
+        self.groundHeight = -35
 
         # fall setup
         # grab a random position
@@ -230,10 +242,11 @@ class Parachute(DirectObject):
 
         if (not self.forced):
             pos = self.posGen.getNewPos(d)
-            if (pos == None): return -1
+            if pos is None:
+                return -1
         # for the pilot
         else:
-            pos = Vec3(x,y,z)
+            pos = Vec3(x, y, z)
 
         self.modelNP.setPos(pos)
         self.maxHeight = self.modelNP.getZ()
@@ -252,11 +265,13 @@ class Parachute(DirectObject):
                           name="left_"+self.name)
         self.swingSeq = Sequence(swing0,swing1)
         self.swingSeq.loop()
-        if (not self.forced):
-            self.swingSeq.setT(uniform(0,1))
+        if not self.forced:
+            self.swingSeq.setT(uniform(0, 1))
 
         # set fall time, interval and callback after fall
-        adjustedDuration = (self.modelNP.getZ() * self.falltime) / self.posGen.topLeft[2]
+        #adjustedDuration = (self.modelNP.getZ() * self.falltime) / self.posGen.topLeft[2]
+        adjustedDuration = (self.modelNP.getZ() - self.groundHeight) / self.speed
+        printOut("Adjusted Duration of speed: %f" % adjustedDuration, 0)
         self.fallInterval = self.genFallDownInterval(adjustedDuration, self.groundHeight)
 
         self.fallInterval.setDoneEvent("finishedPreFall_" + self.name)
@@ -291,11 +306,13 @@ class Parachute(DirectObject):
 
     def finishedPreFall(self):
         # dissapear!
+        printOut("Node position: %f,%f,%f" %(self.modelNP.getX(),self.modelNP.getY(),self.modelNP.getZ()),0)
+        printOut("Node scale: %f" % (self.modelNP.getScale()[0]), 0)
         fadeOut = LerpFunctionInterval(self.modelNP.setAlphaScale,
                 toData=0.0,fromData=1.0,duration=1.0)
         fadeOut.start()
 
-        self.fallInterval2 = self.genFallDownInterval(5.0, 0)
+        self.fallInterval2 = self.genFallDownInterval(2.0, self.groundHeight - 5.0)
         self.fallInterval2.setDoneEvent("lastBitFall_" + self.name)
         self.acceptOnce("lastBitFall_" + self.name, self.lastBitFall)
         self.fallInterval2.start()
@@ -306,8 +323,12 @@ class Parachute(DirectObject):
         self.modelNP.setAlphaScale(1.0)
 
     def lastBitFall(self):
+        """
+        Gets executed when the parachutes finishes the very last movement and
+        dissapears.
+        """
         #self.particleDust.cleanup()
-        self.falling=False
+        self.falling = False
         #if (not self.isTarget):
         #    self.newPos()
         #    self.start()
@@ -350,7 +371,7 @@ class Parachute(DirectObject):
     def printPos(self):
         print self.modelNP.getPos()
 
-    def genFallDownInterval(self, duration,endHeight):
+    def genFallDownInterval(self, duration, endHeight):
         # adjust duration based on the actual height of
         # the parachute.
         return LerpPosInterval(self.modelNP,

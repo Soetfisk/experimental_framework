@@ -36,16 +36,16 @@ class Pilot(Element):
         self.setupTerrain()
         self.setupParachutes()
 
+        self.reversals = 0
+
     def setupParachutes(self):
         """Creates parachutes objects needed for the pilot, loads textures and all..."""
-        # references to all the Parachute objects created
-        self.parachutes = {}
         # all textures for a given colour
         self.textures = {}
         # YAML config
         parConfNode = self.config.parachutes
         # common to all parachute objects
-        falltime = parConfNode.falltime
+        speed = parConfNode.speed
         # model name of the parachute
         modelName = parConfNode.modelname
         # texture for the parachute
@@ -53,12 +53,14 @@ class Pilot(Element):
         # adjust scale factor
         scale = parConfNode.scale
 
-
-        # only setup the default COLOUR
+        # only setup ONE COLOUR
         # to know which is the default colour, check the config file
         # for "defaultIdx", which relates to the list of parachutes
         # (each of which has a colour)
         p = parConfNode.textures[parConfNode.defaultIdx]
+        self.minQ = p.textureMinLevel
+        self.maxQ = p.textureMaxLevel
+
         color = str(p.name.upper())
 
         # LOAD EVERY SINGLE TEXTURE IN THE SEQUENCE!
@@ -74,32 +76,21 @@ class Pilot(Element):
             t.setAnisotropicDegree(2)
             self.textures[i] = t
 
-        printOut("Total memory used by textures in Mbytes: %s\n" % str(totalMemory/(1024*1024)), 5)
+        #printOut("Total memory used by textures in Mbytes: %s\n" % str(totalMemory/(1024*1024)), 0)
         # load texture for the actual parachute
         texture = loader.loadTexture(parachuteTex)
         texture.setMinfilter(Texture.FTLinearMipmapLinear)
         texture.setAnisotropicDegree(2)
 
         paraModels = {}
-        for n in ['left', 'right']:
+
+        for n in ['QM', 'Qi']:
             node = NodePath(n + "_parachute")
             node.setTransparency(1)
-            if getattr(self, 'rescaleFactor', None):
-                printOut("Warning, using rescale factor of %"%self.rescaleFactor, 0)
-                node.setScale(float(self.rescaleFactor))
-            else:
-                printOut("Warning, rescaleFactor was not found!",0)
-                node.setScale(1.0)
 
-            node.setPos(Vec3(-1000, 40, 0))
-
-            cam = self.world.camera
-            Ypos = cam.pos[1] + self.parDistCam
-            if n == 'left':
-                node.setPos(-20, Ypos, 100)
-            else:
-                node.setPos(20, Ypos, 100)
-
+            cam = self.config.world.camera
+            Ypos = cam.pos[1] + self.config.parDistCam
+            node.setPos(0, Ypos, 100)
             # parachute model
             paraModel  = loader.loadModel(modelName)
             # TODO: Make this scale a factor of the overall scale!
@@ -109,46 +100,40 @@ class Pilot(Element):
             paraModel.setTexture(texture)
             paraModels[n] = paraModel
             # this is added at the very end of this function
-            #paraModel.reparentTo(node)
+            paraModel.reparentTo(node)
 
             # bill board (plane) model
             bodyModel = loader.loadModel("Elements/Game/models/plane")
             bodyModel.setName("body")
             bodyModel.setPos(Vec3(0, 0, -0.5))
-            #bodyModel.setScale(1.05)
+            bodyModel.setScale(1.05)
             bodyModel.setTransparency(1)
+            # both with the MAXIMUM quality to start with
             bodyModel.setTexture(self.textures[len(self.textures)-1], 1)
             bodyModel.reparentTo(node)
 
             node.reparentTo(self.sceneNP)
-            self.parachutes[n] = PilotParachute(self.world, node, self.textures, parConfNode)
-
-        self.adjustScale(parConfNode.targetScreenSize)
-        # now that we have adjusted the scale with only the BODY model, lets attach
-        # also the parachute to each model (left and right).
-        for n in ['left', 'right']:
-            paraModels[n].reparentTo(self.parachutes[n].node)
+            # this is equivalent to
+            # self.QM = ....
+            # self.Qi = ....
+            setattr(self, n, PilotParachute(self.config.world, node, self.textures, parConfNode))
 
     def printSize(self):
-        left = self.parachutes['left'].node
         parConfNode = self.config.parachutes
-        (width, height) = self.onScreenSize(left)
+        (width, height) = self.onScreenSize(self.QM.node)
         print "Parachute takes (%s,%s) pixels" % (width, height)
         #self.adjustScale(parConfNode.targetScreenSize)
         #(width, height) = self.onScreenSize(left)
         #print "Parachute takes (%s,%s) pixels" % (width, height)
 
     def translate(self, x,y,z):
-        node = self.parachutes['left']
-        node.setPos(node.getPos()+Point3(x,y,z))
+        self.QM.node.setPos(self.QM.node.getPos()+Point3(x,y,z))
         #self.printSize()
 
     def adjustScale(self, size):
         # rescale the object so it takes the closest value to size
         # in pixels with an error of +-2 pixels
-        left = self.parachutes['left'].node
-        right= self.parachutes['right'].node
-        scale = self.adjustScaleNodes([left, right], size)
+        scale = self.adjustScaleNodes([self.QM.node, self.Qi.node], size)
 
     def adjustScaleNodes(self, nodes, size):
         adjustScale = 1.0
@@ -191,8 +176,8 @@ class Pilot(Element):
             nodeHeight = abs(aspectMax[2] - aspectMin[2])
 
             # calculate pixels on screen using the size of the screen
-            pixWidth = nodeWidth * self.world.camera.screenHeight * 0.5
-            pixHeight = nodeHeight * self.world.camera.screenHeight * 0.5
+            pixWidth = nodeWidth * self.config.world.camera.screenHeight * 0.5
+            pixHeight = nodeHeight * self.config.world.camera.screenHeight * 0.5
 
             return (pixWidth ,pixHeight)
 
@@ -200,16 +185,16 @@ class Pilot(Element):
         """Sets terrain model, attaching it to the scene nodepath"""
         # transform to position the ground model
         self.groundTransform = NodePath("groundTransform")
-        self.groundTransform.setHpr(120, 0, 0)
+        self.groundTransform.setHpr(130, 7, 7)
         # ground model
         self.ground = loader.loadModel("Elements/Game/models/terrain/master")
-        self.ground.setPos(78, -100, 0)
+        self.ground.setPos(213, -179, -5)
         self.ground.reparentTo(self.groundTransform)
         # ground model is only shown in the gamePlay tree.
         self.groundTransform.reparentTo(self.sceneNP)
         return
 
-    def qualityButtonPressed(self, extraArgs):
+    def leftRightButtonPressed(self, extraArgs):
         # print "calling qualityButton %s\n" %extraArgs
         # this is a workaround the GUI of panda, which I don't
         # fully understand yet.
@@ -219,21 +204,22 @@ class Pilot(Element):
 
         # selection made
         self.optionMade = True
+        if extraArgs == 'L':
+            pass
         self.qualitySelected = extraArgs
         # this will set the button on
         self.nextButton["state"]=DGG.NORMAL
         #print "selected: %s" % extraArgs "L" or "R"
 
     def nextButtonPressed(self):
-        #print "calling nextButtonPressed\n"
-        
         # invalidate other buttons (left right)
         if (self.optionMade):
+            # disable LEFT and RIGHT buttons
             for b in self.buttons:
                 b["state"] = DGG.DISABLED
 
         # set updateQualityPilot flag so the
-        # texture changes on the next round
+        # texture changes on the next fall
         self.updateQualityPilot = True
         
         # disable NEXT so the decision is FINAL
@@ -254,27 +240,25 @@ class Pilot(Element):
         posX = [-0.5, 0.5]
         posY = -0.9 # [0.7,0.5,0.3]
         # callback called, with "<< Left" or "Right >>"
-        comando = self.qualityButtonPressed
+        comando = self.leftRightButtonPressed
         # DirectGui objects are parented by default to aspect2d!!
         parentNP = self.hudNP
 
         # create a "next button" to go for the next comparison
-        nextPressed = self.nextButtonPressed
-        self.nextButton = DirectButton(  parent=parentNP, text="Next --> ",
-                                    pad=pad0, scale=0.05,
-                                    pos=(1.0, 0, -0.9), command=nextPressed
+        self.nextButton = DirectButton( parent = parentNP, text="Next --> ",
+                                    pad = pad0, scale=0.05,
+                                    pos = (1.0, 0, -0.9), command=self.nextButtonPressed
                                     )
         self.nextButton["state"] = DGG.DISABLED
 
         self.buttons = []
         for i in range(2):
             self.buttons.append(
-                DirectRadioButton(  parent=parentNP, text=texto[i],
-                                    pad=pad0, variable=self.radioSelected,
-                                    value=[i],scale=0.05,
-                                    pos=(posX[i],0,posY),command=comando,
-                                    extraArgs=[textoMsg[i]])
-                                  )
+                DirectRadioButton(parent=parentNP, text=texto[i],
+                                  pad=pad0, variable=self.radioSelected,
+                                  value=[i],scale=0.05,
+                                  pos=(posX[i],0,posY),command=comando,
+                                  extraArgs=[textoMsg[i]]) )
         # tell each button about the rest of the guys (panda3d internal)
         for b in self.buttons:
             b.setOthers(self.buttons)
@@ -282,20 +266,23 @@ class Pilot(Element):
         return
 
     def startPilot(self):
-        # set qualities, HQ is reference, and Qi is lower
-        self.HQ = self.parachutes['left']
-        self.Qi = self.parachutes['right']
-        self.updateQualityPilot = False
-        
+        self.QM.setTexture(self.maxQ)
+        self.Qi.setTexture(self.minQ)
+
+        taskMgr.add(self.updatePilotParachutes, "updatePilotParachutes")
+
+        # set qualities, QM is reference, and Qi is lower
+        # self.updateQualityPilot = False
+
         # all qualities but not the maximum quality
-        #self.listOfQualities = range(1,len(self.HQ.textures))
+        #self.listOfQualities = range(1,len(self.QM.textures))
         #self.listPositions = []
         # mix the qualities just once, and then grab always one from
         # the head of the list. 
         #shuffle(self.listOfQualities)
         
-        # force maximum texture quality on HQ
-        #self.HQ.forceTexture(0)
+        # force maximum texture quality on QM
+        #self.QM.forceTexture(0)
         # pick a random quality and set it
         #self.currentHi = self.listOfQualities.pop()
         #self.Qi.forceTexture(self.currentHi)
@@ -306,86 +293,88 @@ class Pilot(Element):
         #self.showNode("terrainScene")
         #self.showNode("pilot")
         
-        self.setParachutesTop(True)
+        #self.setParachutesTop(True)
     #=============================================
     def enterState(self):
         # call super first
         Element.enterState(self)
-        # specifics keyboard
-        self.setupKeys()
+        # this rescale factor comes from another state that
+        # probably sets it up, or from the default value in the
+        # experiment setup.
+        rescale = self.rescaleFactor
+
+        self.QM.node.setScale(rescale)
+        self.Qi.node.setScale(rescale)
+
+        # simple task that checks if the parachutes reached the bottom and need
+        # to be re-launched from the top
+        self.startPilot()
+
     #=============================================
     def exitState(self):
         # call super first
         Element.exitState(self)
         self.pilotLog.stopLog()
     #=============================================
-    def setupKeys(self):
-        # clear global setup keys
-        pass
-
     def finishPilot(self):
         """ final screen to say thanks!"""
         self.sendMessage("exitPilot")
 
     def setParachutesTop(self, flip):
-        return
         # setup two models, initial quality comparison
-        # Ypos is the DISTANCE FROM THE CAMERA, in DEPTH
-        cam = self.world.camera
-        #Ypos = self.cameraDict['pos'][1] + self.cameraDict['parDistCam']
-        Ypos = cam.pos[1] + self.parDistCam
-        # HEIGHT, in World coordinates
-        #minZ = self.cameraDict['minZ']
-        minZ = cam.minZ
-        
-        #when r == 1 the HQ goes on the right, when is -1 goes on the left
+        cam = self.config.world.camera
+
+        # field of view in RADIANS
+        fovRads = (cam.fov * pi / 180.0)
+        # HIPOTHENUSE of the triangle from camera to parDistCam
+        hip = self.config.parDistCam / cos(fovRads / 2.0)
+        # Minimum X value within the viewing volume
+        minX = -hip*sin(fovRads/2.0)
+        minZ = cam.ratio-hip*sin(fovRads/2.0)
+
+        Ypos = cam.pos[1] + self.config.parDistCam
+
+        #when r == 1 the QM goes on the right, when is -1 goes on the left
         r = 1
         if flip:
             # create a random -1 or a 1
             r = (randint(0,1)*2)-1
         
-        self.HQ.newPos(0, r* 20, Ypos, -minZ + 60, True)
-        self.Qi.newPos(0, r*-20, Ypos, -minZ + 60, True)
+        self.QM.newPos(0, r* 20, Ypos, -minZ, True)
+        self.Qi.newPos(0, r*-20, Ypos, -minZ, True)
         
         # start fall animation, exactly the same for both
-        self.HQ.start()
+        self.QM.start()
         self.Qi.start()
         
-        # simple task that checks if the parachutes reached the bottom and need
-        # to be re-launched from the top
-        taskMgr.add(self.updatePilotParachutes, "updatePilotParachutes")
 
-#    def setupGame(self):
-#        """ sets the game basic elements """
-#        self.setupTerrain()
-#        # generates ALL the parachutes, and some extra stuff
-#        self.setupParachutes()
-#        return
     def updatePilotParachutes(self,t):
         """This task checks if it's necessary to drop again the
         two parachutes from the top, and change their quality
         and drop the new pair"""
 
-        # if the HQ parachute is falling, just leave till next frame
-        if (self.HQ.falling):
-            return Task.cont
+        # if the QM parachute is falling, just leave till next frame
+        if (self.QM.falling):
+            return t.cont
 
-        self.setParachutesTop(True)
-        return Task.cont
+        #self.setParachutesTop(True)
+        #return t.cont
 
         # by default, don't swap the falling parachutes 
-        flip = False
+        flip = True
 
-        """ is it necessary to update the quality, because 
-            the user pressed the Next button ?? """
+        """ did the user press Next ?, change quality """
         if (self.updateQualityPilot):
-            # save choice to ouput file
-            if ( self.HQ.node.getX() < 0 ):
-                l = self.HQ.currentQ
+
+            if (self.qualitySelected):
+                pass
+
+            if ( self.QM.node.getX() < 0 ):
+                l = self.QM.currentQ
                 r = self.Qi.currentQ
             else:
                 l = self.Qi.currentQ
-                r = self.HQ.currentQ
+                r = self.QM.currentQ
 
             ts = time.time()
             self.pilotLog.logEvent("left  : " + str(l)+"\n",ts)
@@ -412,5 +401,5 @@ class Pilot(Element):
         # set new position (at the top) for the falling
         # parachutes
         self.setParachutesTop(flip)
-        return Task.cont
+        return t.cont
  

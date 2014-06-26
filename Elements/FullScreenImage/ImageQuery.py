@@ -24,7 +24,7 @@ class ImageQuery(Element):
         # build basic element  
         super(ImageQuery,self).__init__(**kwargs)
 
-        sx, sz = getattr(self,'scale',[1.0,1.0])
+        sx, sz = getattr(self.config,'scale',[1.0,1.0])
         self.imageNodes=[]
         self.hiddenNodes=[]
         # if the user makes a mistake, we give ONE chance to ammend at
@@ -37,8 +37,8 @@ class ImageQuery(Element):
         self.current = random.randint(0, len(self.imageNodes))
         # load images for the test
         try:
-            for arg in self.imageStrArgs:
-                finalName = self.imageNameStr % arg
+            for arg in self.config.imageStrArgs:
+                finalName = self.config.imageNameStr % arg
                 tempNodes.append(OnscreenImage(image=finalName,
                                                scale=Vec3(sx, 1.0, sz)))
                 tempNodes[-1].setTransparency(TransparencyAttrib.MAlpha)
@@ -46,12 +46,12 @@ class ImageQuery(Element):
                 tempNodes[-1].setName(finalName)
                 tempNodes[-1].reparentTo(self.hudNP)
 
-            self.imageNodes = zip(tempNodes, self.imageAnswers)
+            self.imageNodes = zip(tempNodes, self.config.imageAnswers)
 
         except Exception,e:
             printOut("Fatal error, could not load texture file",0)
             printOut(str(e), 0)
-            self.world.quit()
+            self.config.world.quit()
 
         # label text
         label = OnscreenText( text = "What do you see?",
