@@ -1,0 +1,39 @@
+elements:
+
+
+#- className: DataForm
+#  name: UserInfo
+#  config: PilotData/pilotDataForm.yaml
+
+ # START
+- className: EmptyState
+  name: start
+  timeout: 1.0
+
+- module: DataForm
+  className: ConsentForm
+  name: consentForm
+  config: Elements/DataForm/test/consentForm.yaml
+
+- module: DataForm
+  className: DataForm
+  name: MyDataForm
+  config: Elements/DataForm/test/myDataForm.yaml
+
+- module: DataForm
+  className: UserQuestionnaire
+  name: testQ
+  config: Elements/DataForm/test/testQuestionnaire.yaml
+
+ # END
+- className: EmptyState
+  name: end
+
+
+transitions:
+- trans: 'start @ consentForm:auto'
+- trans: 'consentForm @ MyDataForm:consentYes'
+- trans: 'consentForm @ end:consentNo'
+- trans: 'MyDataForm @ testQ:auto'
+- trans: 'testQ @ end:auto'
+

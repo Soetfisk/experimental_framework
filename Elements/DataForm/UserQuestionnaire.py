@@ -23,10 +23,11 @@ class UserQuestionnaire(Element):
         """
         Class constructor
         """
-        # build basic element
+        # call Element constructor with configuration arguments
         super(UserQuestionnaire, self).__init__(**kwargs)
         printOut("Element for User Questionnaire constructed", 1)
 
+        # build UI
         self.setupGUI()
 
         # create a simple service that can be queried in different ways,
@@ -58,11 +59,11 @@ class UserQuestionnaire(Element):
         # read title or set to a default value
         settings = getattr(self.config, "settings", None)
         if settings is None:
-            printOut("Missing settings attribute for UserQuestionnaire")
+            printOut("Missing settings attribute for UserQuestionnaire", 1)
             self.world.quit()
 
         if getattr(self.config, "questions", None) is None:
-            printOut("No questions set, add them to the config file")
+            printOut("No questions set, add them to the config file", 1)
             self.world.quit()
 
         # background colour

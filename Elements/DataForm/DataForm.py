@@ -12,7 +12,7 @@ from Service import *
 class DataForm(Element):
     """Class to display a form on screen and
     capture user data. The form is constructed
-    dynamically from a JSON description.
+    dynamically from a TEXTUAL description.
     The class provides a service, to serve the
     answers as a dictionary to anyone that
     posseses a hook"""
@@ -158,7 +158,7 @@ class DataForm(Element):
         self.nextButton = DirectButton(
                                         parent = self.myFrame, text="Next",
                                         pad=pad0, scale=0.05,
-                                        pos=(frameSize[1]-10*0.05,0,lastYpos),
+                                        pos=(frameSize[1]-10*0.05,0,-0.9),
                                         command=self.nextPressed
                                       )
         # resize canvas to fit in height

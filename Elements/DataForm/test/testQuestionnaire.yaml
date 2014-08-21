@@ -1,0 +1,30 @@
+settings:
+    formId: testQuestionnaire
+    scale: float
+    maxlabel: int
+    labelcolour: [1.0,0.5,0.5,1.0]
+    title: 'Please answer the following questions:'
+    background: [0.2,0.2,0.2,1]
+    prefixPath: Elements/DataForm/test
+
+questions:
+ - text: single option question
+   order: 0
+   answerType: Option
+   answerOptions: ['uno','dos','tres']
+
+ - text: free text entry question
+   order: 1
+   answerType: TextEntry
+
+ - text: single option with graphics
+   order: 2
+   answerType: Option
+   answerOptions: ['Bueno', 'Muy Bueno', 'Pesimo']
+   graphics:
+    - image: Elements/DataForm/test/soldierBlue_10.png
+      pos: [-0.3,0,-0.5]
+      scale: 0.3
+    - image: Elements/DataForm/test/soldierBlue_99.png
+      pos: [0.3,0,-0.5]
+      scale: 0.3
