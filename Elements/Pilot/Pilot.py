@@ -130,26 +130,26 @@ class Pilot(Element):
         self.QM.node.setPos(self.QM.node.getPos()+Point3(x,y,z))
         #self.printSize()
 
-    def adjustScale(self, size):
-        # rescale the object so it takes the closest value to size
-        # in pixels with an error of +-2 pixels
-        scale = self.adjustScaleNodes([self.QM.node, self.Qi.node], size)
+#    def adjustScale(self, size):
+#        # rescale the object so it takes the closest value to size
+#        # in pixels with an error of +-2 pixels
+#        scale = self.adjustScaleNodes([self.QM.node, self.Qi.node], size)
 
-    def adjustScaleNodes(self, nodes, size):
-        adjustScale = 1.0
-        while(True):
-           current = max(self.onScreenSize(nodes[0]))
-           # 2 pixels difference!
-           if int(current) - size > 2:
-               scale = 0.9
-           elif int(current) - size < -2:
-               scale = 1.10
-           else:
-               adjustScale = nodes[0].getScale()
-               break
-           for n in nodes:
-               n.setScale(n.getScale()*scale)
-        return adjustScale
+#    def adjustScaleNodes(self, nodes, size):
+#        adjustScale = 1.0
+#        while(True):
+#           current = max(self.onScreenSize(nodes[0]))
+#           # 2 pixels difference!
+#           if int(current) - size > 2:
+#               scale = 0.9
+#           elif int(current) - size < -2:
+#               scale = 1.10
+#           else:
+#               adjustScale = nodes[0].getScale()
+#               break
+#           for n in nodes:
+#               n.setScale(n.getScale()*scale)
+#        return adjustScale
 
     def onScreenSize(self, node):
         """Returns the screen size in pixels for a given node that

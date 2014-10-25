@@ -135,15 +135,18 @@ parachutes:
 
 
   # badGuys
+  # HUD Label
   targetsLabel: Enemy
-  targets: [Magenta,Magenta,Magenta,Green,Green, Green]
+  # colours used, and how MANY!!!
+  targets: [Magenta, Magenta, Magenta]
+  # quality for bad guys (100 is maximum)
   targetsQ: [100]
-  targetCount: 5
+  targetCount: 10
   # goodGuys
   nonTargetsLabel: Allies
-  nonTargets: [Blue,Blue,Blue, Red, Red, Red]
+  nonTargets: [Green, Green, Green]
   nonTargetsQ: [50]
-  nonTargetCount: 3
+  nonTargetCount: 10
   texturePrefix: PilotData/textures/soldierColor_
   texturePostfix: .png
 #    levels: [50,30,25,20,15,10,10]

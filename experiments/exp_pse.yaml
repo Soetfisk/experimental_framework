@@ -1,9 +1,7 @@
 elements:
 
-# the order in which classes are defined is not important, the FSM definition
-# is going to define what is executed.
-# Nevertheless, when parsing this YAML file, every class definition found is
-# created, so if not used it is better to comment out any code with '#'
+# the order in which classes are defined is not important, the FSM transitions
+# are going to define what is executed and in what order.
 
  - className: EmptyState
    name: start
@@ -167,50 +165,48 @@ elements:
    name: FinalScreen
    plain_text: PilotData/finalText.txt
 
+
 transitions:
-# INTRO
- #- trans: 'start @ IntroScreen:auto'
- - trans: 'start @ thegame:auto'
- - trans: 'thegame@Pilot:auto'
- - trans: 'Pilot@end:auto'
- #- trans: 'start @ MessageAdjustScale:auto'
- #- trans: 'start @ studyServer:auto'
- # - trans: 'start @ gameQuestions:auto'
-
- # - trans: 'gameQuestions@end:auto'
- #- trans: 'studyServer@end:auto'
- #- trans: 'IntroScreen@end:auto'
-
- # CONSENT
+# START -> INTROSCREEN -> CONSENT FORM
+# - trans: 'start @ IntroScreen:auto'
  - trans: 'IntroScreen @ consentForm:auto'
+
+# CONSENT FORM -> GATHER USER INFO -> COLOUR BLIND TEST
  - trans: 'consentForm @ UserInfo:consentYes'
- - trans: 'consentForm @ end:consentNo'
- # USER INFO
+ - trans: 'consentForm @ FinalScreen:consentNo'
  - trans: 'UserInfo @ colourBlindText:auto'
- # COLOUR BLIND
  - trans: 'colourBlindText @ colourBlindCheck:auto'
  - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
  - trans: 'colourBlindProblem @ end:auto'
 
-# PARALLEL STATES!, JUST TO OVERLAY SOME TEXT
- - trans: 'colourBlindCheck @ rescaleScreen:imageQueryOk'
+# COLOUR BLIND TEST -> ADJUST SCREEN RESOLUTION FOR TESTS
+# THIS IS NO TRADITIONAL FSM, we can activate MULTIPLE STATES.
  - trans: 'colourBlindCheck @ MessageAdjustScale:imageQueryOk'
+ - trans: 'colourBlindCheck @ rescaleScreen:imageQueryOk'
 
- # RESCALE SCREEN
+# SCREEN ADJUSTMET -> GAME INTRODUCTION
  - trans: 'rescaleScreen @ gameIntroText:auto'
  - trans: 'MessageAdjustScale @ gameIntroText:auto'
- # GAME
- - trans: 'gameIntroText @ thegame:auto'
- # GAME QUESTIONNAIRE
- #- trans: 'thegame @ gameQuestions:endOfGame'
- # PILOT
- #- trans: 'gameQuestions @ PrePilotScreen:auto'
- - trans: 'PrePilotScreen @ Pilot:auto'
- - trans: 'Pilot @ PilotQuestionnaire: auto'
- # UPLOAD RESULTS
- - trans: 'PilotQuestionnaire @ studyServer: auto'
- - trans: 'PilotQuestionnaire @ FinalScreen: auto'
 
- # THE END
- - trans: 'studyServer@end: dataUploaded'
- - trans: 'FinalScreen@end:dataUploaded'
+# GAME INTRODUCTION -> GAME
+ - trans: 'start @ thegame:auto'
+ - trans: 'gameIntroText @ thegame:auto'
+
+# GAME -> GAME QUESTIONNAIRE
+ - trans: 'thegame @ gameQuestions:endOfGame'
+
+# GAME QUESTIONS -> PRE-PILOT SCREEN
+ - trans: 'gameQuestions @ PrePilotScreen:auto'
+ - trans: 'PrePilotScreen @ Pilot:auto'
+
+# PILOT -> PILOT QUESTIONNAIRE
+ - trans: 'Pilot @ PilotQuestionnaire: auto'
+
+# SERVER UPLOAD INFORMATION
+ - trans: 'PilotQuestionnaire @ studyServer: auto'
+
+# STUDY SERVER UPLOAD TO FINAL SCREEN
+ - trans: 'studyServer @ FinalScreen: dataSaved'
+
+# END
+ - trans: 'FinalScreen@end:auto'

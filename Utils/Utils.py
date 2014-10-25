@@ -5,7 +5,7 @@
 # Use like this:
 # Numbers = enum(ONE=1, TWO=2, THREE=3)
 # Numbers.ONE == 1
-def createEnum(**enums):
+def enum(**enums):
     return type('Enum',(),enums)
 
 def make_list(node):

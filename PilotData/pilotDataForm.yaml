@@ -2,11 +2,11 @@
 #
 
 settings:
-    formId: userdata
-    scale: 0.06
-    maxlabel: 10
-    labelcolour: [1.0,0.5,0.5,1.0]
-    title: 'Please provide us with some information about you:'
+   formId: userdata
+   scale: 0.06
+   maxlabel: 10
+   labelcolour: [1.0,0.5,0.5,1.0]
+   title: 'Please provide us with some information about you:'
 
 input:
  - label: Gender

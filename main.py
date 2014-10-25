@@ -1,4 +1,5 @@
 import os, sys
+sys.path.append("./external")
 import Utils.Debug as debug
 import time
 

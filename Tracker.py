@@ -8,9 +8,7 @@ from Queue import *
 from socket import socket,error,AF_INET,SOCK_STREAM
 from time import time
 
-# enum in Python
-def enum(**enums):
-    return type('Enum',(),enums)
+from Utils.Utils import enum
 
 class Tracker(DirectObject):
     """Tracker class, holding a TCP socket, and some knowledge
@@ -25,9 +23,9 @@ class Tracker(DirectObject):
         self.sock = socket(AF_INET, SOCK_STREAM)
 
         # enums extracted from CPP tracker code
-        self.COM = enum(UNKNOWN_COMMAND='0',REG_EYE_DATA='1',UNREG_EYE_DATA='2',START_CALIBRATION=3,
-                        ADD_CALIBRATION_PT='4',REMOVE_CALIBRATION_PT='5',STOP_CALIBRATION='6',START_TRACKING='7',
-                        STOP_TRACKING='8',GET_WINDOW_SIZE='9')
+        self.COM = enum(UNKNOWN_COMMAND=0,REG_EYE_DATA=1,UNREG_EYE_DATA=2,START_CALIBRATION=3,
+                        ADD_CALIBRATION_PT=4,REMOVE_CALIBRATION_PT=5,STOP_CALIBRATION=6,START_TRACKING=7,
+                        STOP_TRACKING=8,GET_WINDOW_SIZE=9)
         self.trackerWinSize = None
         self.logger = None
 

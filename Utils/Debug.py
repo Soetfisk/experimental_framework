@@ -1,4 +1,5 @@
-from colorama import *
+from external.colorama import *
+
 init()
 
 # trivial module that defines a function to print out

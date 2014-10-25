@@ -1,18 +1,3 @@
-# configuration for the camera.
-# the application expects the following values.
-# [] are lists, {} are dicts, and so on.
-# the whole file is a dictionary
-# { 'cameraConfig': xxx, 'keys': xxx, and so on }
-
-# this dictionary entry is another dictionary
-#cameraConfig:
-#  pos: [0.0,-110.0,7.0]
-#  lookAt: [0.0,0.0,20.0]
-#  fov: 60.0
-#  screenWidth: 1280
-#  screenHeight: 800
-#  parDistCam: 250.0
-
 # Keyboard callbacks, execute only once or many and arguments
 # this is an entry which is a LIST of dictionaries
 keys:
@@ -25,9 +10,6 @@ keys:
    comment: send termina message
    once: false
    args: ['exitPilot']
- - key: p
-   callback: printSize
-   comment: ""
  - key: i
    callback: translate
    args: [0,0,5]
@@ -40,9 +22,6 @@ keys:
  - key: l
    callback: translate
    args: [5,0,0]
- - key: a
-   callback: adjustScale
-   args: [50]
 
 # This seems not to be used atm
 # this is a dictionary
@@ -56,7 +35,6 @@ validation:
 parachutes:
   speed: 20.0
   scale: 1
-  targetScreenSize: 80
   modelname: PilotData/models/para02.egg
   parachuteTex: PilotData/models/textures/para_tex.png
   defaultIdx: 0
@@ -82,7 +60,7 @@ parachutes:
       texturePostFix: .png
     - index: 3
       name: Magenta
-      texturePrefix: PilotData/textures/soldierBlue_
+      texturePrefix: PilotData/textures/soldierMagenta
       textureMinLevel: 10
       textureMaxLevel: 100
       texturePostFix: .png

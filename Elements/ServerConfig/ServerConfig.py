@@ -6,13 +6,12 @@ from direct.task.Task import *
 from panda3d.core import *
 from Element import *
 
+from Utils.Utils import enum
+
 from socket import socket, error, AF_INET, SOCK_STREAM
 
 #sys utils
 import sys
-
-def enum(**enums):
-    return type('Enum',(),enums)
 
 class ServerConfig(Element):
     """
@@ -28,7 +27,7 @@ class ServerConfig(Element):
         self.serverName = self.config.serverName
         self.serverPort = self.config.serverPort
         self.connToken = None
-        self.COM = enum(GET_CONFIG='0', SEND_RESULTS='1')
+        self.COM = enum(GET_CONFIG=0, SEND_RESULTS=1)
 
         tN = TextNode("info_text")
         tN.setAlign(TextNode.ACenter)
