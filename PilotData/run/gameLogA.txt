@@ -1,0 +1,468 @@
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 10:08:45 2014
+  0.000:game start
+  1.653::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 17:04:17 2014
+  0.000:game start
+  2.772::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 17:06:47 2014
+  0.000:game start
+  8.867::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 17:08:09 2014
+  0.000:game start
+  7.898::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 17:08:27 2014
+  0.000:game start
+  5.059::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 17:08:57 2014
+  0.000:game start
+  4.843::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 17:09:15 2014
+  0.000:game start
+  4.391::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 17:09:29 2014
+  0.000:game start
+  2.840::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 17:09:42 2014
+  0.000:game start
+  6.358::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 17:10:00 2014
+  0.000:game start
+ 30.664::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 17:13:52 2014
+  0.000:game start
+ 38.444::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 17:16:51 2014
+  0.000:game start
+ 67.771::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 17:23:38 2014
+  0.000:game start
+  7.331::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 19:21:10 2014
+  0.000:game start
+  1.255::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 19:38:55 2014
+  0.000:game start
+ 28.646::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 19:40:16 2014
+  0.000:game start
+  0.922::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 19:40:30 2014
+  0.000:game start
+ 88.604::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 19:42:14 2014
+  0.000:game start
+ 10.336::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 21:47:43 2014
+  0.000:game start
+ 94.160::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 21:53:19 2014
+  0.000:game start
+  9.818::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 23:10:12 2014
+  0.000:game start
+ 23.221::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 23:11:19 2014
+  0.000:game start
+ 10.269::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 23:12:24 2014
+  0.000:game start
+  5.545::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Mar 20 23:12:55 2014
+  0.000:game start
+ 11.170::EOL
+  0.000:==== new game participant ====
+  0.000:date: Fri Mar 21 00:05:31 2014
+  0.000:game start
+ 19.985::EOL
+  0.000:==== new game participant ====
+  0.000:date: Fri Mar 21 00:07:24 2014
+  0.000:game start
+  8.433::EOL
+  0.000:==== new game participant ====
+  0.000:date: Fri Mar 21 00:12:32 2014
+  0.000:game start
+ 23.489::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Mar 24 12:07:38 2014
+  0.000:game start
+  2.810::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Mar 24 15:13:36 2014
+  0.000:game start
+  0.588::EOL
+  0.000:==== new game participant ====
+  0.000:date: Tue Mar 25 00:27:26 2014
+  0.000:game start
+ 13.234::EOL
+  0.000:==== new game participant ====
+  0.000:date: Tue Mar 25 00:28:22 2014
+  0.000:game start
+ 12.250::EOL
+  0.000:==== new game participant ====
+  0.000:date: Tue Mar 25 01:03:35 2014
+  0.000:game start
+ 11.899::EOL
+  0.000:==== new game participant ====
+  0.000:date: Tue Mar 25 01:09:05 2014
+  0.000:game start
+ 15.439::EOL
+  0.000:==== new game participant ====
+  0.000:date: Tue Mar 25 01:11:30 2014
+  0.000:game start
+ 13.902::EOL
+  0.000:==== new game participant ====
+  0.000:date: Tue Mar 25 01:47:01 2014
+  0.000:game start
+  2.192::EOL
+  0.000:==== new game participant ====
+  0.000:date: Tue Mar 25 01:47:51 2014
+  0.000:game start
+  2.259::EOL
+  0.000:==== new game participant ====
+  0.000:date: Tue Mar 25 22:32:36 2014
+  0.000:game start
+450.375::EOL
+  0.000:==== new game participant ====
+  0.000:date: Tue Mar 25 23:30:34 2014
+  0.000:game start
+ 40.880::EOL
+  0.000:==== new game participant ====
+  0.000:date: Tue Mar 25 23:31:30 2014
+  0.000:game start
+ 39.107::EOL
+  0.000:==== new game participant ====
+  0.000:date: Tue Mar 25 23:36:21 2014
+  0.000:game start
+ 17.142::EOL
+  0.000:==== new game participant ====
+  0.000:date: Tue Mar 25 23:43:56 2014
+  0.000:game start
+ 17.926::EOL
+  0.000:==== new game participant ====
+  0.000:date: Tue Mar 25 23:45:14 2014
+  0.000:game start
+163.789::EOL
+  0.000:==== new game participant ====
+  0.000:date: Tue Mar 25 23:52:17 2014
+  0.000:game start
+ 19.029::EOL
+  0.000:==== new game participant ====
+  0.000:date: Tue Mar 25 23:57:37 2014
+  0.000:game start
+131.820::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Mar 26 00:03:32 2014
+  0.000:game start
+272.263::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Mar 26 00:10:45 2014
+  0.000:game start
+ 27.066::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Mar 26 00:11:42 2014
+  0.000:game start
+ 24.526::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Mar 26 00:22:13 2014
+  0.000:game start
+ 29.041::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Mar 26 00:29:54 2014
+  0.000:game start
+ 16.977::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Mar 26 11:00:56 2014
+  0.000:game start
+ 16.790::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Mar 26 11:04:02 2014
+  0.000:game start
+ 25.371::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Mar 26 11:07:38 2014
+  0.000:game start
+ 16.404::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Mar 26 11:26:14 2014
+  0.000:game start
+ 27.644::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Mar 26 16:06:13 2014
+  0.000:game start
+ 22.461::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Mar 26 16:10:50 2014
+  0.000:game start
+ 17.024::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Mar 26 16:14:01 2014
+  0.000:game start
+ 17.009::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Mar 26 16:16:33 2014
+  0.000:game start
+  7.427::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Mar 26 16:42:17 2014
+  0.000:game start
+ 17.676::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Mar 26 18:35:01 2014
+  0.000:game start
+  7.099::EOL
+  0.000:==== new game participant ====
+  0.000:date: Tue Apr 01 10:16:50 2014
+  0.000:game start
+ 12.408::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Apr 03 17:36:10 2014
+  0.000:game start
+ 13.977::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Apr 03 17:38:51 2014
+  0.000:game start
+ 12.125::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 14 15:02:36 2014
+  0.000:game start
+ 14.996::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 14 15:07:27 2014
+  0.000:game start
+  8.291::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 14 15:10:18 2014
+  0.000:game start
+  6.872::EOL
+  0.000:==== new game participant ====
+  0.000:date: Sun Apr 20 21:21:21 2014
+  0.000:game start
+ 15.912::EOL
+  0.000:==== new game participant ====
+  0.000:date: Sun Apr 20 23:17:38 2014
+  0.000:game start
+  1.807::EOL
+  0.000:==== new game participant ====
+  0.000:date: Sun Apr 20 23:18:56 2014
+  0.000:game start
+  1.016::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 21 00:46:56 2014
+  0.000:game start
+  1.656::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 21 00:47:49 2014
+  0.000:game start
+  0.202::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 21 00:53:02 2014
+  0.000:game start
+  1.006::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 21 00:53:20 2014
+  0.000:game start
+  1.323::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 21 00:53:42 2014
+  0.000:game start
+  0.656::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 21 01:19:12 2014
+  0.000:game start
+  2.471::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 21 01:22:41 2014
+  0.000:game start
+  0.785::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 21 01:26:24 2014
+  0.000:game start
+  1.585::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 21 11:21:04 2014
+  0.000:game start
+  0.806::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 21 11:48:25 2014
+  0.000:game start
+  1.005::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 21 11:50:16 2014
+  0.000:game start
+  0.665::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 21 11:50:38 2014
+  0.000:game start
+ 15.999::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 21 12:03:42 2014
+  0.000:game start
+  2.353::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 21 12:19:53 2014
+  0.000:game start
+  1.607::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 21 12:48:37 2014
+  0.000:game start
+  0.923::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 21 12:50:22 2014
+  0.000:game start
+  2.091::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Apr 21 12:50:53 2014
+  0.000:game start
+  1.256::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Apr 23 20:35:43 2014
+  0.000:game start
+ 22.136::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Apr 23 20:38:45 2014
+  0.000:game start
+  4.291::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Apr 23 21:58:31 2014
+  0.000:game start
+  0.888::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Apr 23 21:59:02 2014
+  0.000:game start
+ 34.429::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Apr 23 22:05:47 2014
+  0.000:game start
+ 10.195::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Apr 23 23:06:58 2014
+  0.000:game start
+  7.491::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Apr 23 23:08:48 2014
+  0.000:game start
+ 35.247::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Apr 23 23:12:04 2014
+  0.000:game start
+  4.191::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Apr 23 23:13:34 2014
+  0.000:game start
+  9.380::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Apr 23 23:15:34 2014
+  0.000:game start
+  8.360::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Apr 23 23:16:08 2014
+  0.000:game start
+ 10.459::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Apr 23 23:53:02 2014
+  0.000:game start
+ 17.215::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Apr 23 23:57:23 2014
+  0.000:game start
+ 25.870::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Apr 23 23:58:38 2014
+  0.000:game start
+ 25.555::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Apr 24 00:02:30 2014
+  0.000:game start
+ 21.859::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Apr 24 16:17:01 2014
+  0.000:game start
+  3.091::EOL
+  0.000:==== new game participant ====
+  0.000:date: Fri Apr 25 11:08:13 2014
+  0.000:game start
+  1.973::EOL
+  0.000:==== new game participant ====
+  0.000:date: Fri Apr 25 11:24:34 2014
+  0.000:game start
+  0.555::EOL
+  0.000:==== new game participant ====
+  0.000:date: Fri Apr 25 11:27:01 2014
+  0.000:game start
+  0.758::EOL
+  0.000:==== new game participant ====
+  0.000:date: Fri Apr 25 11:27:39 2014
+  0.000:game start
+  1.006::EOL
+  0.000:==== new game participant ====
+  0.000:date: Fri Apr 25 11:28:13 2014
+  0.000:game start
+  1.471::EOL
+  0.000:==== new game participant ====
+  0.000:date: Fri Apr 25 11:45:12 2014
+  0.000:game start
+  0.639::EOL
+  0.000:==== new game participant ====
+  0.000:date: Tue May 20 01:32:09 2014
+  0.000:game start
+  2.352::EOL
+  0.000:==== new game participant ====
+  0.000:date: Thu Aug 21 18:25:00 2014
+  0.000:game start
+ 17.365::EOL
+  0.000:==== new game participant ====
+  0.000:date: Fri Aug 22 16:24:17 2014
+  0.000:game start
+ 45.451::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Sep 10 16:31:03 2014
+  0.000:game start
+ 28.009::EOL
+  0.000:==== new game participant ====
+  0.000:date: Wed Sep 10 16:34:12 2014
+  0.000:game start
+ 31.614::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Oct 27 09:42:48 2014
+  0.000:game start
+ 35.152::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Oct 27 09:55:18 2014
+  0.000:game start
+  7.319::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Oct 27 09:58:43 2014
+  0.000:game start
+ 11.169::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Oct 27 10:00:44 2014
+  0.000:game start
+ 10.886::EOL
+  0.000:==== new game participant ====
+  0.000:date: Mon Oct 27 10:01:19 2014
+  0.000:game start
+  8.436::EOL
