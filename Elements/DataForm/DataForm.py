@@ -63,7 +63,7 @@ class DataForm(Element):
         # centered
         pos = (0,1.0,0)
         # background colour
-        colour = (0.2,0.2,0.2,1)
+        colour = self.colours['dark_grey']
         # guiLabels colour
         labelColour = self.config.settings.labelcolour
         # global scale of the frame
@@ -173,7 +173,7 @@ class DataForm(Element):
     #def clearButton(self):
     #    self.clearInputs()
     def nextPressed(self):
-        self.sendMessage('auto')
+        self.sendMessage('nextPressed')
 
     def saveInputs(self):
         """

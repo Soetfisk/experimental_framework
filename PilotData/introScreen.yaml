@@ -6,7 +6,8 @@ keys:
    once: true
    args: ['auto']
  - key: n
+   comment: Sends auto message
    callback: sendMessage
    once: true
-   args: ['AUTO']
+   args: ['auto']
 

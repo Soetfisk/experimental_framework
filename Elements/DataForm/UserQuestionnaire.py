@@ -169,7 +169,7 @@ class UserQuestionnaire(Element):
                                       popupMarkerBorder=(1,0),
                                       initialitem=0,
                                       # command=self.optionMenu, extraArgs=[],
-                                      pos=(0.5,1,0.2))
+                                      pos=(-1.0,1,0.2))
             widget.reparentTo(n)
         if getattr(question, "graphics", None):
             for g in question.graphics:

@@ -7,6 +7,7 @@ import pandaConfig
 for o in pandaConfig.options:
     loadPrcFileData('', o)
 
+from Utils.Utils import getColors
 
 # rest of config files are stored in JSON format
 try:
@@ -23,6 +24,7 @@ from direct.showbase.DirectObject import DirectObject
 from direct.gui.OnscreenText import OnscreenText
 from panda3d.core import TextNode
 from panda3d.core import WindowProperties
+from panda3d.core import Vec4
 
 # for finite state machines
 from direct.fsm.FSM import FSM
@@ -102,6 +104,22 @@ class World(DirectObject):
 #========== FSM HANDLING =================================================================
 #=========================================================================================
 
+    # splits a transition string into a tuple of strings (fromState,toState,event)
+    def splitTransitionString(self, transition):
+        try:
+            if ':' in transition:
+                evt = transition.split(':')[1].strip()
+            else:
+                evt = 'auto'
+            # parse the transition "fromA @ toB : whenEvt"
+            fromState, toState = transition.split('@')
+            fromState = fromState.strip()
+            toState = toState.split(':')[0].strip()
+            return (fromState,toState,evt)
+        except:
+            printOut("Malformed transition: "+ transition, 0)
+            self.quit()
+
     def setupFSM(self, experiment):
         """
             Constructs a FSM where each node is one element in the
@@ -115,67 +133,79 @@ class World(DirectObject):
 
         # experiment configuration
         # dictionary form
-        printOut("Loading json experiment: %s" %experiment,2)
-        if ('json' in experiment):
-            exp = json.load(open(experiment))
-        elif ('yaml' in experiment):
+        printOut("Loading yaml experiment: %s" %experiment,2)
+        #if ('json' in experiment):
+        #    exp = json.load(open(experiment))
+        if ('yaml' in experiment):
             exp = yaml.load(open(experiment))
 
-        # create an empty FSM object
-        # fsm = FSM('TheIncredibleMachine')
-        # keep track of transitions in a separate dictionary
-        # the transitions are a nested dictionary
-        # { 'stateA': { 'event1':['stateB'] } }
         fsmTransitions = {}
 
-        # grab transitions dictionary or assign a linear
-        # sequence based in order of appareance of the nodes
+        # parse transitions from YAML file
         try:
             transitions = exp['transitions']
             printOut("Custom transitions defined for this experiment",2)
         except KeyError, a:
-            transitions = []
-            printOut("Default transitions (linear sequence)",2)
+            printOut("You have to define the transitions in the YAML file",0)
+            self.quit()
 
-        for t in transitions:
-            if ':' in t['trans']:
-                evt = t['trans'].split(':')[1].strip()
+
+
+        # list of Elements to load when the transitions have been processed.
+        toLoad = []
+        # stack to perform a tree traversal, HAS to have 'start' transition
+        transitionsStack = ['start']
+        # while the stack is not empty
+        while (transitionsStack):
+            fromNode = transitionsStack.pop()
+            if (fromNode in toLoad):
+                continue
             else:
-                evt = 'auto'
-            # parse the transition "fromA @ toB : whenEvt"
-            fromState, toState = t['trans'].split('@')
-            fromState = fromState.strip()
-            toState = toState.split(':')[0].strip()
+                toLoad.append(fromNode)
+                fsmTransitions[fromNode] = {}
 
-            # is this the first time this element is seen in the FSM
-            if fromState not in fsmTransitions.keys():
-                fsmTransitions[fromState] = {}
+            for t in transitions:
+                (fromState,toState,evt) = self.splitTransitionString(t['trans'])
+                if (fromState == fromNode):
+                    # add child to stack
+                    transitionsStack.append(toState)
+                    fsmTransitions[fromState][evt] = fsmTransitions[fromState].get(evt,[]) + [toState]
+                    # notify the FSM when the event happens
+                    self.accept(evt, self.FsmEventHandler)
 
-            if evt not in fsmTransitions[fromState].keys():
-                # this is a list, because we want to support concurrent
-                # state changes.
-                fsmTransitions[fromState][evt] = []
 
-            # this is a list, because we want to support concurrent
-            fsmTransitions[fromState][evt] += [toState]
-            # accept a message with the event evt to jump to end
-            self.accept(evt, self.FsmEventHandler)
-            #if evt is not 'auto':
-                # the event handler will jump to the right state in the FSM
+        # for t in transitions:
+        #
+        #     (fromState,toState,evt) = self.splitTransitionString(t['trans'])
+        #
+        #     # is this the first time this element is seen in the FSM
+        #     if fromState not in fsmTransitions.keys():
+        #         fsmTransitions[fromState] = {}
+        #
+        #     if evt not in fsmTransitions[fromState].keys():
+        #         # this is a list, because we want to support concurrent
+        #         # state changes.
+        #         fsmTransitions[fromState][evt] = []
+        #
+        #     # this is a list, because we want to support concurrent
+        #     fsmTransitions[fromState][evt] += [toState]
+        #     # accept a message with the event evt to jump to end
+        #     self.accept(evt, self.FsmEventHandler)
+        #     #if evt is not 'auto':
+        #         # the event handler will jump to the right state in the FSM
 
-        # For each element in the experiment, try to import the corresponding
-        # module and construct the object passing all arguments.
-        # used if default transitions have to be created.
-        next = 'start'
-
-        for n, el in enumerate(exp['elements']):
+        for el in exp['elements']:
             try:
+                name = el['name']
+                if name not in toLoad:
+                    continue
+
                 className = el['className']
+                module = el.get('module',className)
                 if 'module' in el.keys():
                     module = el['module']
                 else:
                     module = className
-                name = el['name']
 
                 # load the Python Module for this element
                 mod = __import__('Elements.'+module+'.'+className,
@@ -353,6 +383,8 @@ class World(DirectObject):
 
         self.setupCamera()
         self.setupPandaCamera()
+
+        base.win.setClearColor(getColors()['dark_grey'])
 
         # dictionary with key values for Elements to communicate.
         # between each other.

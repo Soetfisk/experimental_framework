@@ -1,6 +1,8 @@
 
-This is the game introduction and explanation.
-All the details about how to play the game have to
-be described here.
+Our land is being invaded as we speak!, you have to resist the first wave of attacks.
+Allies and enemies look alike, but they have a different colour. Use the hint at the bottom of the screen to distinguish them.
+Do not shoot at your allies!
+
+Use your mouse to aim, and the space bar key to shoot
 
 press 'n' key to advance...

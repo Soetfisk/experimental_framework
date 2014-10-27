@@ -4,26 +4,36 @@ settings:
     maxlabel: 10
     labelcolour: [1.0,0.5,0.5,1.0]
     title: 'Please answer the following questions:'
-    background: [0.2,0.2,0.2,1]
+    background: [0.3,0.3,0.3,1]
 
 questions:
- - text: another question
+ - text: Have you been able to distinguish between enemies and allies based on their colour ?
    order: 0
    answerType: Option
-   answerOptions: ['uno','dos','tres']
+   answerOptions: ['yes','no']
 
- - text: this is a question
+ - text: Which colour was used for the enemies ?
    order: 1
-   answerType: TextEntry
+   answerType: Option
+   answerOptions: ['Magenta','Green']
 
- - text: What is the difference between this and that? and other interesting things
+ - text: Besides the colour, have you noticed any other difference between enemies and allies ?
    order: 2
-   answerType: TextEntry
+   answerType: Option
+   answerOptions: ['yes','no']
 
- - text: Como cree usted que blah blah... y ademas este nodo colapsa con el texto
+ - text: If that difference is among the following options, please select it.
    order: 3
    answerType: Option
-   answerOptions: ['Bueno', 'Muy Bueno', 'Pesimo']
+   answerOptions: ['different size','different speed','different graphics quality']
+
+ - text: The following images display two different graphics quality, please select one option based on your gameplay, ignoring the colour.
+   order: 4
+   answerType: Option
+   answerOptions: ['The left quality was used for the allies, and the right quality for the enemies',
+                   'The right quality was used for the allies, and the left quality for the enemies',
+                   'The left quality was used for both allies and enemies',
+                   'The right quality was used for both allies and enemies']
    graphics:
     - image: PilotData/textures/red64.png
       pos: [-0.3,0,-0.5]

@@ -32,8 +32,6 @@ class ConsentForm(Element):
         frameSize = (-ratio, ratio, -1.0, 1.0)
         # centered
         pos = (0, 1.0, 0)
-        # background colour
-        colour = (0.5, 0.5, 0.5, 1)
         # guiLabels colour
         labelColour = self.config.settings.labelcolour
         # global scale of the frame
@@ -43,7 +41,7 @@ class ConsentForm(Element):
                                                        frameSize[1],
                                                        50*frameSize[2],
                                                        frameSize[3]),
-                                                       frameColor=colour,
+                                                       frameColor=self.colours['dark_grey'],
                                                        frameSize=frameSize,
                                                        pos=pos)
 
@@ -85,11 +83,11 @@ class ConsentForm(Element):
 
     def yesPressed(self):
         self.answer = 'yes'
-        self.sendMessage('consentYes')
+        self.sendMessage('yesPressed')
 
     def noPressed(self):
         self.answer = 'no'
-        self.sendMessage('consentNo')
+        self.sendMessage('noPressed')
 
     def enterState(self):
         Element.enterState(self)

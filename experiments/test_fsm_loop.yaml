@@ -1,0 +1,34 @@
+elements:
+
+####################################
+# Initial and final states in the FSM.
+####################################
+
+ - className: EmptyState
+   name: start
+
+ - className: EmptyState
+   name: two
+   keys:
+    - key: l
+      callback: sendMessage
+      args: ['loop']
+    - key: f
+      callback: sendMessage
+      args: ['finish']
+
+ - className: EmptyState
+   name: end
+
+transitions:
+ - trans: 'start @ two:auto'
+ - trans: 'two @ start:loop'
+ - trans: 'two @ end: finish'
+
+ #
+ #    |-------|
+ #    V       |
+ #  start --> two --> end
+ #
+ #
+

@@ -2,18 +2,98 @@ elements:
 
 # the order in which classes are defined is not important, the FSM transitions
 # are going to define what is executed and in what order.
+# Elements will not be initialized if they are not in the FSM
 
+
+####################################
+# Initial and final states in the FSM.
+####################################
  - className: EmptyState
    name: start
    timeout: 1.0
 
+ - className: EmptyState
+   name: end
+
+####################################
+# Text display elements.
+####################################
+
+ # introduction to the experiment
  - className: ScreenText
    name: IntroScreen
    plain_text: PilotData/introPilot.txt
+   # some keybindings defined in a separate YAML
    config: PilotData/introScreen.yaml
 
- - className: EmptyState
-   name: ResultsUploader
+ - className: ScreenText
+   name: colourBlindText
+   plain_text: PilotData/colourBlindText.txt
+   # example defining the keybindings directly here
+   keys:
+    - key: escape
+      callback: sendMessage
+      args: ['auto']
+
+ - className: ScreenText
+   name: colourBlindProblem
+   plain_text: PilotData/colourBlindProblem.txt
+
+ - module: ScreenText
+   className: ScreenText
+   name: PrePilotScreen
+   plain_text: PilotData/prePilot.txt
+   keys:
+    - key: escape
+      callback: sendMessage
+      args: ['auto']
+
+# @TODO - write up intro text
+ - className: ScreenText
+   name: gameIntroText
+   plain_text: PilotData/gameIntroText.txt
+   keys:
+    - key: n
+      callback: sendMessage
+      args: ['auto']
+
+ - module: ScreenText
+   className: ScreenText
+   name: FinalScreen
+   plain_text: PilotData/finalText.txt
+
+
+ - className: HUDText
+   name: MessageAdjustScale
+   text: "Please use the keys 'w' (increase), 's' (decrease) to adjust the size of the \nmodel (parachute+robot) so it occupies exactly 5 cm on your screen. \nFor finner adjustments use 'e' and 'd' accordingly.\n\nPress the key 'n' when you have finished the adjustment"
+   topLeft: [0.1, 0.2]
+   keys:
+    - key: n
+      callback: sendMessage
+      args: ['nextPressed']
+
+ # One stop timer, can be initialized at the beginning
+ - module: HUDText
+   className: HUDTimer
+   name: timer1
+   text: "0.0"
+   topLeft: [0.1, 0.08]
+   hide: True
+
+ # One stop timer, can be initialized at the beginning
+ - module: HUDText
+   className: HUDCountDown
+   name: countDown
+   text: "Get ready!"
+   countDown: 10.0
+   startIn: 1.0
+   trigger: startGame
+   topLeft: [1.0, 1.0]
+   hide: False
+
+####################################
+# Forms - Data input.
+####################################
 
  - module: DataForm
    className: ConsentForm
@@ -31,14 +111,8 @@ elements:
       callback: pushResults
       args: ['this is a result']
 
- - className: ScreenText
-   name: colourBlindText
-   plain_text: PilotData/colourBlindText.txt
-   keys:
-    - key: escape
-      callback: sendMessage
-      args: [auto]
 
+# Very custom Element, for querying for Colour Blindness
  - module: FullScreenImage
    className: ImageQuery
    name: colourBlindCheck
@@ -54,10 +128,6 @@ elements:
       callback: nextImage
       once: false
 
- - className: ScreenText
-   name: colourBlindProblem
-   plain_text: PilotData/colourBlindProblem.txt
-
  - module: Pilot
    className: ScreenAdjustment
    name: rescaleScreen
@@ -68,20 +138,11 @@ elements:
    parDistCam: 250.0
    writeToGlobals:
      rescaleFactor: 12.0
-
    keys:
     - key: escape
       callback: sendMessage
       args: ['auto']
       once: true
-
- - className: ScreenText
-   name: gameIntroText
-   plain_text: PilotData/gameIntroText.txt
-   keys:
-    - key: n
-      callback: sendMessage
-      args: ['auto']
 
  - className: Game
    name: thegame
@@ -100,35 +161,9 @@ elements:
       callback: sendMessage
       args: ['auto']
 
- - className: EmptyState
-   name: end
-
  - className: DataForm
    name: UserInfo
    config: PilotData/pilotDataForm.yaml
-
- - className: HUDText
-   name: Timer
-   text: "0.0"
-   topLeft: [10, 10]
-
- - className: HUDText
-   name: MessageAdjustScale
-   text: "Please use the keys 'w' (increase), 's' (decrease) to adjust the size of the \nmodel (parachute+robot) so it ocuppies exactly 5 cm on your screen. \nFor finner adjustments use 'e' and 'd' accordingly.\n\nPress the key 'n' when you have finished the adjustment"
-   topLeft: [0.1, 0.2]
-   keys:
-    - key: n
-      callback: sendMessage
-      args: ['auto']
-
- - module: ScreenText
-   className: ScreenText
-   name: PrePilotScreen
-   plain_text: PilotData/prePilot.txt
-   keys:
-    - key: escape
-      callback: sendMessage
-      args: ['auto']
 
  - className: Pilot
    name: Pilot
@@ -160,53 +195,36 @@ elements:
       callback: sendMessage
       args: ['auto']
 
- - module: ScreenText
-   className: ScreenText
-   name: FinalScreen
-   plain_text: PilotData/finalText.txt
-
-
 transitions:
-# START -> INTROSCREEN -> CONSENT FORM
-# - trans: 'start @ IntroScreen:auto'
- - trans: 'IntroScreen @ consentForm:auto'
+#- trans: 'start @ IntroScreen:auto'
+- trans: 'IntroScreen @ consentForm:auto'
+- trans: 'consentForm @ UserInfo:yesPressed'
+- trans: 'consentForm @ end:noPressed'
+- trans: 'UserInfo @ colourBlindText:nextPressed'
+- trans: 'colourBlindText @ colourBlindCheck:auto'
+- trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
+- trans: 'colourBlindProblem @ end:auto'
+# TWO STATES ACTIVATED HERE
+- trans: 'colourBlindCheck @ MessageAdjustScale:imageQueryOk'
+- trans: 'colourBlindCheck @ rescaleScreen:imageQueryOk'
+# TWO STATES DEACTIVATE INTO ONE
+- trans: 'rescaleScreen @ gameIntroText:nextPressed'
+- trans: 'MessageAdjustScale @ gameIntroText:nextPressed'
 
-# CONSENT FORM -> GATHER USER INFO -> COLOUR BLIND TEST
- - trans: 'consentForm @ UserInfo:consentYes'
- - trans: 'consentForm @ FinalScreen:consentNo'
- - trans: 'UserInfo @ colourBlindText:auto'
- - trans: 'colourBlindText @ colourBlindCheck:auto'
- - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
- - trans: 'colourBlindProblem @ end:auto'
+- trans: 'start @ gameIntroText:auto'
+- trans: 'gameIntroText @ thegame:auto'
+- trans: 'gameIntroText @ countDown:auto'
 
-# COLOUR BLIND TEST -> ADJUST SCREEN RESOLUTION FOR TESTS
-# THIS IS NO TRADITIONAL FSM, we can activate MULTIPLE STATES.
- - trans: 'colourBlindCheck @ MessageAdjustScale:imageQueryOk'
- - trans: 'colourBlindCheck @ rescaleScreen:imageQueryOk'
+- trans: 'countDown @ gameQuestions:endOfGame'
+- trans: 'thegame @ gameQuestions:endOfGame'
 
-# SCREEN ADJUSTMET -> GAME INTRODUCTION
- - trans: 'rescaleScreen @ gameIntroText:auto'
- - trans: 'MessageAdjustScale @ gameIntroText:auto'
-
-# GAME INTRODUCTION -> GAME
- - trans: 'start @ thegame:auto'
- - trans: 'gameIntroText @ thegame:auto'
-
-# GAME -> GAME QUESTIONNAIRE
- - trans: 'thegame @ gameQuestions:endOfGame'
-
-# GAME QUESTIONS -> PRE-PILOT SCREEN
- - trans: 'gameQuestions @ PrePilotScreen:auto'
- - trans: 'PrePilotScreen @ Pilot:auto'
-
-# PILOT -> PILOT QUESTIONNAIRE
- - trans: 'Pilot @ PilotQuestionnaire: auto'
+- trans: 'gameQuestions @ PrePilotScreen:auto'
+- trans: 'PrePilotScreen @ Pilot:auto'
+- trans: 'Pilot @ PilotQuestionnaire: auto'
 
 # SERVER UPLOAD INFORMATION
- - trans: 'PilotQuestionnaire @ studyServer: auto'
-
+# - trans: 'PilotQuestionnaire @ studyServer: auto'
 # STUDY SERVER UPLOAD TO FINAL SCREEN
- - trans: 'studyServer @ FinalScreen: dataSaved'
-
+# - trans: 'studyServer @ FinalScreen: dataSaved'
 # END
- - trans: 'FinalScreen@end:auto'
+# - trans: 'FinalScreen@end:auto'

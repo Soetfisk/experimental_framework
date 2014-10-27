@@ -9,7 +9,7 @@
 
 # Keyboard callbacks, execute only once or many and arguments
 keys:
-  - key: z
+  - key: z,startGame
     callback: startGame
     comment: Start the game
     once: True

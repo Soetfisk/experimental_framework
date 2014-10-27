@@ -1,5 +1,19 @@
+from panda3d.core import Vec4
+
 # some handy functions that I've used in different
 # places
+
+# helper class to map common colour names to Vec4 objects
+def getColors():
+    colors = {}
+    colors['RED'] =     Vec4(1.0,0.0,0.0,1.0)
+    colors['BLUE'] =    Vec4(0.0,0.0,1.0,1.0)
+    colors['GREEN'] =   Vec4(0.0,1.0,0.0,1.0)
+    colors['YELLOW'] =  Vec4(0.0,1.0,1.0,1.0)
+    colors['MAGENTA'] = Vec4(1.0,0.0,1.0,1.0)
+    colors['dark_grey'] = Vec4(0.3,0.3,0.3,1.0)
+    colors['light_red'] = Vec4(0.5,0.0,0.0,1.0)
+    return colors
 
 # utility function to create an enum
 # Use like this:

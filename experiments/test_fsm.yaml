@@ -1,0 +1,59 @@
+elements:
+
+####################################
+# Initial and final states in the FSM.
+####################################
+
+ - className: EmptyState
+   name: start
+
+ - className: EmptyState
+   name: two
+
+ - className: EmptyState
+   name: three
+
+ - className: EmptyState
+   name: four
+
+ - className: EmptyState
+   name: five
+
+ - className: EmptyState
+   name: six
+   keys:
+    - key: l
+      callback: sendMessage
+      args: ['loop']
+    - key: f
+      callback: sendMessage
+      args: ['finish']
+
+ - className: EmptyState
+   name: end
+
+transitions:
+ - trans: 'start @ two:auto'
+ - trans: 'start @ three:auto'
+ - trans: 'start @ four:auto'
+
+ - trans: 'three @ five:auto'
+ - trans: 'four @ six:auto'
+ - trans: 'five @ six:auto'
+ - trans: 'six @ five: loop'
+
+ - trans: 'six @ end:finish'
+ - trans: 'two @ end:finish'
+
+ #
+ #          |--> two ------------------------|
+ #  start---|                |-------|       |
+ #          |                V       |       V
+ #          |--> three --> five --> six --> end
+ #          |                        ^
+ #          |--> four ---------------|
+ #
+ #
+ #
+ #
+

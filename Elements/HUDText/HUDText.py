@@ -41,7 +41,7 @@ class HUDText(Element):
 
         topLeft = getattr(self.config,'topLeft',[0.0,0.0])
 
-        tNP.setPos(leftBorder + topLeft[0], 0, 0.6 + topLeft[1])
+        tNP.setPos(leftBorder + topLeft[0], 0, 1.0 - topLeft[1])
 
         tN.setText(self.config.text)
         # attach the text node to the HUD section
@@ -51,17 +51,9 @@ class HUDText(Element):
         self.hideElement()
 
     def enterState(self):
-        # print "entering ScreenText"
-        # super class enterState
         Element.enterState(self)
-        #taskMgr.add(self.updateTimer, "onScreenTimer", sort=2)
 
     def exitState(self):
-        # print "leaving state ScreenText"
         Element.exitState(self)
-        taskMgr.remove("onScreenTimer")
 
-#    def updateTimer(self, task):
-        #self.textNode.setText("%.0f" % task.time)
-        #return task.cont
 

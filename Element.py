@@ -25,6 +25,9 @@ class Element(object):
         # this changes when the state is activated.
         self.active = False
 
+        # some colours constants to share among all elements
+        self.colours = getColors()
+
         dictionary = {}
         if 'config' in kwargs:
             try:
@@ -61,6 +64,8 @@ class Element(object):
         self.sceneNP = NodePath(self.config.name)
         self.sceneNP.hide()
         self.hudNP = NodePath(self.config.name+'_hud')
+        # set a special BIN for the hudNP
+        self.hudNP.setBin('fixed',5)
         self.hudNP.hide()
         # these are basic nodepaths to attach the specific stuff of this
         # element. (text,graphics,anything else)
@@ -110,6 +115,7 @@ class Element(object):
             comment = getattr(k, 'comment', '')
             cb = getattr(self, k.callback, None)
             key = getattr(k, 'key', None)
+            key = str(key)
             once = getattr(k, 'once', False)
             args = getattr(k, 'args', [])
             # force args to be a list...
@@ -121,6 +127,7 @@ class Element(object):
                 printOut('Ignoring that keybinding', 0)
                 self.config.world.quit()
             # this will give us back a [] even if no 'commas' are found
+
             for eachKey in key.split(','):
                 # this could return false in case the key has already been registered
                 if self.kbd.registerKey(eachKey, self.config.name, cb, comment, once, args):
@@ -135,6 +142,7 @@ class Element(object):
                 printOut("Unregistered key from %s: %s" % (self.config.name, k), 4)
             else:
                 printOut("Unable to unregister key from %s: %s" % (self.config.name, k), 0)
+        self.registeredKeys = []
 
     def needsToSaveData(self):
         return False
@@ -184,7 +192,7 @@ class Element(object):
         try:
             globals = self.yaml_config['readFromGlobals']
         except KeyError, e:
-            print e
+            #print e
             globals = None
 
         if globals:
@@ -211,7 +219,7 @@ class Element(object):
         try:
             globals = self.yaml_config['writeToGlobals']
         except KeyError, e:
-            print e
+            #print e
             globals = None
 
         if globals:
