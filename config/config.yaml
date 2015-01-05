@@ -14,5 +14,5 @@ cameraConfig:
 
 simulationLog:
   # main log for the framework.
-  outfile: run/worldlog.txt,
+  outfile: run/SimulationLog.txt
   mode: a
