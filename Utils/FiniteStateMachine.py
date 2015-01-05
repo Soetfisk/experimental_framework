@@ -1,6 +1,10 @@
 __author__ = 'Francholi'
 
 from Element import Element
+from Debug import printOut
+from Utils import *
+
+FSM_RES = enum(FSM_KEY_ERROR=0, FSM_INCOMPLETE=1, FSM_OK=2)
 
 """
 This finiteStateMachine allows for concurrent
@@ -13,9 +17,20 @@ class FiniteStateMachine(object):
     def __init__(self, newTransitions, elements):
         self.transitions = newTransitions
         self.states = elements
-
         # fix end transition to do nothing
         self.transitions['end'] = {}
+        # check that the FSM is correct, meaning at least
+        # that all states mentioned in the transitions exist.
+        missing = [ el for el in self.transitions.keys() if el not in self.states.keys()]
+        if len(missing) > 0:
+            printOut("Fatal error, the FSM has names that are not defined",0)
+            printOut("Missing elements: %s" % missing,0)
+            self.valid = False
+        else:
+            self.valid = True
+
+    def isValid(self):
+        return self.valid
 
     def hasDone(self):
         """
@@ -44,6 +59,7 @@ class FiniteStateMachine(object):
                     s.exitState()
         for newState in list(set(updateLast)):
             self.states[newState].enterState()
+
 
     def getTransitions(self):
         return self.transitions

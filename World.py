@@ -94,6 +94,9 @@ class World(DirectObject):
 
         # build FSM of the experiment
         self.fsm = self.setupFSM(experiment)
+        if (not self.fsm.isValid()):
+            printOut("Invalid FSM")
+            self.quit()
 
         # enter into the START state
         self.elements['start'].enterState()
