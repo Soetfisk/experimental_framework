@@ -179,7 +179,7 @@ class Element(object):
                 t = float(t)
                 if t:
                     taskMgr.doMethodLater(t, self.config.world.advanceFSM,
-                    'timeout'+self.config.name, extraArgs=['auto'])
+                    'timeout_'+self.config.name, extraArgs=['auto'])
             except:
                 printOut("error converting timeout value %s in %s " % (str(t), self.config.name), 0)
                 self.config.world.quit()
@@ -209,7 +209,7 @@ class Element(object):
         exits from this state
         """
         self.hideElement()
-        taskMgr.remove('timeout'+self.config.name)
+        taskMgr.remove('timeout_'+self.config.name)
         self.unregisterKeys()
         printOut("Leaving state %s" % self.config.name,2)
 #        self.config.world.createTextKeys()
