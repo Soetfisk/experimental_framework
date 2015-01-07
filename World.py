@@ -4,6 +4,7 @@
 from pandac.PandaModules import loadPrcFileData
 # pandaConfig defines a list of options to setup Panda3D
 import pandaConfig
+
 for o in pandaConfig.options:
     loadPrcFileData('', o)
 
@@ -47,6 +48,7 @@ from Utils.Utils import *
 # simple keyboard class that wraps around Panda messenger
 from Keyboard import Keyboard
 
+
 class World(DirectObject):
     """Main class with all the setup and interaction configuration"""
 
@@ -56,12 +58,12 @@ class World(DirectObject):
         from the config files and the experiment file
         """
         # first timestamp since the whole application started
-        self.baseTime=time.time()
+        self.baseTime = time.time()
 
         # Dictionary to store the elements (nodes) that will be part of
         # an experimentation, will construct a Finite State Machine 
         # with them
-        self.elements={}
+        self.elements = {}
 
         # list to hold events from the FSM
         self.eventQueue = []
@@ -95,10 +97,9 @@ class World(DirectObject):
         self.elements['start'].enterState()
 
 
-
-#=========================================================================================
-#========== FSM HANDLING =================================================================
-#=========================================================================================
+    # =========================================================================================
+    # ========== FSM HANDLING =================================================================
+    #=========================================================================================
 
     # splits a transition string into a tuple of strings (fromState,toState,event)
     def splitTransitionString(self, transition):
@@ -111,9 +112,9 @@ class World(DirectObject):
             fromState, toState = transition.split('@')
             fromState = fromState.strip()
             toState = toState.split(':')[0].strip()
-            return (fromState,toState,evt)
+            return (fromState, toState, evt)
         except:
-            printOut("Malformed transition: "+ transition, 0)
+            printOut("Malformed transition: " + transition, 0)
             self.quit()
 
     def setupFSM(self, experiment):
@@ -128,8 +129,8 @@ class World(DirectObject):
         """
 
         # experiment configuration, in YAML format
-        printOut("Loading yaml experiment: %s" %experiment,2)
-        if ('yaml' in experiment):
+        printOut("Loading yaml experiment: %s" % experiment, 2)
+        if 'yaml' in experiment:
             exp = yaml.load(open(experiment))
 
         fsmTransitions = {}
@@ -137,9 +138,9 @@ class World(DirectObject):
         # parse transitions from YAML file
         try:
             transitions = exp['transitions']
-            printOut("Custom transitions defined for this experiment",2)
+            printOut("Custom transitions defined for this experiment", 2)
         except KeyError, a:
-            printOut("You have to define the transitions in the YAML file",0)
+            printOut("You have to define the transitions in the YAML file", 0)
             self.quit()
 
 
@@ -158,11 +159,11 @@ class World(DirectObject):
                 fsmTransitions[fromNode] = {}
 
             for t in transitions:
-                (fromState,toState,evt) = self.splitTransitionString(t['trans'])
+                (fromState, toState, evt) = self.splitTransitionString(t['trans'])
                 if (fromState == fromNode):
                     # add child to stack
                     transitionsStack.append(toState)
-                    fsmTransitions[fromState][evt] = fsmTransitions[fromState].get(evt,[]) + [toState]
+                    fsmTransitions[fromState][evt] = fsmTransitions[fromState].get(evt, []) + [toState]
                     # notify the FSM when the event happens
                     self.accept(evt, self.FsmEventHandler)
 
@@ -194,14 +195,14 @@ class World(DirectObject):
                     continue
 
                 className = el['className']
-                module = el.get('module',className)
+                module = el.get('module', className)
                 if 'module' in el.keys():
                     module = el['module']
                 else:
                     module = className
 
                 # load the Python Module for this element
-                mod = __import__('Elements.'+module+'.'+className,
+                mod = __import__('Elements.' + module + '.' + className,
                                  globals(), locals(), [className], -1)
                 # get a reference to the class based on className
                 myElementClass = getattr(mod, className)
@@ -213,7 +214,7 @@ class World(DirectObject):
                 printOut("Building from class %s with arguments: " % className, 2)
                 printOut(str(kwargs), 2)
                 state_obj = myElementClass(**kwargs)
-                printOut("Instance of class "+ className + " created", 2)
+                printOut("Instance of class " + className + " created", 2)
 
                 # pass keyboard reference so it can register its own keyboard
                 # events
@@ -241,7 +242,7 @@ class World(DirectObject):
                 #        fsmTransitions[next] = {'auto': 'end'}
 
             except ImportError, i:
-                printOut("Error importing module, missing file or wrong className",0)
+                printOut("Error importing module, missing file or wrong className", 0)
                 print className
                 print i
                 sys.exit()
@@ -251,8 +252,8 @@ class World(DirectObject):
                 print v
                 sys.exit()
             except AttributeError, e:
-                printOut("Attribute error when building " + el['name'],0)
-                printOut("Most likely there is a mismatch between the code and the config file",0)
+                printOut("Attribute error when building " + el['name'], 0)
+                printOut("Most likely there is a mismatch between the code and the config file", 0)
                 printOut("%s" % e, 0)
                 self.quit()
             except Exception, e:
@@ -283,27 +284,27 @@ class World(DirectObject):
         # current node
         curr = self.fsm.state
         if (curr == 'Off'):
-            printOut("Starting the FSM..., moving to first node",2)
+            printOut("Starting the FSM..., moving to first node", 2)
             curr = 'start'
 
-        self.log.logEvent("Leaving state %s\n"%curr,time.time())
+        self.log.logEvent("Leaving state %s\n" % curr, time.time())
 
-        if (curr != 'start' and curr!='Off'):
+        if (curr != 'start' and curr != 'Off'):
             element = self.elements[curr]
             if (element.needsToSaveData()):
                 element.saveUserData()
                 t = time.time()
-                self.log.logEvent("User data: %s\n"%element.name,t)
+                self.log.logEvent("User data: %s\n" % element.name, t)
                 d = element.getUserData()
-                for k,v in d.items():
-                    self.log.logEvent("%s:%s\n"%(k,str(v)), t)
+                for k, v in d.items():
+                    self.log.logEvent("%s:%s\n" % (k, str(v)), t)
 
         # retrieve possible events at this node
         events = trans[curr].keys()
-        printOut("advancing FSM:",2)
+        printOut("advancing FSM:", 2)
         printOut("current state: %s" % curr, 2)
-        printOut("possible events: %s " % str(events),2)
-        printOut("event queue %s" % str(self.eventQueue),2)
+        printOut("possible events: %s " % str(events), 2)
+        printOut("event queue %s" % str(self.eventQueue), 2)
         # go through each event in the queue
         for e in self.eventQueue:
             # event matching ?
@@ -311,7 +312,7 @@ class World(DirectObject):
                 # remove THE FIRST occurence, set new state for transition
                 del self.eventQueue[self.eventQueue.index(e)]
                 nextState = trans[curr][e]
-                break # so the else: below does not execute
+                break  # so the else: below does not execute
 
         # if we looped through all the events, and found no matching
         # transition, then do the auto transition
@@ -319,16 +320,16 @@ class World(DirectObject):
             nextState = trans[curr]['auto']
 
         if nextState == 'end':
-            printOut("Finished FSM, next state is 'end'",2)
-            printOut("Quitting and closing files",2)
+            printOut("Finished FSM, next state is 'end'", 2)
+            printOut("Quitting and closing files", 2)
             # no more states!
             self.fsm.request("Off")
-            self.log.logEvent("Entering state Off\n",time.time())
+            self.log.logEvent("Entering state Off\n", time.time())
             self.quit()
         else:
             # nextState=self.elementsNames[pos+1]
             printOut("Entering STATE %s" % nextState, 2)
-            self.log.logEvent("Entering state %s\n"%nextState,time.time())
+            self.log.logEvent("Entering state %s\n" % nextState, time.time())
             self.fsm.request(nextState)
 
     def FsmEventHandler(self, event):
@@ -343,9 +344,9 @@ class World(DirectObject):
         #self.eventQueue.append(event)
 
 
-#=========================================================================================
-#========== SETUP ========================================================================
-#=========================================================================================
+    #=========================================================================================
+    #========== SETUP ========================================================================
+    #=========================================================================================
 
     def generalSetup(self):
         """
@@ -360,12 +361,12 @@ class World(DirectObject):
 
         # create general log file
         genLog = self.config.simulationLog
-        self.log = Logger(genLog.outfile,genLog.mode)
+        self.log = Logger(genLog.outfile, genLog.mode)
         self.log.startLog(self.baseTime)
         t = time.time()
         printOut("==== Application started ====\n", 2)
         self.log.logEvent("==== Application started ====\n", t)
-        self.log.logEvent("date: " +  ctime() + "\n", t)
+        self.log.logEvent("date: " + ctime() + "\n", t)
         self.log.logEvent("loading Elements\n", t)
 
         self.setupCamera()
@@ -384,9 +385,9 @@ class World(DirectObject):
         t = time.time()
         self.log.logEvent(message, t)
 
-#=========================================================================================
-#========== INPUT HANDLING ===============================================================
-#=========================================================================================
+    #=========================================================================================
+    #========== INPUT HANDLING ===============================================================
+    #=========================================================================================
 
     def hideMouseCursor(self):
         """Hides mouse cursor in Panda3D"""
@@ -408,9 +409,9 @@ class World(DirectObject):
         base.win.requestProperties(props)
         return
 
-#=========================================================================================
-#========== CAMERA HANDLING ==============================================================
-#=========================================================================================
+    #=========================================================================================
+    #========== CAMERA HANDLING ==============================================================
+    #=========================================================================================
 
     def setupPandaCamera(self):
         """Using the object cam with some basic properties about the
@@ -508,9 +509,9 @@ class World(DirectObject):
             parent = aspect2d
         npath.reparentTo(parent)
 
-#=========================================================================================
-#========== KEYBOARD - KEYS HANDLING =====================================================
-#=========================================================================================
+    #=========================================================================================
+    #========== KEYBOARD - KEYS HANDLING =====================================================
+    #=========================================================================================
 
     def stopKeyboard(self):
         self.keyboard.clearKeys()
@@ -524,7 +525,7 @@ class World(DirectObject):
         # add a basic key to display/toggle help
         if not k.registerKey('control-h', 'World', self.toggleTextKeys, "Shows/Hides this help"):
             self.fatal("Error registering key h for World, check you are not using this key"
-                  "for any purpose as it is reserved")
+                       "for any purpose as it is reserved")
 
         for key_record in self.keyConfig['global_keys']:
             try:
@@ -546,14 +547,14 @@ class World(DirectObject):
                 printOut("Error, no method found for callback: %s" % key_record['callback'], 0)
                 printOut("Ignoring this key binding", 0)
 
-        self.cursorHidden=False
+        self.cursorHidden = False
         # called when resizing the Panda window.
         self.accept('window-event', self.windowEventHandler)
         self.createTextKeys()
         return
 
     def fatal(self, message):
-        printOut(message,0)
+        printOut(message, 0)
         self.quit()
 
     def createTextKeys(self):
@@ -566,21 +567,21 @@ class World(DirectObject):
 
         # create new text nodes
         keys = self.keyboard.getKeys()
-        for (pos,k) in enumerate(keys):
+        for (pos, k) in enumerate(keys):
             text = self.keyboard.getTextKey(k)
-            self.screenText[k] = OnscreenText(text,pos=(base.a2dLeft,.95-0.06*pos),fg=(1,1,0,1),
-                    align=TextNode.ALeft,scale=.05)
+            self.screenText[k] = OnscreenText(text, pos=(base.a2dLeft, .95 - 0.06 * pos), fg=(1, 1, 0, 1),
+                                              align=TextNode.ALeft, scale=.05)
             self.screenText[k].hide()
 
     def realignTextKeys(self):
         """Realign the text keys if the window has been resized"""
         #printOut("Realign text on window resize",0)
-        for (key,val) in self.screenText.items():
+        for (key, val) in self.screenText.items():
             val.setX(base.a2dLeft)
 
     def toggleTextKeys(self):
         """Hides/shows all key texts. Should be consistent about "ALL" """
-        for (key,val) in self.screenText.items():
+        for (key, val) in self.screenText.items():
             if val.isHidden():
                 val.show()
             else:
@@ -591,17 +592,17 @@ class World(DirectObject):
         messenger.toggleVerbose()
 
     def quit(self):
-        self.log.logEvent("Simulation finished\n",time.time())
+        self.log.logEvent("Simulation finished\n", time.time())
         self.log.stopLog()
         self.tracker.stopTrack()
         sys.exit()
 
-#    def _quit(self):
-        # this will implicitly quit, but each state will have
-        # the opportunity to clear out the logs
-        #self.fsm.request("Off")
-#        self.quit()
-        #while(True):
-        #    self.advanceFSM()
+    #    def _quit(self):
+    # this will implicitly quit, but each state will have
+    # the opportunity to clear out the logs
+    #self.fsm.request("Off")
+    #        self.quit()
+    #while(True):
+    #    self.advanceFSM()
 
 
