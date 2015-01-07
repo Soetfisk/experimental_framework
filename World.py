@@ -9,11 +9,6 @@ for o in pandaConfig.options:
 
 from Utils.Utils import getColors
 
-# rest of config files are stored in JSON format
-try:
-    import json
-except ImportError:
-    import simplejson as json
 import yaml
 
 from Utils.FiniteStateMachine import *
@@ -71,9 +66,7 @@ class World(DirectObject):
         # list to hold events from the FSM
         self.eventQueue = []
 
-        # get global keys configuration
-        # this keys are always available application wide
-        # self.json_keys = json.load(open("config/globalKeys.json"))
+        # get global keys configuration, always available application wide
         self.keyConfig = yaml.load(open("config/globalKeys.yaml"))
 
         # This class inherits from DirectObject, and Keyboard
@@ -134,11 +127,8 @@ class World(DirectObject):
             has happened. If no event is specified an "auto" event is created.
         """
 
-        # experiment configuration
-        # dictionary form
+        # experiment configuration, in YAML format
         printOut("Loading yaml experiment: %s" %experiment,2)
-        #if ('json' in experiment):
-        #    exp = json.load(open(experiment))
         if ('yaml' in experiment):
             exp = yaml.load(open(experiment))
 
@@ -368,12 +358,6 @@ class World(DirectObject):
         # create an object from dictionary to simplify usage
         self.config = objFromDict(configDict)
 
-        # file describing all the service templates available
-        # self.services = objFromDict(json.load(open('config/services.json')))
-        # create Service manager
-        # self.serviceMgr = ServiceMgr(self.services)
-        # printOut("Service Manager created",1)
-
         # create general log file
         genLog = self.config.simulationLog
         self.log = Logger(genLog.outfile,genLog.mode)
@@ -532,14 +516,12 @@ class World(DirectObject):
         self.keyboard.clearKeys()
 
     def resetKeys(self):
-        """clears all key bindings and links the global keys specified
-        in config/globalKeys.json"""
-        # shorter name
+        """clears all key bindings and links the global keys specified in config/globalKeys.yaml"""
         k = self.keyboard
         # clean up events (ALL EVENTS) on World
         k.clearKeys()
-        # add a basic key to display/toggle help
 
+        # add a basic key to display/toggle help
         if not k.registerKey('control-h', 'World', self.toggleTextKeys, "Shows/Hides this help"):
             self.fatal("Error registering key h for World, check you are not using this key"
                   "for any purpose as it is reserved")
