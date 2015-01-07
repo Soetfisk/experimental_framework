@@ -1,7 +1,6 @@
-#keys:
-#
-
 settings:
+   outfiledir: run
+   outfileprefix: userdata
    formId: userdata
    scale: 0.06
    maxlabel: 10

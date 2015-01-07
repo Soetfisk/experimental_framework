@@ -26,17 +26,13 @@ class DataForm(Element):
         # the config is loaded by Element automatically into self.config
         self.setupGUI()
         printOut("DataForm GUI constructed", 1)
-        # create a simple service that can be queried in different ways,
-        # pass (serverName, serviceName, callback)
-        # TODO
-        # self.createService('userdata0','UserData', self.getUserData)
-        # printOut("Service userdata0 for dataform created",1)
 
         # in this dictionary we will keep the inputs from the form.
         self.userInput = {}
 
     def needsToSaveData(self):
         return True
+
     def saveUserData(self):
         self.saveInputs()
 
@@ -212,9 +208,20 @@ class DataForm(Element):
                     pass
                 self.userInput[i.label] = value
 
-        printOut("Values saved from Form:", 1)
-        for (k,v) in self.userInput.items():
-            printOut("%s: %s" % (k,v), 1)
+
+        # open file to save user input
+        s = self.config.settings
+        filename = "%s/%s_%s.txt" % (s.outfiledir, s.outfileprefix, self.config.world.participantId)
+        try:
+            out = open(filename, 'w')
+            out.write("participant id: %s\n" % self.config.world.participantId)
+            for (k,v) in self.userInput.items():
+                out.write("%s: %s\n" %(k,v))
+            out.close()
+        except Exception, e:
+            printOut(str(e), 0)
+            printOut("Fatal error trying to generate file with user information.",0)
+            self.config.world.quit()
 
 
     def clearInputs(self):

@@ -57,6 +57,7 @@ class World(DirectObject):
         Constructor for World class, the configuration is read
         from the config files and the experiment file
         """
+
         # first timestamp since the whole application started
         self.baseTime = time.time()
 
@@ -352,12 +353,14 @@ class World(DirectObject):
         """
         common functionality and basic setup used by all the states/elements
         """
-        # general configuration lies in this JSON file
+        # general configuration lies in this YAML file
         # such as camera settings, etc.
         configDict = yaml.load(open("config/config.yaml"))
 
         # create an object from dictionary to simplify usage
         self.config = objFromDict(configDict)
+
+        self.participantId = time.strftime("%y%m%d_%H%M%S")
 
         # create general log file
         genLog = self.config.simulationLog
@@ -367,6 +370,7 @@ class World(DirectObject):
         printOut("==== Application started ====\n", 2)
         self.log.logEvent("==== Application started ====\n", t)
         self.log.logEvent("date: " + ctime() + "\n", t)
+        self.log.logEvent("participant id: %s\n" % self.participantId, t)
         self.log.logEvent("loading Elements\n", t)
 
         self.setupCamera()
