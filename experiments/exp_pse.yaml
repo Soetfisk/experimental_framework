@@ -1,8 +1,9 @@
 elements:
 
-# the order in which classes are defined is not important, the FSM transitions
+# The order in which classes are defined is not important, the FSM transitions
 # are going to define what is executed and in what order.
-# Elements will not be initialized if they are not in the FSM
+# Elements will not be initialized if they are not listed as transitions at the
+# end.
 
 
 ####################################
@@ -10,7 +11,7 @@ elements:
 ####################################
  - className: EmptyState
    name: start
-   timeout: 1.0
+   timeout: 2.0
 
  - className: EmptyState
    name: end
@@ -196,31 +197,36 @@ elements:
       args: ['auto']
 
 transitions:
-#- trans: 'start @ IntroScreen:auto'
+- trans: 'start @ IntroScreen:auto'
 - trans: 'IntroScreen @ consentForm:auto'
 - trans: 'consentForm @ UserInfo:yesPressed'
 - trans: 'consentForm @ end:noPressed'
-- trans: 'UserInfo @ colourBlindText:nextPressed'
-- trans: 'colourBlindText @ colourBlindCheck:auto'
-- trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
-- trans: 'colourBlindProblem @ end:auto'
+- trans: 'UserInfo @ end:nextPressed'
+
+#- trans: 'UserInfo @ saveUserData:nextPressed'
+#- trans: 'saveUserData @ end: dataSaved'
+
+#- trans: 'UserInfo @ colourBlindText:nextPressed'
+#- trans: 'colourBlindText @ colourBlindCheck:auto'
+#- trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
+#- trans: 'colourBlindProblem @ end:auto'
 # TWO STATES ACTIVATED HERE
-- trans: 'colourBlindCheck @ MessageAdjustScale:imageQueryOk'
-- trans: 'colourBlindCheck @ rescaleScreen:imageQueryOk'
+#- trans: 'colourBlindCheck @ MessageAdjustScale:imageQueryOk'
+#- trans: 'colourBlindCheck @ rescaleScreen:imageQueryOk'
 # TWO STATES DEACTIVATE INTO ONE
-- trans: 'rescaleScreen @ gameIntroText:nextPressed'
-- trans: 'MessageAdjustScale @ gameIntroText:nextPressed'
+#- trans: 'rescaleScreen @ gameIntroText:nextPressed'
+#- trans: 'MessageAdjustScale @ gameIntroText:nextPressed'
 
-- trans: 'start @ gameIntroText:auto'
-- trans: 'gameIntroText @ thegame:auto'
-- trans: 'gameIntroText @ countDown:auto'
+#- trans: 'start @ gameIntroText:auto'
+#- trans: 'gameIntroText @ thegame:auto'
+#- trans: 'gameIntroText @ countDown:auto'
 
-- trans: 'countDown @ gameQuestions:endOfGame'
-- trans: 'thegame @ gameQuestions:endOfGame'
+#- trans: 'countDown @ gameQuestions:endOfGame'
+#- trans: 'thegame @ gameQuestions:endOfGame'
 
-- trans: 'gameQuestions @ PrePilotScreen:auto'
-- trans: 'PrePilotScreen @ Pilot:auto'
-- trans: 'Pilot @ PilotQuestionnaire: auto'
+#- trans: 'gameQuestions @ PrePilotScreen:auto'
+#- trans: 'PrePilotScreen @ Pilot:auto'
+#- trans: 'Pilot @ PilotQuestionnaire: auto'
 
 # SERVER UPLOAD INFORMATION
 # - trans: 'PilotQuestionnaire @ studyServer: auto'
