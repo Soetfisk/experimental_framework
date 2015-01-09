@@ -86,7 +86,7 @@ elements:
    className: HUDCountDown
    name: countDown
    text: "Get ready!"
-   countDown: 10.0
+   countDown: 5.0
    startIn: 1.0
    trigger: startGame
    topLeft: [1.0, 1.0]
@@ -197,34 +197,32 @@ elements:
       args: ['auto']
 
 transitions:
-- trans: 'start @ IntroScreen:auto'
-- trans: 'IntroScreen @ consentForm:auto'
-- trans: 'consentForm @ UserInfo:yesPressed'
-- trans: 'consentForm @ end:noPressed'
-- trans: 'UserInfo @ end:nextPressed'
-
-#- trans: 'UserInfo @ saveUserData:nextPressed'
-#- trans: 'saveUserData @ end: dataSaved'
-
+#- trans: 'start @ IntroScreen:auto'
+#- trans: 'IntroScreen @ consentForm:auto'
+#- trans: 'consentForm @ UserInfo:yesPressed'
+#- trans: 'consentForm @ end:noPressed'
 #- trans: 'UserInfo @ colourBlindText:nextPressed'
 #- trans: 'colourBlindText @ colourBlindCheck:auto'
 #- trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
 #- trans: 'colourBlindProblem @ end:auto'
+
 # TWO STATES ACTIVATED HERE
 #- trans: 'colourBlindCheck @ MessageAdjustScale:imageQueryOk'
 #- trans: 'colourBlindCheck @ rescaleScreen:imageQueryOk'
+
 # TWO STATES DEACTIVATE INTO ONE
 #- trans: 'rescaleScreen @ gameIntroText:nextPressed'
 #- trans: 'MessageAdjustScale @ gameIntroText:nextPressed'
 
-#- trans: 'start @ gameIntroText:auto'
-#- trans: 'gameIntroText @ thegame:auto'
-#- trans: 'gameIntroText @ countDown:auto'
+- trans: 'start @ gameIntroText:auto'
+- trans: 'gameIntroText @ thegame:auto'
+- trans: 'gameIntroText @ countDown:auto'
 
-#- trans: 'countDown @ gameQuestions:endOfGame'
-#- trans: 'thegame @ gameQuestions:endOfGame'
+- trans: 'countDown @ gameQuestions:endOfGame'
+- trans: 'thegame @ gameQuestions:endOfGame'
 
-#- trans: 'gameQuestions @ PrePilotScreen:auto'
+- trans: 'gameQuestions @ PrePilotScreen:auto'
+- trans: 'PrePilotScreen @ end:auto'
 #- trans: 'PrePilotScreen @ Pilot:auto'
 #- trans: 'Pilot @ PilotQuestionnaire: auto'
 
