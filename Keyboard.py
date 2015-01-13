@@ -1,7 +1,11 @@
 from Utils.Debug import printOut
 
 class Keyboard():
-    """trivial wrapper around the panda messenger focused on keyboard handling"""
+    """
+    trivial wrapper around the panda messenger focused on EVENT handling, not only keyboard handling
+    A message can be a simple key stroke, a combination of keys or a word
+    One message or event can be linked to ONLY ONE callback.
+    """
 
     def __init__(self, msn):
         """ Receives a reference to the messenger object in Panda3D,

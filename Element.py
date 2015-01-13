@@ -115,6 +115,7 @@ class Element(object):
             comment = getattr(k, 'comment', '')
             cb = getattr(self, k.callback, None)
             key = getattr(k, 'key', None)
+            # in case is the letter 1,2,3..., or even a number 123
             key = str(key)
             once = getattr(k, 'once', False)
             args = getattr(k, 'args', [])
@@ -124,12 +125,13 @@ class Element(object):
             if key is None or cb is None:
                 printOut('Error!, key or callback missing in when '
                          'setting up %s' % self.config.name, 0)
-                printOut('Ignoring that keybinding', 0)
+                printOut('Ignoring key binding', 0)
                 self.config.world.quit()
             # this will give us back a [] even if no 'commas' are found
 
             for eachKey in key.split(','):
                 # this could return false in case the key has already been registered
+                # in that case the method registerKey from the kbd will warn about that.
                 if self.kbd.registerKey(eachKey, self.config.name, cb, comment, once, args):
                     self.registeredKeys.append(eachKey)
         else:
@@ -160,7 +162,8 @@ class Element(object):
         self.sceneNP.show()
 
     def sendMessage(self, message):
-        messenger.send(message,[message])
+        # messenger.send(message,[message])
+        messenger.send(message)
 
     def enterState(self):
         """

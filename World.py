@@ -166,7 +166,7 @@ class World(DirectObject):
                     transitionsStack.append(toState)
                     fsmTransitions[fromState][evt] = fsmTransitions[fromState].get(evt, []) + [toState]
                     # notify the FSM when the event happens
-                    self.accept(evt, self.FsmEventHandler)
+                    self.accept(evt, self.FsmEventHandler, [evt])
 
 
         # for t in transitions:
