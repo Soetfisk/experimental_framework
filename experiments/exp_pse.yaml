@@ -63,7 +63,6 @@ elements:
    name: FinalScreen
    plain_text: PilotData/finalText.txt
 
-
  - className: HUDText
    name: MessageAdjustScale
    text: "Please use the keys 'w' (increase), 's' (decrease) to adjust the size of the \nmodel (parachute+robot) so it occupies exactly 5 cm on your screen. \nFor finner adjustments use 'e' and 'd' accordingly.\n\nPress the key 'n' when you have finished the adjustment"
@@ -87,7 +86,7 @@ elements:
    name: countDown
    text: "Get ready!"
    countDown: 5.0
-   startIn: 1.0
+   delayStart: 1.0
    trigger: startGame
    topLeft: [1.0, 1.0]
    hide: False
@@ -113,7 +112,7 @@ elements:
       args: ['this is a result']
 
 
-# Very custom Element, for querying for Colour Blindness
+# Very specific Element, for testing for Colour Blindness
  - module: FullScreenImage
    className: ImageQuery
    name: colourBlindCheck
@@ -196,8 +195,19 @@ elements:
       callback: sendMessage
       args: ['auto']
 
+ - module: EyeTracker
+   className: Tobii_TCP_C_Client
+   name: eyeTracker
+   logGaze: true
+   serverIp: 127.0.0.1
+   serverPort: 2345
+
 transitions:
-#- trans: 'start @ IntroScreen:auto'
+- trans: 'start @ IntroScreen:auto'
+- trans: 'start @ eyeTracker:auto'
+- trans: 'IntroScreen @ end: auto'
+- trans: 'eyeTracker @ end: auto'
+
 #- trans: 'IntroScreen @ consentForm:auto'
 #- trans: 'consentForm @ UserInfo:yesPressed'
 #- trans: 'consentForm @ end:noPressed'
@@ -214,15 +224,19 @@ transitions:
 #- trans: 'rescaleScreen @ gameIntroText:nextPressed'
 #- trans: 'MessageAdjustScale @ gameIntroText:nextPressed'
 
-- trans: 'start @ gameIntroText:auto'
-- trans: 'gameIntroText @ thegame:auto'
-- trans: 'gameIntroText @ countDown:auto'
+#- trans: 'start @ gameIntroText:xxx'
+#- trans: 'gameIntroText @ thegame:auto'
+#- trans: 'gameIntroText @ countDown:auto'
 
-- trans: 'countDown @ gameQuestions:endOfGame'
-- trans: 'thegame @ gameQuestions:endOfGame'
+#- trans: 'countDown @ end: endOfGame'
+#- trans: 'thegame @ end: endOfGame'
 
-- trans: 'gameQuestions @ PrePilotScreen:auto'
-- trans: 'PrePilotScreen @ end:auto'
+#- trans: 'countDown @ gameQuestions:endOfGame'
+#- trans: 'thegame @ gameQuestions:endOfGame'
+
+#- trans: 'gameQuestions @ PrePilotScreen:auto'
+#- trans: 'PrePilotScreen @ end:auto'
+
 #- trans: 'PrePilotScreen @ Pilot:auto'
 #- trans: 'Pilot @ PilotQuestionnaire: auto'
 

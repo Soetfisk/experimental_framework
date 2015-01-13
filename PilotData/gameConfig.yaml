@@ -8,8 +8,10 @@
 #}
 
 # Keyboard callbacks, execute only once or many and arguments
+# If we use a 'word', it will be equivalent to a key, but triggered
+# by a message.
 keys:
-  - key: z,startGame
+  - key: startGame
     callback: startGame
     comment: Start the game
     once: True

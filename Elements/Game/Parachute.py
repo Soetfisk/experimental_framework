@@ -271,7 +271,7 @@ class Parachute(DirectObject):
         # set fall time, interval and callback after fall
         #adjustedDuration = (self.modelNP.getZ() * self.falltime) / self.posGen.topLeft[2]
         adjustedDuration = (self.modelNP.getZ() - self.groundHeight) / self.speed
-        printOut("Adjusted Duration of speed: %f" % adjustedDuration, 0)
+        printOut("Adjusted Duration of speed: %f" % adjustedDuration, 2)
         self.fallInterval = self.genFallDownInterval(adjustedDuration, self.groundHeight)
 
         self.fallInterval.setDoneEvent("finishedPreFall_" + self.name)
@@ -306,8 +306,8 @@ class Parachute(DirectObject):
 
     def finishedPreFall(self):
         # dissapear!
-        printOut("Node position: %f,%f,%f" %(self.modelNP.getX(),self.modelNP.getY(),self.modelNP.getZ()),0)
-        printOut("Node scale: %f" % (self.modelNP.getScale()[0]), 0)
+        #printOut("Node position: %f,%f,%f" %(self.modelNP.getX(),self.modelNP.getY(),self.modelNP.getZ()),0)
+        #printOut("Node scale: %f" % (self.modelNP.getScale()[0]), 0)
         fadeOut = LerpFunctionInterval(self.modelNP.setAlphaScale,
                 toData=0.0,fromData=1.0,duration=1.0)
         fadeOut.start()

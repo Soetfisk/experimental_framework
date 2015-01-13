@@ -25,20 +25,19 @@ class HUDCountDown(HUDText):
 
         # check if hide boolean has been specified
         # otherwise assume visible
-        if (not getattr(self.config,'hide',False)):
-            self.config.hide = False
+        self.config.hide = getattr(self.config,'hide',False)
 
         if (not getattr(self.config,'countDown')):
             printOut("Error building HUDCountDown, missing countDown attribute in YAML",0)
             self.config.world.quit()
 
-        if (not getattr(self.config,'startIn',1.0)):
-            self.config.startIn = 1.0
-            printOut("Warning, starting count down timer in 1 second by default",1)
+        if (not getattr(self.config,'delayStart',1.0)):
+            self.config.delayStart = 1.0
+            printOut("Warning, starting count down timer in 1 second by default",0)
 
         if (not getattr(self.config,'trigger',False)):
             self.config.trigger = 'auto'
-            printOut("Warning, this count down timer triggers auto by default",1)
+            printOut("Warning, this count down timer triggers event 'auto' by default",0)
 
         # by default Element renders in bin fixed,5
         self.hudNP.setBin('fixed',10)
@@ -60,8 +59,7 @@ class HUDCountDown(HUDText):
         HUDText.exitState(self)
 
     def delayStart(self, task):
-        if (task.time >= self.config.startIn):
-            #taskMgr.remove('delayStart')
+        if (task.time >= self.config.delayStart):
             taskMgr.add(self.updateTimer, "onScreenTimer", sort=2)
             return task.done
         else:
@@ -69,7 +67,10 @@ class HUDCountDown(HUDText):
 
     def updateTimer(self, task):
         if (self.config.countDown - task.time <= 0):
-            #self.sendMessage(self.config.trigger)
+            # enter into a passive mode, hides the node and
+            # and does NOTHING ELSE until exits the state.
+            self.hideElement()
+            self.sendMessage(self.config.trigger)
             return task.done
         else:
             if (not self.config.hide):
