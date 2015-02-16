@@ -1,6 +1,6 @@
 from time import ctime
 
-#game imports
+# game imports
 from targetGuide import targetGuide
 from pointsHUD import pointsHUD
 from Logger import Logger
@@ -13,9 +13,10 @@ import random
 from Utils.Debug import printOut
 
 try:
-        import json
+    import json
 except ImportError:
-        import simplejson as json
+    import simplejson as json
+
 
 class Game(Element):
     """class to implement game and replay functionality
@@ -64,6 +65,7 @@ class Game(Element):
         # this can be None or the Dictionary, depending if the user already
         # entered the data
         #return userData
+
     #=============================================
     def startLogging(self):
         t = time.time()
@@ -77,10 +79,12 @@ class Game(Element):
 
         self.gameLog.logEvent("date: " + ctime() + "\n", t)
         self.gameLog.logEvent("game start\n", t)
+
     #=============================================
     def stopLogging(self):
         self.gameLog.stopLog()
         self.replayLog.stopLog()
+
     #=============================================
     def setupTerrain(self):
         """Sets terrain model, attaching it to the scene nodepath"""
@@ -94,29 +98,32 @@ class Game(Element):
         # ground model is only shown in the gamePlay tree.
         self.groundTransform.reparentTo(self.sceneNP)
         return
+
     #=============================================
     # DEBUGING PURSPOSES -- I WANT A GUI!!!
-    def moveGround(self,axis,amount):
+    def moveGround(self, axis, amount):
         pos = self.ground.getPos()
         pos[axis] += amount
-        self.ground.setPos(pos[0],pos[1],pos[2])
+        self.ground.setPos(pos[0], pos[1], pos[2])
         print pos
+
     def rotate(self, amount):
         self.groundTransform.setH(self.groundTransform.getH() + amount)
         print "Heading: " + str(self.groundTransform.getH())
+
     #==============================================
 
     def setupParachutes(self):
         """Creates parachutes objects needed for the game, loads textures and all..."""
         # references to all the Parachute objects created
         # actual Parachutes objects
-        self.parachutes = {}    # dict of parachute objects
+        self.parachutes = {}  # dict of parachute objects
         self.parachutesFalling = {}
 
         # bad guys (just names)
-        self.targets = []       # parachutes that are targets
+        self.targets = []  # parachutes that are targets
         # good guys (just names)
-        self.non_targets = []   # parachutes that are no targets.
+        self.non_targets = []  # parachutes that are no targets.
 
         # load sequences
         # references to the sequences in the config file
@@ -153,7 +160,7 @@ class Game(Element):
                 # add unique id per color and quality
                 pos = badGuy.rfind("/") + 1
                 uniqueName = badGuy[pos:]
-                uniqueName = str(id0)+"."+str(id1)+"."+uniqueName
+                uniqueName = str(id0) + "." + str(id1) + "." + uniqueName
                 # remove the prefix with the path
 
                 self.targets.append(uniqueName)
@@ -171,7 +178,7 @@ class Game(Element):
                 goodGuy = goodGuy.replace("Color", color)
                 pos = goodGuy.rfind("/") + 1
                 uniqueName = goodGuy[pos:]
-                uniqueName = str(id0)+"."+str(id1)+"."+uniqueName
+                uniqueName = str(id0) + "." + str(id1) + "." + uniqueName
 
                 self.non_targets.append(uniqueName)
                 obj = Parachute(world=self, name=uniqueName, textureName=goodGuy,
@@ -181,51 +188,51 @@ class Game(Element):
                 obj.ignoreHit = True
                 self.parachutes[uniqueName] = obj
 
-        #targetnames = self.currSeq  # target names
+                #targetnames = self.currSeq  # target names
 
-        # how many parachutes of each color, based on the max
-        #each = int(ceil(float(parachutesCount) / len(parConfNode.parachutes.names)) )
-        # check that 1 of each of the next 3 targets exists in upper
-        # third of the screen
-        #self.centerFirstThird = (-2*self.config.world.camera.minZ)/3.0
-        #self.firstThirdSize = self.centerFirstThird
+                # how many parachutes of each color, based on the max
+                #each = int(ceil(float(parachutesCount) / len(parConfNode.parachutes.names)) )
+                # check that 1 of each of the next 3 targets exists in upper
+                # third of the screen
+                #self.centerFirstThird = (-2*self.config.world.camera.minZ)/3.0
+                #self.firstThirdSize = self.centerFirstThird
 
-        #self.non_targets_cnt = []
+                #self.non_targets_cnt = []
 
-        #
-        #for color in parConfNode.names:
+                #
+                #for color in parConfNode.names:
 
-        #    levels = parConfNode.textures.levels
-        #    for l in levels:
+                #    levels = parConfNode.textures.levels
+                #    for l in levels:
 
-            #for i in range(6):
+                #for i in range(6):
                 # only 2 of each non-target
-        #        if (i > 2 and color not in targetnames):
-        #            pass
-        #        nameId = color + "_" + str(i)
+                #        if (i > 2 and color not in targetnames):
+                #            pass
+                #        nameId = color + "_" + str(i)
                 # creates parachute object
-        #        obj = Parachute(nameId, p, self, self.posGen, falltime, parConfNode.scale, not self.isReplay)
+                #        obj = Parachute(nameId, p, self, self.posGen, falltime, parConfNode.scale, not self.isReplay)
 
-        #        obj.modelNP.reparentTo(self.sceneNP)
-        #        self.parachutes[nameId] = obj
+                #        obj.modelNP.reparentTo(self.sceneNP)
+                #        self.parachutes[nameId] = obj
 
                 # improve this registration on events
-        #        lm.register(obj, ["CYCLE"])
+                #        lm.register(obj, ["CYCLE"])
 
-        #        if (color not in targetnames):
-        #            obj.isTarget = False
-        #            obj.ignoreHit = True
-        #            self.non_targets[nameId] = obj
-        #            if (color not in self.non_targets_cnt):
-        #                self.non_targets_cnt.append(color)
-        #        else:
-        #            self.targets[nameId] = obj
-        #            obj.isTarget = True
-        #            obj.ignoreHit = False
+                #        if (color not in targetnames):
+                #            obj.isTarget = False
+                #            obj.ignoreHit = True
+                #            self.non_targets[nameId] = obj
+                #            if (color not in self.non_targets_cnt):
+                #                self.non_targets_cnt.append(color)
+                #        else:
+                #            self.targets[nameId] = obj
+                #            obj.isTarget = True
+                #            obj.ignoreHit = False
 
-        # DON'T NEED THE LIST ANYMORE!, just replace it with length.
-        #self.non_targets_cnt = len(self.non_targets_cnt)
-        #self.lodManager = lm
+                # DON'T NEED THE LIST ANYMORE!, just replace it with length.
+                #self.non_targets_cnt = len(self.non_targets_cnt)
+                #self.lodManager = lm
 
     #=============================================
 
@@ -279,25 +286,25 @@ class Game(Element):
 
         if self.lastEyeSample:
             eyesample = "[%.3f,%.3f]\n" % (self.lastEyeSample[0], self.lastEyeSample[1])
-            self.replayLog.logEvent("E:"+eyesample, curr_t)
+            self.replayLog.logEvent("E:" + eyesample, curr_t)
 
         # grab all parachutes (name,value) and save their position
-        for p_name,par in self.parachutes.items():
+        for p_name, par in self.parachutes.items():
             np = par.modelNP
-            if (np.getX() != -1000 and par.hitted==False ):
-                position = "[\'%s\',%.3f,%.3f,%.3f]\n" % (p_name,np.getX(),np.getY(),np.getZ())
-                self.replayLog.logEvent("P:" + position ,curr_t)
+            if (np.getX() != -1000 and par.hitted == False ):
+                position = "[\'%s\',%.3f,%.3f,%.3f]\n" % (p_name, np.getX(), np.getY(), np.getZ())
+                self.replayLog.logEvent("P:" + position, curr_t)
         # grab heading and pitch of the cannon
         hpr = self.cannon.getHpr()
         if (self.lastHpr != hpr):
-            hpr_str = "[%.3f,%.3f]\n" % (hpr[0],hpr[1])
-            self.replayLog.logEvent("C:" + hpr_str ,curr_t)
+            hpr_str = "[%.3f,%.3f]\n" % (hpr[0], hpr[1])
+            self.replayLog.logEvent("C:" + hpr_str, curr_t)
             self.lastHpr = hpr
 
         crossPos = self.crosshairNP.getPos()
         if (self.lastCrossHairPos != crossPos):
-            crossPos_str = "[%.3f,%.3f,%.3f]\n" % (crossPos[0],crossPos[1],crossPos[2])
-            self.replayLog.logEvent("T:" + crossPos_str ,curr_t)
+            crossPos_str = "[%.3f,%.3f,%.3f]\n" % (crossPos[0], crossPos[1], crossPos[2])
+            self.replayLog.logEvent("T:" + crossPos_str, curr_t)
             self.lastCrossHairPos = crossPos
 
 
@@ -313,35 +320,35 @@ class Game(Element):
     def moveCannon(self, howmuch):
         """convert value howmuch to float and move the cannon that amount"""
         try:
-          howmuch = float(howmuch)
+            howmuch = float(howmuch)
         except:
-          printOut("Error: Cannot convert value to float: %s" %howmuch, 0)
-          howmuch = 0.0
+            printOut("Error: Cannot convert value to float: %s" % howmuch, 0)
+            howmuch = 0.0
 
         try:
-            self._tempZ=self._tempZ+howmuch
+            self._tempZ = self._tempZ + howmuch
         except:
             # we get here for an attribute error on _tempZ, therefore
             # _tempZ and _origZ don't exist !!
-            self._tempZ=0.0
-            self._origZ=self.cannonNP.getZ()
+            self._tempZ = 0.0
+            self._origZ = self.cannonNP.getZ()
 
-        printOut("adjusting Cannon Height to: %f" % (self._origZ+self._tempZ), 0)
-        self.cannonNP.setZ( self._origZ + self._tempZ )
+        printOut("adjusting Cannon Height to: %f" % (self._origZ + self._tempZ), 0)
+        self.cannonNP.setZ(self._origZ + self._tempZ)
 
     def setupCannonKeys(self):
         """ some additional key bindings"""
         k = self.kbd
 
-        keyValue={'j':[0],'j-up':[4],
-                  'l':[1],'l-up':[5],
-                  'i':[2],'i-up':[6],
-                  'k':[3],'k-up':[7]}
-        for key,value in keyValue.items():
-            k.registerKey(key, self.config.name, self.arrowKey,"",False,value,False)
+        keyValue = {'j': [0], 'j-up': [4],
+                    'l': [1], 'l-up': [5],
+                    'i': [2], 'i-up': [6],
+                    'k': [3], 'k-up': [7]}
+        for key, value in keyValue.items():
+            k.registerKey(key, self.config.name, self.arrowKey, "", False, value, False)
             self.registeredKeys.append(key)
 
-        k.registerKey("w", self.config.name, self.shoot,"shoot!", False,[],False)
+        k.registerKey("w", self.config.name, self.shoot, "shoot!", False, [], False)
         self.registeredKeys.append("w")
 
     #=============================================
@@ -352,7 +359,7 @@ class Game(Element):
         bad = list(set(self.config.parachutes.targets))
         bad = map(str.upper, bad)
         self.targetGuideHUDLeft = targetGuide(bad, 'left',
-                                   self.config.parachutes.targetsLabel)
+                                              self.config.parachutes.targetsLabel)
 
         self.targetGuideHUDLeft.targetsNP.reparentTo(self.hudNP)
 
@@ -410,16 +417,15 @@ class Game(Element):
         # HIPOTHENUSE of the triangle from camera to parDistCam
         hip = self.config.parDistCam / cos(fovRads / 2)
         # Minimum X value within the viewing volume
-        minX = -hip*sin(fovRads/2.0)
-        minZ = cam.ratio-hip*sin(fovRads/2.0)
-
+        minX = -hip * sin(fovRads / 2.0)
+        minZ = cam.ratio - hip * sin(fovRads / 2.0)
 
         Ypos = cam.pos[1] + self.config.parDistCam
         maxPar = self.config.parachutes.simultaneous
         self.posGen = PositionGenerator(
-                      topLeft=Vec3(minX, Ypos, -minZ),
-                      topRight=Vec3(-minX, Ypos, -minZ),
-                      memory=maxPar, world=self )
+            topLeft=Vec3(minX, Ypos, -minZ),
+            topRight=Vec3(-minX, Ypos, -minZ),
+            memory=maxPar, world=self)
 
         # number of cycles after changing quality
         self.cycles = 0
@@ -436,7 +442,7 @@ class Game(Element):
         base.enableParticles()
         # enables collisions
         if not self.isReplay:
-             self.setupCollisions()
+            self.setupCollisions()
         # sets up the HUD for the targets
         self.setupTargetsHUD()
         # sets up the HUD for the points
@@ -463,7 +469,8 @@ class Game(Element):
 
         self.currController = 0
         self.controllers = [self.setChByKeyboard,
-                            self.setChByMouse]
+                            self.setChByMouse,
+                            self.setChByTracker]
 
         # try to read pointsToEnd the game, if not set then
         # set it to 200 points and finish.
@@ -478,10 +485,10 @@ class Game(Element):
         # sets up a plane to test hits against the mouse...
         # this is used to control the crosshair with the mouse.
         distance = self.config.shooter.focusplane
-        self.hitPlane = Plane(Vec3(0,1,0), Point3(0,distance,0))
+        self.hitPlane = Plane(Vec3(0, 1, 0), Point3(0, distance, 0))
         cm = CardMaker("hitting plane")
-        cm.setFrame(-100,100,-100,100)
-        self.sceneNP.attachNewNode(cm.generate()).lookAt(0,-1,0)
+        cm.setFrame(-100, 100, -100, 100)
+        self.sceneNP.attachNewNode(cm.generate()).lookAt(0, -1, 0)
 
     def setupSounds(self):
         """
@@ -500,25 +507,25 @@ class Game(Element):
             self.sounds[s.id].setVolume(float(s.vol))
         return
 
-    def playSound(self,snd):
+    def playSound(self, snd):
         """
         basic function to play sounds based on a dictionary
         of sound objects.
         """
         if (self.sndEnabled):
-          try:
-            self.sounds[snd].play()
-          except KeyError:
-            printOut("Trying to play sound, unknown sound: %s"%snd,0)
-            pass
-          except Exception,e:
-            printOut("Trying to play sound, unknown error",0)
-            print e
+            try:
+                self.sounds[snd].play()
+            except KeyError:
+                printOut("Trying to play sound, unknown sound: %s" % snd, 0)
+                pass
+            except Exception, e:
+                printOut("Trying to play sound, unknown error", 0)
+                print e
 
     def setupPointsHUD(self):
         r = self.config.world.camera.ratio
         self.pointsHUD = pointsHUD(self.config.pointsHUD,
-                                   Vec3(-r+0.05,0,0.90))
+                                   Vec3(-r + 0.05, 0, 0.90))
         self.pointsHUD.getNP().reparentTo(self.hudNP)
         self.setPoints(0)
 
@@ -533,34 +540,39 @@ class Game(Element):
         # base.cTrav.showCollisions(render)
         return
 
-    
+
     #=============================================
     # CHANGE HOW WE CONTROL THE CROSSHAIR
     #=============================================
     def changeCrossHairControl(self):
+        """
+        Wraps around the existing cross hair controllers in the list self.controllers
+        :return:
+        """
         self.currController = (self.currController + 1) % len(self.controllers)
         self.controllers[self.currController]()
 
     def setChByTracker(self):
         self.chController = 'tracker'
         taskMgr.remove("chController")
-        # start tracking
-        # self.config.world.tracker.track()
         taskMgr.add(self.crossHairTracker, "chController", sort=2)
-        self.config.world.accept("mouse1", self.shoot,[])
-        printOut("Adding task to control crosshair using the EyeTracker",0)
+        self.config.world.accept("mouse1", self.shoot, [])
+        printOut("Adding task to control crosshair using the EyeTracker", 0)
 
     def setChByKeyboard(self):
         self.chController = 'keyboard'
         taskMgr.remove("chController")
         taskMgr.add(self.crossHairKeyboard, "chController", sort=2)
+        printOut("Adding task to control crosshair using the keyboard", 0)
         #self.config.world.ignore('mouse1-down')
 
     def setChByMouse(self):
         self.chController = 'mouse'
         taskMgr.remove("chController")
         taskMgr.add(self.crossHairMouse, "chController", sort=2)
-        self.config.world.accept("mouse1", self.shoot,[])
+        self.config.world.accept("mouse1", self.shoot, [])
+        printOut("Adding task to control crosshair using the mouse", 0)
+
     #=============================================
 
     def startGame(self):
@@ -568,7 +580,7 @@ class Game(Element):
         starts the game loop
         """
         # put crosshair in the middle of the screen
-        self.aimAtXY(0.0,0.0)
+        self.aimAtXY(0.0, 0.0)
         # set cross hair controller (keyboard)
         shooter = self.config.shooter
 
@@ -597,13 +609,13 @@ class Game(Element):
         return
 
 
-    def aimAtXY(self,x,y):
+    def aimAtXY(self, x, y):
         """Generic function that moves the chrosshairNP to
         the XY position on screen and rotates the cannon
         accordingly"""
 
         # where is the cross hair on the screen
-        pos = Point2(x,y)
+        pos = Point2(x, y)
         pos3d = Point3()
 
         # frustrum points
@@ -611,13 +623,12 @@ class Game(Element):
         farPoint = Point3()
         base.camLens.extrude(pos, nearPoint, farPoint)
         if (self.hitPlane.intersectsLine(pos3d,
-                              render.getRelativePoint(camera,nearPoint),
-                              render.getRelativePoint(camera,farPoint))):
-
+                                         render.getRelativePoint(camera, nearPoint),
+                                         render.getRelativePoint(camera, farPoint))):
             #print "intersection at: ", pos3d
             self.crosshairNP.setX(pos3d.getX())
             # 5 is the limit to not go below the ground with the crosshair.
-            self.crosshairNP.setZ(max(pos3d.getZ(),-45.0))
+            self.crosshairNP.setZ(max(pos3d.getZ(), -45.0))
             #self.crosshairNP.setZ(pos3d.getZ())
             # print self.crosshairNP.getZ()
             # set here the crosshair...
@@ -630,40 +641,49 @@ class Game(Element):
         # assume 45 degrees is the maximum Heading angle of the turret
         # make Z between [-1,1] approx
         #print "Z:" + str(self.crosshairNP.getZ())
-        normZ = (self.crosshairNP.getZ() + 45.0) / (80.0+45.0)
+        normZ = (self.crosshairNP.getZ() + 45.0) / (80.0 + 45.0)
         #print "normZ:" + str(normZ)
         newP = -normZ * 25.0
         self.cannon.setP(newP)
         #self.cannon.setP(0)
+
     #=============================================
     #=============================================
     # TASKS
 
-    def crossHairMouse(self,task):
+    def crossHairMouse(self, task):
         if base.mouseWatcherNode.hasMouse():
             mpos = base.mouseWatcherNode.getMouse()
-            self.cursorX,self.cursorY = mpos
-            self.aimAtXY(mpos.x,mpos.y)
+            self.cursorX, self.cursorY = mpos
+            self.aimAtXY(mpos.x, mpos.y)
+            print mpos.x,mpos.y
         return task.again
 
-    def crossHairTracker(self,task):
+    def crossHairTracker(self, task):
         #printOut("at crosshairTracker",0)
         # sample is a (x,y) tuple
-        sample = self.config.world.tracker.readGazeSample()
+
+        # read samples from the eyetracker -- returns a LIST of TUPLES
+        samples = self.config.eyeTracker.readGaze(5)
+        avgx = sum([x[0][0] for x in samples]) / 5
+        avgy = sum([y[0][1] for y in samples]) / 5
+        #sample,timestamp = self.config.eyeTracker.readGaze()[0]
         # tracker.trackerWinSize is (X,Y,W,H)
-        tws = self.config.world.tracker.trackerWinSize
-        if sample:
+        #tws = self.config.world.tracker.trackerWinSize
+        #if sample:
             # map gaze sample to Panda screen coordinates
             # assume that both windows share the same top-left
             # origins (or full-screen)
-            normSample = ((sample[0] / tws[2])*2 - 1, (sample[1] / tws[3])*2 - 1)
-            self.lastEyeSample = normSample
+        #    normSample = ((sample[0] / tws[2]) * 2 - 1, (sample[1] / tws[3]) * 2 - 1)
+        #    self.lastEyeSample = normSample
             # INVERT Y coordinate because OpenFrameWorks uses different convention.
-            self.aimAtXY(normSample[0], -normSample[1])
-        else:
-            print "sample is None!"
+        #    self.aimAtXY(normSample[0], -normSample[1])
+        #else:
+        #    print "sample is None!"
+        print avgx, avgy
+        self.aimAtXY( avgx * 2.0 - 1.0, avgy * -2.0 + 1.0 )
         return task.again
- 
+
     def crossHairKeyboard(self, t):
         """
         updates cross hair and cannon using arrow keys
@@ -681,30 +701,30 @@ class Game(Element):
         #        'l-up':[5],'i':[2],'i-up':[6],
         #        'k':[3],'k-up':[7]}
 
-        dx = (-self.mapkeys[0]*s + self.mapkeys[1]*s)
-        dz = (self.mapkeys[2]*s - self.mapkeys[3]*s)
+        dx = (-self.mapkeys[0] * s + self.mapkeys[1] * s)
+        dz = (self.mapkeys[2] * s - self.mapkeys[3] * s)
 
-        self.cursorX = min(1,max(self.cursorX + dx, -1.0))
-        self.cursorY = min(1,max(self.cursorY + dz, -0.55))
+        self.cursorX = min(1, max(self.cursorX + dx, -1.0))
+        self.cursorY = min(1, max(self.cursorY + dz, -0.55))
         self.aimAtXY(self.cursorX, self.cursorY)
         return Task.cont
 
-#        if ((dx > 0 and hpr[0] > 135) or (dx < 0 and hpr[0] < 225)):
-#            self.crosshairNP.setX(self.crosshairNP.getX()+dx)
-#            # assume 45 degrees is the maximum Heading angle of the turret
-#            newH = 180.0 - (self.crosshairNP.getX() * 45 / 137)
-#            self.cannon.setH(newH)
-#            # CONDITIONAL LOG
-#            self.replayLog.logEvent("L:"+str(newH)+"\n",ts)
-#        if ((dz < 0 and hpr[1] < 15.0) or (dz > 0 and hpr[1] > -45)):
-#            self.crosshairNP.setZ(self.crosshairNP.getZ()+dz)
-#            # assume 45 degrees is the maximum Heading angle of the turret
-#            newP = -self.crosshairNP.getZ() * 45 / 180
-#            self.cannon.setP(newP)
-#
-#            # CONDITIONAL LOG
-#            self.replayLog.logEvent("M:"+str(newP)+"\n",ts)
-#        return Task.cont
+    #        if ((dx > 0 and hpr[0] > 135) or (dx < 0 and hpr[0] < 225)):
+    #            self.crosshairNP.setX(self.crosshairNP.getX()+dx)
+    #            # assume 45 degrees is the maximum Heading angle of the turret
+    #            newH = 180.0 - (self.crosshairNP.getX() * 45 / 137)
+    #            self.cannon.setH(newH)
+    #            # CONDITIONAL LOG
+    #            self.replayLog.logEvent("L:"+str(newH)+"\n",ts)
+    #        if ((dz < 0 and hpr[1] < 15.0) or (dz > 0 and hpr[1] > -45)):
+    #            self.crosshairNP.setZ(self.crosshairNP.getZ()+dz)
+    #            # assume 45 degrees is the maximum Heading angle of the turret
+    #            newP = -self.crosshairNP.getZ() * 45 / 180
+    #            self.cannon.setP(newP)
+    #
+    #            # CONDITIONAL LOG
+    #            self.replayLog.logEvent("M:"+str(newP)+"\n",ts)
+    #        return Task.cont
 
     def addParachutes(self, t):
         """this is the most consuming task of the game, which
@@ -735,14 +755,14 @@ class Game(Element):
                 self.parachutes[p] = v
                 toRemove.append(p)
         for p in toRemove:
-            del(self.parachutesFalling[p])
+            del (self.parachutesFalling[p])
         # FROM THIS POINT, each parachute is the right Dictionary.
 
 
         # list of parachutes for which I have found a free position
         willStartFallingNow = []
 
-        for p,v in self.parachutes.items():
+        for p, v in self.parachutes.items():
             # starting position is always above the camera
             # for 250.0 of pardistcam, with +85 in Z we can
             # hide it
@@ -752,65 +772,65 @@ class Game(Element):
             for i in range(1, 10):
                 if found:
                     break
-                pos = Vec3(randint(-100,100),self.config.parDistCam,randint(80,100))
+                pos = Vec3(randint(-100, 100), self.config.parDistCam, randint(80, 100))
                 for fv in \
-                    self.parachutesFalling.values() + willStartFallingNow:
-                        if (pos - fv.modelNP.getPos()).\
-                            lengthSquared() < (40*40):
-                            # finding ONE is enough
-                            break
+                                self.parachutesFalling.values() + willStartFallingNow:
+                    if (pos - fv.modelNP.getPos()). \
+                            lengthSquared() < (40 * 40):
+                        # finding ONE is enough
+                        break
                 else:
                     # Found a spot which is distant enough from
                     # the other falling (or to fall) parachutes.
                     found = True
-                    v.newPos(x=pos[0],y=pos[1],z=pos[2],forced=True)
+                    v.newPos(x=pos[0], y=pos[1], z=pos[2], forced=True)
                     willStartFallingNow.append(v)
 
         for w in willStartFallingNow:
             self.parachutesFalling[w.name] = w
-            del(self.parachutes[w.name])
+            del (self.parachutes[w.name])
             w.start()
 
         return Task.cont
 
-#        for n in self.nextThreeTargets:
-#            coveredBy = None
-#            candidates= []
-#            for k,v in self.targets.items():
-#                if (n in k and not v.falling):
-#                    candidates.append(k)
-#                else:
-#                    if ((n in k) and (k not in needNoMoreTargets)):
-#                        pos = v.modelNP.getPos()
-#                        if (v.falling and pos.getZ() > 70.0):
-#                            needNoMoreTargets.append(k)
-#                            coveredBy = (k,v)
-#                            break
-#            if (coveredBy == None and len(candidates)>0):
-#                if (self.targets[candidates[0]].newPos(0) == 1):
-#                    self.targets[candidates[0]].start()
-#            if (len(needNoMoreTargets) == 3): break
-#
-#        counter = 0
-#        ky = self.non_targets.keys()
-#        shuffle(ky)
-#        active = 0
-#
-#        for a in self.non_targets.values():
-#            if (a.falling): active+=1
-#
-#        for k in ky[0:5 - len(needNoMoreTargets)]:
-#            if (active > 3*self.non_targets_cnt):
-#                return Task.cont
-#
-#            t = self.non_targets[k]
-#            if (not t.falling):
-#                r = t.newPos(0)
-#                if (r==1):
-#                    t.start()
-#                    active+=1
-#
-#        return Task.cont
+    #        for n in self.nextThreeTargets:
+    #            coveredBy = None
+    #            candidates= []
+    #            for k,v in self.targets.items():
+    #                if (n in k and not v.falling):
+    #                    candidates.append(k)
+    #                else:
+    #                    if ((n in k) and (k not in needNoMoreTargets)):
+    #                        pos = v.modelNP.getPos()
+    #                        if (v.falling and pos.getZ() > 70.0):
+    #                            needNoMoreTargets.append(k)
+    #                            coveredBy = (k,v)
+    #                            break
+    #            if (coveredBy == None and len(candidates)>0):
+    #                if (self.targets[candidates[0]].newPos(0) == 1):
+    #                    self.targets[candidates[0]].start()
+    #            if (len(needNoMoreTargets) == 3): break
+    #
+    #        counter = 0
+    #        ky = self.non_targets.keys()
+    #        shuffle(ky)
+    #        active = 0
+    #
+    #        for a in self.non_targets.values():
+    #            if (a.falling): active+=1
+    #
+    #        for k in ky[0:5 - len(needNoMoreTargets)]:
+    #            if (active > 3*self.non_targets_cnt):
+    #                return Task.cont
+    #
+    #            t = self.non_targets[k]
+    #            if (not t.falling):
+    #                r = t.newPos(0)
+    #                if (r==1):
+    #                    t.start()
+    #                    active+=1
+    #
+    #        return Task.cont
     #=============================================
 
     def validHit(self, par_name):
@@ -819,15 +839,15 @@ class Game(Element):
             self.addPoints(-10)
             return False
 
-        #validColor = self.currSeq[self.currentTarget]
-        #if (validColor not in par_name):
-        #    return False
-        #else:
+            #validColor = self.currSeq[self.currentTarget]
+            #if (validColor not in par_name):
+            #    return False
+            #else:
             # log for replay
 
         if self.replayLog:
             ts = time.time()
-            self.replayLog.logEvent("H:[\'"+par_name+"\']\n",ts)
+            self.replayLog.logEvent("H:[\'" + par_name + "\']\n", ts)
             # good hit, advance arrow
             # self.targetGuideHUD.advanceArrow()
             #self.replayLog.logEvent("A: %d\n" % self.targetGuideHUD.currentTarget, ts)
@@ -835,23 +855,23 @@ class Game(Element):
         self.addPoints(15)
         return True
 
-            #newTarget = (self.currentTarget+1) % len(self.currSeq)
-            # nextThreeTargets
-            # ntt = self.currSeq[newTarget:newTarget+3]
-            # did we wrap around??
-            # l = len(ntt)
-            #if (l<3):
-            #    ntt += self.currSeq[0:3-l]
-            #self.nextThreeTargets = ntt
+        #newTarget = (self.currentTarget+1) % len(self.currSeq)
+        # nextThreeTargets
+        # ntt = self.currSeq[newTarget:newTarget+3]
+        # did we wrap around??
+        # l = len(ntt)
+        #if (l<3):
+        #    ntt += self.currSeq[0:3-l]
+        #self.nextThreeTargets = ntt
 
-            # new cycle ??
-            #if (newTarget is 0):
-            #    self.cyclesTargets += 1
-            #    c = CycleEvent(self.cyclesTargets)
-            #    self.lodManager.notify(c)
+        # new cycle ??
+        #if (newTarget is 0):
+        #    self.cyclesTargets += 1
+        #    c = CycleEvent(self.cyclesTargets)
+        #    self.lodManager.notify(c)
 
-            #self.lastTarget = self.currentTarget
-            #self.currentTarget = newTarget
+        #self.lastTarget = self.currentTarget
+        #self.currentTarget = newTarget
 
     #=============================================
 
@@ -867,7 +887,7 @@ class Game(Element):
     #=============================================
 
     def addPoints(self, points):
-        self.setPoints( self.points + points )
+        self.setPoints(self.points + points)
 
     #=============================================
 
@@ -876,16 +896,16 @@ class Game(Element):
            in a particular instant"""
         pass
 
-#        temp = self.targets.items()
-#        if type_par == 'non_targets':
-#            temp = self.non_targets.items()
-#        if type_par == 'all':
-#            temp += self.non_targets.items()
-#
-#        result = []
-#        for k, v in temp:
-#            result.append(v.modelNP.getPos())
-#        return result
+    #        temp = self.targets.items()
+    #        if type_par == 'non_targets':
+    #            temp = self.non_targets.items()
+    #        if type_par == 'all':
+    #            temp += self.non_targets.items()
+    #
+    #        result = []
+    #        for k, v in temp:
+    #            result.append(v.modelNP.getPos())
+    #        return result
 
     #=============================================
 
@@ -969,14 +989,14 @@ class Game(Element):
         self.cannonSmokeNP = NodePath("smokeNP")
         self.cannonSmokeNP.reparentTo(self.cannon)
 
-        self.bullets=[]
+        self.bullets = []
         for i in range(shooter.bulletSet):
 
             bulletNP = loader.loadModel(shooter.bullet)
-            bulletNP.node().setName("bulletNode_"+str(i))
+            bulletNP.node().setName("bulletNode_" + str(i))
             bulletNP.setScale(self.bulletSize)
-            bulletNP.setName("bulletNP_"+str(i))
-            bulletNP.setColor(0.1,0.1,0.1)
+            bulletNP.setName("bulletNP_" + str(i))
+            bulletNP.setColor(0.1, 0.1, 0.1)
 
             if not self.isReplay:
                 # collision sphere solid attached to the node
@@ -984,7 +1004,7 @@ class Game(Element):
                 # the radious will change the difficulty
                 colSolid = CollisionSphere(0, 5, 0, 3.0)
                 colNP = bulletNP.attachNewNode(
-                        CollisionNode('ColNodeBullet_'+str(i)))
+                    CollisionNode('ColNodeBullet_' + str(i)))
 
                 colNP.node().addSolid(colSolid)
                 colNP.node().setFromCollideMask(BitMask32(0x80))
@@ -996,8 +1016,8 @@ class Game(Element):
             self.bullets.append(bulletNP)
             self.bullets[-1].reparentTo(cannonNP)
 
-        self.bulletIdx=0
-        self.maxbullets=shooter.bulletSet
+        self.bulletIdx = 0
+        self.maxbullets = shooter.bulletSet
 
         t = loader.loadTexture(shooter.crosshair)
         t.setMinfilter(Texture.FTLinearMipmapLinear)
@@ -1047,24 +1067,24 @@ class Game(Element):
 
         # build projectile interval of the bullet
         proj = ProjectileInterval(self.bullets[idx],
-                     startPos=fromNode.getPos(self.sceneNP),
-                     endPos=(self.crosshairNP.getPos() + Vec3(0, 1, 0)),
-                     gravityMult=1.0,
-                     duration=self.bulletTime)
+                                  startPos=fromNode.getPos(self.sceneNP),
+                                  endPos=(self.crosshairNP.getPos() + Vec3(0, 1, 0)),
+                                  gravityMult=1.0,
+                                  duration=self.bulletTime)
 
         # this is to make the ball like the size of the cannon, and then
         # enlarge it a bit so it doesn't appear too small at distance
         resizeBullet = self.bullets[idx].scaleInterval(self.bulletTime, 1.4)
 
         # event handling to hide the ball
-        event = "hideball"+str(idx)
+        event = "hideball" + str(idx)
         proj.setDoneEvent(event)
 
         #p.reparentTo(self.bullets[idx])
         #p.start(self.bullets[idx])
         proj.acceptOnce(event, self.hideAndRemoveBullet, [self.bullets[idx]])
 
-        self.bulletIdx+=1
+        self.bulletIdx += 1
         proj.start()
         resizeBullet.start()
 
@@ -1102,7 +1122,7 @@ class Game(Element):
         if (key < 4):
             self.mapkeys[key] = 1
         else:
-            self.mapkeys[key-4] = 0
+            self.mapkeys[key - 4] = 0
 
         if (self.replayLog.logging):
             # get time stamp
@@ -1114,9 +1134,9 @@ class Game(Element):
 
     #=============================================
     def pauseFall(self):
-        for p,v in self.parachutesFalling.items():
+        for p, v in self.parachutesFalling.items():
             v.pauseFall()
 
     def unPauseFall(self):
-        for p,v in self.parachutesFalling.items():
+        for p, v in self.parachutesFalling.items():
             v.unPauseFall()

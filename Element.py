@@ -1,27 +1,31 @@
 from panda3d.core import *
+
 import sys
 from Utils.Debug import printOut
 from Utils.Utils import *
-try:
-    import json
-except ImportError:
-    import simplejson as json
+#try:
+#    import json
+#except ImportError:
+#    import simplejson as json
 
+#import external.yaml as yaml
 import yaml
 
 class Element(object):
-    """ Base class for the Elements in the experiment.
+    """
+    Base class for the Elements in the experiment.
     Each element represents ONE stage in the experiment,
     for example, one image, a text message, a timer,
     a game!, a pilot...
     """
     def __init__(self,**kwargs):
-        """
-        The constructor does a lot of work already, adding all the
-        kwargs keys to attributes to this object. Setting basic members
-        for the subclases such as the world (DirectObject), the name,
-        the 3d node in the scene and a hud node in the scene.
-    """
+        '''
+        Element constructor. Adds all kwargs as attributes. Creates some
+        useful attributes to give access to the World, and also to the
+        different scene parts (2d, 3d)
+        :param kwargs: dict
+        :return: None
+        '''
         # this changes when the state is activated.
         self.active = False
 
@@ -34,7 +38,7 @@ class Element(object):
                 dictionary = yaml.load(open(kwargs['config']))
             except Exception, e:
                 print e
-                printOut("Fatal error loading config file "+ c, 0)
+                printOut("Fatal error loading config file " + kwargs['config'], 0)
                 kwargs['world'].quit()
 
         for k, v in kwargs.items():
@@ -59,6 +63,17 @@ class Element(object):
         # make everything in the config file a simple object.
         self.config = objFromDict(dictionary)
         printOut("CONFIG LOADED FOR %s" % self.config.name, 4)
+
+        # try to set some default values, each Element subclass can define
+        # a set of default values that if not present in the config file are
+        # set here. To know the names of these values, check the constructor
+        # of each Element, the attribute "defaults"
+        if getattr(self,"defaults",False):
+            for k,v in self.defaults.items():
+                if not hasattr(self.config, k):
+                    printOut("Using default value for "+self.config.name+": "+k+" : "+str(v),0)
+                    setattr(self.config, k, v)
+
 
         # add the basic 2D and 3D nodepaths in the scenegraph for this element
         self.sceneNP = NodePath(self.config.name)
@@ -90,6 +105,7 @@ class Element(object):
         # and if anyone registered to listen for 'timeout' messages they will
         # react
         taskMgr.doMethodLater(time, self.config.world.advanceFSM, 'timeout', extraArgs=[])
+
 
 #===============================================================================
     def registerKeys(self):
@@ -204,6 +220,17 @@ class Element(object):
                     setattr(self, g, self.config.world.globals[g])
                 else:
                     setattr(self, g, globals[g])
+        # finally, there is a refsto attribute in the config file, which allows to provide a reference from
+        # one Element to another, provided that the target reference exists.
+        refs = getattr(self.config, "refsto", [])
+        el = None
+        for ref in refs:
+            if ref in self.config.world.elements:
+                el = self.config.world.elements[ref]
+                setattr(self.config,ref, el)
+            else:
+                printOut("Element %s trying to set a reference to element %s, tha latter does not exist!" %
+                         (self.config.name, ref ),0)
 
 
     def exitState(self):

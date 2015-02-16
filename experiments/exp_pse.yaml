@@ -146,6 +146,8 @@ elements:
 
  - className: Game
    name: thegame
+   # creates handy references between elements in runtime
+   refsto: ['eyeTracker']
    config: PilotData/gameConfig.yaml
    saveReplay: PilotData/run/replayLogA.txt,w
    logFile: PilotData/run/gameLogA.txt,a
@@ -196,17 +198,18 @@ elements:
       args: ['auto']
 
  - module: EyeTracker
-   className: Tobii_TCP_C_Client
+   className: Tobii_UDP_Client
    name: eyeTracker
-   logGaze: true
-   serverIp: 127.0.0.1
-   serverPort: 2345
 
 transitions:
 - trans: 'start @ IntroScreen:auto'
 - trans: 'start @ eyeTracker:auto'
-- trans: 'IntroScreen @ end: auto'
-- trans: 'eyeTracker @ end: auto'
+- trans: 'IntroScreen @ thegame: auto'
+- trans: 'IntroScreen @ countDown: auto'
+- trans: 'thegame @ end: endOfGame'
+- trans: 'countDown @ end: endOfGame'
+- trans: 'eyeTracker @ end: endOfGame'
+
 
 #- trans: 'IntroScreen @ consentForm:auto'
 #- trans: 'consentForm @ UserInfo:yesPressed'

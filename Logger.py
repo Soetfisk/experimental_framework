@@ -8,9 +8,6 @@ class Logger(object):
     def __init__(self,fileName, mode):
         "Creates a log, throws exception of error opening file"
 
-        # set this to false unless we can open the file or the
-        # name is different from 'nolog'
-        self.logging = False
         # set this to -1 until we start logging
         self.baseTime = 0.0
 
@@ -26,12 +23,15 @@ class Logger(object):
                 printOut("Warning: Failed generating log file %s" % fileName, 0)
                 printOut("Warning: Will continue, but no log will be generated", 0)
                 print e
+                self.logging = False
+        else:
+            self.logging = False
 
         if self.logging is False:
             # avoid any call to this functions with a dummy function
-            self.startLog = self._noLog
-            self.logEvent = self._noLog
-            self.stopLog  = self._noLog
+            self.startLog = self._startLog
+            self.logEvent = self._logEvent
+            self.stopLog  = self._stopLog
 
     def _noLog(self):
         pass
@@ -39,22 +39,41 @@ class Logger(object):
     def isLogging(self):
         return self.logging
 
-    def startLog(self,t):
+    def _startLog(self,t):
+        pass
+    def startLog(self,t=-1):
+        if t==-1:
+            t = time.time()
         self.baseTime = t
         # instead of writing into a file, dump all in memory, and write at the end
         self.logStarted=True
 
-    def logEvent(self,event, ts):
+    def _logEvent(self, event, ts):
+        pass
+
+    def writeln(self, text):
+        """
+        Writes a line of text without a timestamp in the log file
+        :param text: str
+        :return: None
+        """
+        self.logList.append(text+'\n')
+        return
+
+    def logEvent(self,event, ts=-1):
         """Logs a single event, with a timestamp with
         5 fractional digits of precision
         An event is a timestamp, a colon (:), an event
         key and arguments or extra description of the event
         if necessary"""
         # format output...
-        ts2 = "%7.3f:" % (ts - self.baseTime)
-        new_line = ts2+event
-        self.logList.append(new_line)
+        if (ts==-1):
+            ts = time.time()
 
+        self.logList.append("%7.4f:%s" % (ts - self.baseTime, event))
+
+    def _stopLog(self):
+        pass
     def stopLog(self):
         self.closeLog(time.time())
 
