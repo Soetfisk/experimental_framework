@@ -494,3 +494,15 @@
  0.0000:date: Mon Feb 16 19:27:09 2015
  0.0000:game start
 105.043::EOL
+ 0.0000:==== new game participant ====
+ 0.0000:date: Fri Feb 20 18:28:17 2015
+ 0.0000:game start
+ 12.974::EOL
+ 0.0000:==== new game participant ====
+ 0.0000:date: Fri Feb 20 18:31:41 2015
+ 0.0000:game start
+ 13.806::EOL
+ 0.0000:==== new game participant ====
+ 0.0000:date: Fri Feb 20 18:39:48 2015
+ 0.0000:game start
+ 27.553::EOL

@@ -656,33 +656,25 @@ class Game(Element):
             mpos = base.mouseWatcherNode.getMouse()
             self.cursorX, self.cursorY = mpos
             self.aimAtXY(mpos.x, mpos.y)
-            print mpos.x,mpos.y
         return task.again
 
     def crossHairTracker(self, task):
-        #printOut("at crosshairTracker",0)
-        # sample is a (x,y) tuple
-
-        # read samples from the eyetracker -- returns a LIST of TUPLES
-        samples = self.config.eyeTracker.readGaze(5)
-        avgx = sum([x[0][0] for x in samples]) / 5
-        avgy = sum([y[0][1] for y in samples]) / 5
-        #sample,timestamp = self.config.eyeTracker.readGaze()[0]
-        # tracker.trackerWinSize is (X,Y,W,H)
-        #tws = self.config.world.tracker.trackerWinSize
-        #if sample:
-            # map gaze sample to Panda screen coordinates
-            # assume that both windows share the same top-left
-            # origins (or full-screen)
-        #    normSample = ((sample[0] / tws[2]) * 2 - 1, (sample[1] / tws[3]) * 2 - 1)
-        #    self.lastEyeSample = normSample
-            # INVERT Y coordinate because OpenFrameWorks uses different convention.
-        #    self.aimAtXY(normSample[0], -normSample[1])
-        #else:
-        #    print "sample is None!"
-        print avgx, avgy
-        self.aimAtXY( avgx * 2.0 - 1.0, avgy * -2.0 + 1.0 )
-        return task.again
+        try:
+            # read samples from the eyetracker -- returns a LIST of TUPLES
+            samples = self.config.eyeTracker.readGaze(5)
+            avgx = sum([x[0][0] for x in samples]) / 5
+            avgy = sum([y[0][1] for y in samples]) / 5
+            print avgx, avgy
+            self.aimAtXY( avgx * 2.0 - 1.0, avgy * -2.0 + 1.0 )
+            return task.again
+        except AttributeError,e:
+            if getattr(self.config,"eyeTracker",True):
+                # TRUE IF IT DOES NOT EXIST
+                self.setChByMouse()
+                return task.done
+        except Exception,e:
+            print e,
+            return task.again
 
     def crossHairKeyboard(self, t):
         """

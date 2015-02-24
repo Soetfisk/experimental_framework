@@ -229,7 +229,7 @@ class Element(object):
                 el = self.config.world.elements[ref]
                 setattr(self.config,ref, el)
             else:
-                printOut("Element %s trying to set a reference to element %s, tha latter does not exist!" %
+                printOut("ERROR: Element %s trying to set a reference to non-existent element %s!" %
                          (self.config.name, ref ),0)
 
 

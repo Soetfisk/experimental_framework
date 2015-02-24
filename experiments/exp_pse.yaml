@@ -203,12 +203,12 @@ elements:
 
 transitions:
 - trans: 'start @ IntroScreen:auto'
-- trans: 'start @ eyeTracker:auto'
+#- trans: 'start @ eyeTracker:auto'
 - trans: 'IntroScreen @ thegame: auto'
 - trans: 'IntroScreen @ countDown: auto'
 - trans: 'thegame @ end: endOfGame'
 - trans: 'countDown @ end: endOfGame'
-- trans: 'eyeTracker @ end: endOfGame'
+#- trans: 'eyeTracker @ end: endOfGame'
 
 
 #- trans: 'IntroScreen @ consentForm:auto'
