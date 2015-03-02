@@ -4,7 +4,7 @@ import Utils.Debug as debug
 import time
 
 def printUsage():
-    print "Usage: ppython main.py exp=experimentFile.json [debug=0] [channels=all]"
+    print "Usage: ppython main.py exp=experimentFile.yaml [debug=0] [channels=all]"
     sys.exit()
 
 if __name__=='__main__':

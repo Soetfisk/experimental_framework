@@ -306,6 +306,10 @@ class Parachute(DirectObject):
 
     def finishedPreFall(self):
         # dissapear!
+        # ignore hits NOW
+        self.ignoreHit = True
+
+
         #printOut("Node position: %f,%f,%f" %(self.modelNP.getX(),self.modelNP.getY(),self.modelNP.getZ()),0)
         #printOut("Node scale: %f" % (self.modelNP.getScale()[0]), 0)
         fadeOut = LerpFunctionInterval(self.modelNP.setAlphaScale,
