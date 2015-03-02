@@ -47,7 +47,7 @@ class HUDCountDown(HUDText):
         # super class enterState
         HUDText.enterState(self)
         # I WANT THIS NODE TO BE ALWAYS ON TOP
-        self.log("Starting count down timer: " + self.config.name)
+        self.log("Starting count down timer: %s\n" % self.config.name)
         taskMgr.add(self.delayStart, "delayStart", sort=2)
         # is it visible??
         if (self.config.hide):

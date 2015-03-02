@@ -77,11 +77,15 @@ class Logger(object):
     def stopLog(self):
         self.closeLog(time.time())
 
-    def closeLog(self, ts):
+    def closeLog(self, ts=-1):
+        if (ts == -1):
+            ts = time.time()
+
         if (self.baseTime==-1):
             printOut("Warning: closing log before starting the timers",1)
             printOut("Warning: timestamps will not make sense",1)
             self.baseTime=0
+
 
         #print "Closing log on " + str(self.outfile)
         ts2 = ts - self.baseTime

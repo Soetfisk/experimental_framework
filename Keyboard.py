@@ -8,8 +8,12 @@ class Keyboard():
     """
 
     def __init__(self, msn):
-        """ Receives a reference to the messenger object in Panda3D,
-        and uses it to register/remove keyboard callbacks"""
+        '''
+        Constructor for the keyboard class
+        World is an instance of DirectObject so it can use accept to register to messages.
+        :param msn: World
+        :return: None
+        '''
         self.msn = msn
         self.data = {}
         self._keysOrder = []

@@ -45,8 +45,8 @@ class HUDTimer(HUDText):
     def exitState(self):
         # print "leaving state ScreenText"
         taskMgr.remove("onScreenTimer")
-        self.log("Stopping timer: " + self.config.name)
-        self.log("Time elapsed: " + str(self.timeElapsed))
+        self.log("Stopping timer: %s\n" % self.config.name)
+        self.log("Time elapsed: %s\n" % str(self.timeElapsed))
         HUDText.exitState(self)
 
     def updateTimer(self, task):

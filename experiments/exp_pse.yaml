@@ -201,13 +201,19 @@ elements:
    className: Tobii_UDP_Client
    name: eyeTracker
 
+ - module: EventLogger
+   className: EventLogger
+   name: eventLogger
+
 transitions:
 - trans: 'start @ IntroScreen:auto'
+- trans: 'start @ eventLogger:auto'
 #- trans: 'start @ eyeTracker:auto'
 - trans: 'IntroScreen @ thegame: auto'
 - trans: 'IntroScreen @ countDown: auto'
 - trans: 'thegame @ end: endOfGame'
 - trans: 'countDown @ end: endOfGame'
+- trans: 'eventLogger @ end: endOfGame'
 #- trans: 'eyeTracker @ end: endOfGame'
 
 

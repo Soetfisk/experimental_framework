@@ -125,13 +125,13 @@ class ImageQuery(Element):
                     self.rechecking = True
                     self.imageNodes = self.recheck
                     self.recheck = []
-                    self.log("Image query not OK, rechecking")
+                    self.log("Image query not OK, rechecking\n")
                 else:
-                    self.log("Image query not OK")
+                    self.log("Image query not OK\n")
                     self.sendMessage("imageQueryBad")
                     return
             else:
-                self.log("Image query ok")
+                self.log("Image query ok\n")
                 self.sendMessage("imageQueryOk")
                 return
 
