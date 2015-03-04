@@ -615,6 +615,7 @@ class Game(Element):
         accordingly"""
 
         # where is the cross hair on the screen
+        messenger.send('crossHair',sentArgs=[(x,y)])
         pos = Point2(x, y)
         pos3d = Point3()
 
