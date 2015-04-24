@@ -11,7 +11,7 @@ elements:
 ####################################
  - className: EmptyState
    name: start
-   timeout: 2.0
+   timeout: 5.0
 
  - className: EmptyState
    name: end
@@ -207,13 +207,22 @@ elements:
 
 transitions:
 - trans: 'start @ IntroScreen:auto'
-- trans: 'start @ eventLogger:auto'
+- trans: 'IntroScreen @ consentForm:auto'
+- trans: 'consentForm @ UserInfo:yesPressed'
+- trans: 'consentForm @ end:noPressed'
+- trans: 'UserInfo @ colourBlindText:nextPressed'
+- trans: 'colourBlindText @ colourBlindCheck:auto'
+- trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
+- trans: 'colourBlindProblem @ end:auto'
+
+
+#- trans: 'start @ eventLogger:auto'
 #- trans: 'start @ eyeTracker:auto'
-- trans: 'IntroScreen @ thegame: auto'
-- trans: 'IntroScreen @ countDown: auto'
-- trans: 'thegame @ end: endOfGame'
-- trans: 'countDown @ end: endOfGame'
-- trans: 'eventLogger @ end: endOfGame'
+#- trans: 'IntroScreen @ thegame: auto'
+#- trans: 'IntroScreen @ countDown: auto'
+#- trans: 'thegame @ end: endOfGame'
+#- trans: 'countDown @ end: endOfGame'
+#- trans: 'eventLogger @ end: endOfGame'
 #- trans: 'eyeTracker @ end: endOfGame'
 
 
