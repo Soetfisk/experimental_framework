@@ -226,13 +226,10 @@ elements:
 
 transitions:
 - trans: 'start @ selectionImage:auto'
-#- trans: 'IntroScreen @ consentForm:auto'
-#- trans: 'consentForm @ UserInfo:yesPressed'
-#- trans: 'consentForm @ end:noPressed'
-#- trans: 'UserInfo @ colourBlindText:nextPressed'
-#- trans: 'colourBlindText @ colourBlindCheck:auto'
-#- trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
-- trans: 'selectionImage @ end:auto'
+- trans: 'selectionImage @ colourBlindText:auto'
+- trans: 'colourBlindText @ colourBlindCheck:auto'
+- trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
+- trans: 'colourBlindCheck @ end:imageQueryOk'
 
 
 #- trans: 'start @ eventLogger:auto'

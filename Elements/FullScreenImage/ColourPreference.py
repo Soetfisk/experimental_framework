@@ -121,7 +121,8 @@ class ColourPreference(Element):
 
         self.config.world.log.logEvent(currentPair+"\n")
 
-        self.displayPair(self.currentPair+1, True)
+        if len(self.config.pairs) > self.currentPair+1:
+            self.displayPair(self.currentPair+1, True)
 
     def displayPair(self, which, flip):
 
