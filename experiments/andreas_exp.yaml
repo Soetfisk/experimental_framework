@@ -1,0 +1,81 @@
+elements:
+
+# The order in which classes are defined is not important, the FSM transitions
+# are going to define what is executed and in what order.
+# Elements will not be initialized if they are not listed as transitions at the
+# end.
+
+####################################
+# Initial and final states in the FSM.
+####################################
+ - className: EmptyState
+   name: start
+   timeout: 1.0
+
+ - className: EmptyState
+   name: end
+####################################
+# Text display elements.
+####################################
+
+ # introduction to the experiment
+ - className: ScreenText
+   name: IntroScreen
+   plain_text: PilotData/introPilot.txt
+   # some keybindings defined in a separate YAML
+   config: PilotData/introScreen.yaml
+
+ - className: ScreenText
+   name: colourBlindText
+   plain_text: PilotData/colourBlindText.txt
+   # example defining the keybindings directly here
+   keys:
+    - key: escape
+      callback: sendMessage
+      args: ['auto']
+
+ - className: ScreenText
+   name: colourBlindProblem
+   plain_text: PilotData/colourBlindProblem.txt
+
+ - module: FullScreenImage
+   className: ColourPreference
+   name: selectionImage
+   pairs: [[plate1,plate2],[plate1,plate3]]
+   scale: [0.4,0.4]
+   keys:
+    - key: arrow_left
+      callback: imageSelected
+      once: false
+      args: ['left']
+    - key: arrow_right
+      callback: imageSelected
+      once: false
+      args: ['right']
+
+# Very specific Element, for testing for Colour Blindness
+ - module: FullScreenImage
+   className: ImageQuery
+   name: colourBlindCheck
+   imageNameStr: PilotData/colorblind/plate%d.png
+#   imageStrArgs: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
+   imageStrArgs: [1,2,3]
+#   imageAnswers: [12,8,6,29,57,5,3,15,74,2,6,97,45,5,7,16,73]
+   imageAnswers: [12,8,6]
+   images: exp range(1,39)
+   scale: [0.5,0.5]
+   myAttr: 123
+   keys:
+    - key: n
+      callback: nextImage
+      once: false
+
+transitions:
+- trans: 'start @ selectionImage:auto'
+- trans: 'selectionImage @ end:auto'
+#- trans: 'IntroScreen @ consentForm:auto'
+#- trans: 'consentForm @ UserInfo:yesPressed'
+#- trans: 'consentForm @ end:noPressed'
+#- trans: 'UserInfo @ colourBlindText:nextPressed'
+#- trans: 'colourBlindText @ colourBlindCheck:auto'
+#- trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
