@@ -110,7 +110,17 @@ class ColourPreference(Element):
 
     def imageSelected(self,args):
         # save the choice in a list or a file.
-        print "Selected " + args
+
+        pair = self.config.pairs[self.currentPair]
+
+        selection = pair[0]
+        if (args == 'right'):
+            selection = pair[1]
+
+        currentPair = "Selected {s} from {p[0]} -- {p[1]}".format(p = pair, s=selection)
+
+        self.config.world.log.logEvent(currentPair+"\n")
+
         self.displayPair(self.currentPair+1, True)
 
     def displayPair(self, which, flip):
