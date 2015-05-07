@@ -241,10 +241,6 @@ transitions:
 #- trans: 'IntroScreen @ countDown: auto'
 #- trans: 'thegame @ end: endOfGame'
 #- trans: 'countDown @ end: endOfGame'
-#- trans: 'eventLogger @ end: endOfGame'
-#- trans: 'eyeTracker @ end: endOfGame'
-
-
 #- trans: 'IntroScreen @ consentForm:auto'
 #- trans: 'consentForm @ UserInfo:yesPressed'
 #- trans: 'consentForm @ end:noPressed'

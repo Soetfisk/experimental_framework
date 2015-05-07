@@ -4,8 +4,7 @@
     <content url="file://C:/Panda3D-1.8.1/direct" />
     <content url="file://C:/Panda3D-1.8.1/pandac" />
     <content url="file://$MODULE_DIR$" />
-    <orderEntry type="jdk" jdkName="Python 2.7.3 (C:\Panda3D-1.8.1\python\python.exe)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 2.7.5 (C:\Panda3D-1.9.0-x64\python\python.exe)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
-
