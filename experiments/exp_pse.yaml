@@ -11,7 +11,7 @@ elements:
 ####################################
  - className: EmptyState
    name: start
-   timeout: 2.0
+   timeout: 1.0
 
  - className: EmptyState
    name: end
@@ -112,6 +112,24 @@ elements:
       args: ['this is a result']
 
 
+ - module: FullScreenImage
+   className: ColourPreference
+   name: selectionImage
+   pairs: [[plate1,plate2],[plate1,plate3]]
+   scale: [0.4,0.4]
+   keys:
+    - key: arrow_left
+      callback: imageSelected
+      once: false
+      args: ['left']
+    - key: arrow_right
+      callback: imageSelected
+      once: false
+      args: ['right']
+
+
+
+
 # Very specific Element, for testing for Colour Blindness
  - module: FullScreenImage
    className: ImageQuery
@@ -123,6 +141,7 @@ elements:
    imageAnswers: [12,8,6]
    images: exp range(1,39)
    scale: [0.5,0.5]
+   myAttr: 123
    keys:
     - key: n
       callback: nextImage
@@ -206,14 +225,23 @@ elements:
    name: eventLogger
 
 transitions:
-- trans: 'start @ IntroScreen:auto'
-- trans: 'start @ eventLogger:auto'
+- trans: 'start @ selectionImage:auto'
+#- trans: 'IntroScreen @ consentForm:auto'
+#- trans: 'consentForm @ UserInfo:yesPressed'
+#- trans: 'consentForm @ end:noPressed'
+#- trans: 'UserInfo @ colourBlindText:nextPressed'
+#- trans: 'colourBlindText @ colourBlindCheck:auto'
+#- trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
+- trans: 'selectionImage @ end:auto'
+
+
+#- trans: 'start @ eventLogger:auto'
 #- trans: 'start @ eyeTracker:auto'
-- trans: 'IntroScreen @ thegame: auto'
-- trans: 'IntroScreen @ countDown: auto'
-- trans: 'thegame @ end: endOfGame'
-- trans: 'countDown @ end: endOfGame'
-- trans: 'eventLogger @ end: endOfGame'
+#- trans: 'IntroScreen @ thegame: auto'
+#- trans: 'IntroScreen @ countDown: auto'
+#- trans: 'thegame @ end: endOfGame'
+#- trans: 'countDown @ end: endOfGame'
+#- trans: 'eventLogger @ end: endOfGame'
 #- trans: 'eyeTracker @ end: endOfGame'
 
 
