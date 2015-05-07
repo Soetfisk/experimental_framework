@@ -19,6 +19,7 @@ class EmptyState(Element):
         super(EmptyState, self).__init__(**kwargs)
         self.hideElement()
 
+
     def enterState(self):
         # super class enterState
         Element.enterState(self)
