@@ -12,7 +12,6 @@ elements:
  - className: EmptyState
    name: start
    timeout: 1.0
-
  - className: EmptyState
    name: end
 
@@ -225,7 +224,7 @@ elements:
    name: eventLogger
 
 transitions:
-- trans: 'start @ selectionImage:auto'
+- trans: 'start @ selectionImage : auto'
 - trans: 'selectionImage @ colourBlindText:auto'
 - trans: 'colourBlindText @ colourBlindCheck:auto'
 - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'

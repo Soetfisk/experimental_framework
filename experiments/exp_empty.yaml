@@ -1,0 +1,12 @@
+elements:
+ - className: EmptyState
+   name: start
+   timeout: 0.0
+ - className: EmptyState
+   name: end
+ - className: EmptyState
+   name: dummy
+
+transitions:
+- trans: 'start @ dummy : auto'
+- trans: 'dummy @ end:auto'

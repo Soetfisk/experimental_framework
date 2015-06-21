@@ -232,6 +232,9 @@ class Element(object):
                 printOut("ERROR: Element %s trying to set a reference to non-existent element %s!" %
                          (self.config.name, ref ),0)
 
+    def removeElement(self):
+        self.sceneNP.detachNode()
+        self.hudNP.detachNode()
 
     def exitState(self):
         """

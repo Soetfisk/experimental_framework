@@ -46,7 +46,7 @@ class ColourPreference(Element):
             self.config.world.quit()
 
         # label text
-        label = OnscreenText( text = "text top of the screen",
+        label = OnscreenText( text = "Reload is working",
                               pos = (0,-0.7),
                               scale = .08,
                               fg= [1.0,1.0,1.0,1.0],

@@ -13,6 +13,24 @@ from one state to another
 The transitions are encoded as follows:
 {'currentState':{'event':['dest1','dest2'] } }
 """
+
+# splits a transition string into a tuple of strings (fromState,toState,event)
+def splitTransitionString(transition):
+    try:
+        if ':' in transition:
+            evt = transition.split(':')[1].strip()
+        else:
+            evt = 'auto'
+        # parse the transition "fromA @ toB : whenEvt"
+        fromState, toState = transition.split('@')
+        fromState = fromState.strip()
+        toState = toState.split(':')[0].strip()
+        return (fromState, toState, evt)
+    except:
+        printOut("Malformed transition: " + transition, 0)
+        printOut("fix the file and press ctrl+R")
+
+
 class FiniteStateMachine(object):
     def __init__(self, newTransitions, elements):
         self.transitions = newTransitions

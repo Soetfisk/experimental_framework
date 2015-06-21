@@ -14,6 +14,12 @@ global_keys:
   - key: control-m
     callback: toggleMouseCursor
     comment: Show/Hide mouse cursor
+  - key: control-r
+    callback: restartSimulation
+    comment: restartSimulation
+  - key: '1'
+    callback: testOne
+    comment: testOne
 #  - key: control-g
 #    callback: advanceFSM
 #    comment: Advance State Machine

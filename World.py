@@ -1,40 +1,33 @@
-# panda imports
+# python imports
+import sys
+import time
+from time import ctime
+
+
+# config files are in yaml
+import yaml
 
 # utility to load options from file or strings
 from pandac.PandaModules import loadPrcFileData
 # pandaConfig defines a list of options to setup Panda3D
-import pandaConfig
 
+import pandaConfig
 for o in pandaConfig.options:
     loadPrcFileData('', o)
-
-from Utils.Utils import getColors
-
-import yaml
 
 from Utils.FiniteStateMachine import *
 
 # basic Panda3D imports
-import direct.directbase.DirectStart
 from direct.showbase.DirectObject import DirectObject
 from direct.gui.OnscreenText import OnscreenText
 from panda3d.core import TextNode
 from panda3d.core import WindowProperties
-from panda3d.core import Vec4
+import direct.directbase.DirectStart
 
-# for finite state machines
-from direct.fsm.FSM import FSM
-
-# python imports
-from math import sin, cos, pi, ceil
-import sys, os
-import time
-from time import ctime
 
 # python threading for Eye-tracker
 from Tracker import Tracker
 
-# own classes imports
 # logger class
 from Logger import Logger
 # debug class
@@ -50,13 +43,46 @@ from Keyboard import Keyboard
 
 
 class World(DirectObject):
-    """Main class with all the setup and interaction configuration"""
-
     def __init__(self, experiment):
         """
-        Constructor for World class, the configuration is read
-        from the config files and the experiment file
+        empty constructor
+        just calls initialSetup(experiment)
         """
+        self.experiment = experiment
+        self.initialSetup()
+
+    def testOne(self):
+        test = {
+            'className':'ScreenText',
+            'name':'singleScreenText',
+            'plain_text':'PilotData/finalText.txt'
+        }
+        self.cleanSimulation()
+        self.initialSetup(test)
+
+    def cleanSimulation(self):
+        # clean up everything!
+        for e in self.elements.values():
+            e.removeElement()
+        self.ignoreAll()
+
+    def restartSimulation(self):
+        self.cleanSimulation()
+        self.initialSetup()
+
+    def setNewExperiment(self, fileName):
+        self.experiment = fileName
+        self.restartSimulation()
+
+    # singleConfig can be a single module/element description, in dictionary form.
+    def initialSetup(self, singleConfig = ''):
+        if singleConfig:
+            experiment = yaml.load(open("experiments/exp_empty.yaml"))
+            experiment['elements'].append(singleConfig)
+            for t in experiment['transitions']:
+                t['trans'] = t['trans'].replace('dummy',singleConfig['name'])
+        else:
+            experiment = yaml.load(open(self.experiment))
 
         # first timestamp since the whole application started
         self.baseTime = time.time()
@@ -97,28 +123,7 @@ class World(DirectObject):
         # enter into the START state
         self.elements['start'].enterState()
 
-
-    # =========================================================================================
-    # ========== FSM HANDLING =================================================================
-    #=========================================================================================
-
-    # splits a transition string into a tuple of strings (fromState,toState,event)
-    def splitTransitionString(self, transition):
-        try:
-            if ':' in transition:
-                evt = transition.split(':')[1].strip()
-            else:
-                evt = 'auto'
-            # parse the transition "fromA @ toB : whenEvt"
-            fromState, toState = transition.split('@')
-            fromState = fromState.strip()
-            toState = toState.split(':')[0].strip()
-            return (fromState, toState, evt)
-        except:
-            printOut("Malformed transition: " + transition, 0)
-            self.quit()
-
-    def setupFSM(self, experiment):
+    def setupFSM(self, exp):
         """
             Constructs a FSM where each node is one element in the
             experiment. Based on events, the FSM can be non-deterministic,
@@ -130,9 +135,9 @@ class World(DirectObject):
         """
 
         # experiment configuration, in YAML format
-        printOut("Loading yaml experiment: %s" % experiment, 2)
-        if 'yaml' in experiment:
-            exp = yaml.load(open(experiment))
+        #printOut("Loading yaml experiment: %s" % experiment, 2)
+        #if 'yaml' in experiment:
+        #    exp = yaml.load(open(experiment))
 
         fsmTransitions = {}
 
@@ -143,8 +148,6 @@ class World(DirectObject):
         except KeyError, a:
             printOut("You have to define the transitions in the YAML file", 0)
             self.quit()
-
-
 
         # list of Elements to load when the transitions have been processed.
         toLoad = []
@@ -160,34 +163,13 @@ class World(DirectObject):
                 fsmTransitions[fromNode] = {}
 
             for t in transitions:
-                (fromState, toState, evt) = self.splitTransitionString(t['trans'])
+                (fromState, toState, evt) = splitTransitionString(t['trans'])
                 if (fromState == fromNode):
                     # add child to stack
                     transitionsStack.append(toState)
                     fsmTransitions[fromState][evt] = fsmTransitions[fromState].get(evt, []) + [toState]
                     # notify the FSM when the event happens
                     self.accept(evt, self.FsmEventHandler, [evt])
-
-
-        # for t in transitions:
-        #
-        #     (fromState,toState,evt) = self.splitTransitionString(t['trans'])
-        #
-        #     # is this the first time this element is seen in the FSM
-        #     if fromState not in fsmTransitions.keys():
-        #         fsmTransitions[fromState] = {}
-        #
-        #     if evt not in fsmTransitions[fromState].keys():
-        #         # this is a list, because we want to support concurrent
-        #         # state changes.
-        #         fsmTransitions[fromState][evt] = []
-        #
-        #     # this is a list, because we want to support concurrent
-        #     fsmTransitions[fromState][evt] += [toState]
-        #     # accept a message with the event evt to jump to end
-        #     self.accept(evt, self.FsmEventHandler)
-        #     #if evt is not 'auto':
-        #         # the event handler will jump to the right state in the FSM
 
         for el in exp['elements']:
             try:
@@ -202,9 +184,16 @@ class World(DirectObject):
                 else:
                     module = className
 
-                # load the Python Module for this element
-                mod = __import__('Elements.' + module + '.' + className,
-                                 globals(), locals(), [className], -1)
+                # reload or import the Python Module for this element
+                try:
+                    reload(sys.modules['Elements.'+module])
+                    reload(sys.modules['Elements.'+module+'.'+className])
+                    mod = __import__('Elements.'+module+'.'+className,
+                                    globals(), locals(), [className], -1)
+                except Exception,e:
+                    print e
+                    mod = __import__('Elements.' + module + '.' + className,
+                                    globals(), locals(), [className], -1)
                 # get a reference to the class based on className
                 myElementClass = getattr(mod, className)
                 # build dictionary with ALL the arguments for this element
@@ -220,27 +209,7 @@ class World(DirectObject):
                 # pass keyboard reference so it can register its own keyboard
                 # events
                 state_obj.setKeyboard(self.keyboard)
-
-                # dinamically add the enter/exit methods on the FSM
-                # for this element. These methods "enterState", "exitState"
-                # have to exist in the class we are constructing.
-                # we use 'name' so each element is unique even if the
-                # class is re-used.
-                #
-                #setattr(fsm, 'enter'+name, state_obj.enterState)
-                #setattr(fsm, 'exit'+name, state_obj.exitState)
-                # keep a reference to the element by its unique NAME
-
                 self.elements[name] = state_obj
-
-                # if no CUSTOM transitions were defined
-                # add automatic transitions as a simple sequence from the file
-                #if len(transitions) == 0:
-                #    fsmTransitions[next] = {'auto': name}
-                #    next = name
-                #    # if last, add exit
-                #    if len(exp['elements']) == n+1:
-                #        fsmTransitions[next] = {'auto': 'end'}
 
             except ImportError, i:
                 printOut("Error importing module, missing file or wrong className", 0)
@@ -251,7 +220,7 @@ class World(DirectObject):
                 # if the name cannot be split in two pieces by the dot
                 #printOut("Missing or extra dots in the name of :" + s,0)
                 print v
-                sys.exit()
+                sys.quit()
             except AttributeError, e:
                 printOut("Attribute error when building " + el['name'], 0)
                 printOut("Most likely there is a mismatch between the code and the config file", 0)
@@ -270,68 +239,6 @@ class World(DirectObject):
         if self.fsm.hasDone():
             # the simulation has finished.
             self.quit()
-
-    def advanceFSM2(self):
-        """
-        In order to advance to the next state, we check the state we are currently,
-        and the queue of events in case the FSM is not deterministic. If no event
-        matching a valid transition is found, then the default transition is used.
-        Events are UNIQUE for a given element instance, so 2 elements cannot generate
-        the same event!.
-        """
-        # shortname
-        trans = self.fsm.getTransitions()
-
-        # current node
-        curr = self.fsm.state
-        if (curr == 'Off'):
-            printOut("Starting the FSM..., moving to first node", 2)
-            curr = 'start'
-
-        self.log.logEvent("Leaving state %s\n" % curr, time.time())
-
-        if (curr != 'start' and curr != 'Off'):
-            element = self.elements[curr]
-            if (element.needsToSaveData()):
-                element.saveUserData()
-                t = time.time()
-                self.log.logEvent("User data: %s\n" % element.name, t)
-                d = element.getUserData()
-                for k, v in d.items():
-                    self.log.logEvent("%s:%s\n" % (k, str(v)), t)
-
-        # retrieve possible events at this node
-        events = trans[curr].keys()
-        printOut("advancing FSM:", 2)
-        printOut("current state: %s" % curr, 2)
-        printOut("possible events: %s " % str(events), 2)
-        printOut("event queue %s" % str(self.eventQueue), 2)
-        # go through each event in the queue
-        for e in self.eventQueue:
-            # event matching ?
-            if e in events:
-                # remove THE FIRST occurence, set new state for transition
-                del self.eventQueue[self.eventQueue.index(e)]
-                nextState = trans[curr][e]
-                break  # so the else: below does not execute
-
-        # if we looped through all the events, and found no matching
-        # transition, then do the auto transition
-        else:
-            nextState = trans[curr]['auto']
-
-        if nextState == 'end':
-            printOut("Finished FSM, next state is 'end'", 2)
-            printOut("Quitting and closing files", 2)
-            # no more states!
-            self.fsm.request("Off")
-            self.log.logEvent("Entering state Off\n", time.time())
-            self.quit()
-        else:
-            # nextState=self.elementsNames[pos+1]
-            printOut("Entering STATE %s" % nextState, 2)
-            self.log.logEvent("Entering state %s\n" % nextState, time.time())
-            self.fsm.request(nextState)
 
     def FsmEventHandler(self, event):
         """This method is used to capture events triggered by
