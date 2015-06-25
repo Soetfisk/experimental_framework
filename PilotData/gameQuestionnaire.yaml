@@ -2,42 +2,42 @@ settings:
     formId: gameQuestionnaire
     scale: 0.06
     maxlabel: 10
-    labelcolour: [1.0,0.5,0.5,1.0]
+    labelcolour: (1.0,0.5,0.5,1.0)
     title: 'Please answer the following questions:'
-    background: [0.3,0.3,0.3,1]
+    background: (0.3,0.3,0.3,1)
 
 questions:
  - text: Have you been able to distinguish between enemies and allies based on their colour ?
    order: 0
    answerType: Option
-   answerOptions: ['yes','no']
+   answerOptions: ('yes','no')
 
  - text: Which colour was used for the enemies ?
    order: 1
    answerType: Option
-   answerOptions: ['Magenta','Green']
+   answerOptions: ('Magenta','Green')
 
  - text: Besides the colour, have you noticed any other difference between enemies and allies ?
    order: 2
    answerType: Option
-   answerOptions: ['yes','no']
+   answerOptions: ('yes','no')
 
  - text: If that difference is among the following options, please select it.
    order: 3
    answerType: Option
-   answerOptions: ['different size','different speed','different graphics quality']
+   answerOptions: ('different size','different speed','different graphics quality')
 
  - text: The following images display two different graphics quality, please select one option based on your gameplay, ignoring the colour.
    order: 4
    answerType: Option
-   answerOptions: ['The left quality was used for the allies, and the right quality for the enemies',
+   answerOptions: ('The left quality was used for the allies, and the right quality for the enemies',
                    'The right quality was used for the allies, and the left quality for the enemies',
                    'The left quality was used for both allies and enemies',
-                   'The right quality was used for both allies and enemies']
+                   'The right quality was used for both allies and enemies')
    graphics:
     - image: PilotData/textures/red64.png
-      pos: [-0.3,0,-0.5]
+      pos: (-0.3,0,-0.5)
       scale: 0.3
     - image: PilotData/textures/red128.png
-      pos: [0.3,0,-0.5]
+      pos: (0.3,0,-0.5)
       scale: 0.3
