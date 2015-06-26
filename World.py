@@ -16,6 +16,7 @@ for o in pandaConfig.options:
     loadPrcFileData('', o)
 
 from Utils.FiniteStateMachine import *
+from Utils.YamlTools import fixTuples
 
 # basic Panda3D imports
 from direct.showbase.DirectObject import DirectObject
@@ -84,6 +85,8 @@ class World(DirectObject):
         else:
             experiment = yaml.load(open(self.experiment))
 
+        experiment = fixTuples(experiment)
+
         # first timestamp since the whole application started
         self.baseTime = time.time()
 
@@ -97,6 +100,7 @@ class World(DirectObject):
 
         # get global keys configuration, always available application wide
         self.keyConfig = yaml.load(open("config/globalKeys.yaml"))
+        # tuples are not supported by YAML
 
         # This class inherits from DirectObject, and Keyboard
         # will get a reference to the messenger from us
@@ -220,7 +224,7 @@ class World(DirectObject):
                 # if the name cannot be split in two pieces by the dot
                 #printOut("Missing or extra dots in the name of :" + s,0)
                 print v
-                sys.quit()
+                self.quit()
             except AttributeError, e:
                 printOut("Attribute error when building " + el['name'], 0)
                 printOut("Most likely there is a mismatch between the code and the config file", 0)

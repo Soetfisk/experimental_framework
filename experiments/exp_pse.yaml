@@ -40,7 +40,7 @@ elements:
 
  - className: ScreenText
    name: colourBlindProblem
-   level: ['difficult','easy','hard']
+   level: ('difficult','easy','hard')
    point: (1,2,3)
    plain_text: PilotData/colourBlindProblem.txt
 
@@ -119,17 +119,17 @@ elements:
  - module: FullScreenImage
    className: ColourPreference
    name: selectionImage
-   pairs: ((plate1,plate2),(plate1,plate3))
+   pairs: (('plate1','plate2'),('plate1','plate3'))
    scale: (0.4,0.4)
    keys:
     - key: arrow_left
       callback: imageSelected
       once: false
-      args: ('left')
+      args: ("left")
     - key: arrow_right
       callback: imageSelected
       once: false
-      args: ('right')
+      args: ("right")
 
 
 
