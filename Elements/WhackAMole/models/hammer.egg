@@ -1,0 +1,125 @@
+<Comment> {
+  "egg-texture-cards -o hammer.egg -fps 30 hammer0001.png hammer0002.png hammer0003.png hammer0004.png hammer0005.png hammer0006.png hammer0007.png hammer0008.png hammer0009.png hammer0010.png"
+}
+<Texture> hammer0010 {
+  hammer0010.png
+}
+<Texture> hammer0009 {
+  hammer0009.png
+}
+<Texture> hammer0008 {
+  hammer0008.png
+}
+<Texture> hammer0007 {
+  hammer0007.png
+}
+<Texture> hammer0006 {
+  hammer0006.png
+}
+<Texture> hammer0005 {
+  hammer0005.png
+}
+<Texture> hammer0004 {
+  hammer0004.png
+}
+<Texture> hammer0003 {
+  hammer0003.png
+}
+<Texture> hammer0002 {
+  hammer0002.png
+}
+<Texture> hammer0001 {
+  hammer0001.png
+}
+<Group> {
+  <Switch> { 1 }
+  <Scalar> fps { 30 }
+  <VertexPool> vpool {
+    <Vertex> 0 {
+      -0.5 0.5 0
+      <UV> { 0 1 }
+    }
+    <Vertex> 1 {
+      -0.5 -0.5 0
+      <UV> { 0 0 }
+    }
+    <Vertex> 2 {
+      0.5 -0.5 0
+      <UV> { 1 0 }
+    }
+    <Vertex> 3 {
+      0.5 0.5 0
+      <UV> { 1 1 }
+    }
+  }
+  <Group> hammer0001 {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { hammer0001 }
+      <VertexRef> { 0 1 2 3 <Ref> { vpool } }
+    }
+  }
+  <Group> hammer0002 {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { hammer0002 }
+      <VertexRef> { 0 1 2 3 <Ref> { vpool } }
+    }
+  }
+  <Group> hammer0003 {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { hammer0003 }
+      <VertexRef> { 0 1 2 3 <Ref> { vpool } }
+    }
+  }
+  <Group> hammer0004 {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { hammer0004 }
+      <VertexRef> { 0 1 2 3 <Ref> { vpool } }
+    }
+  }
+  <Group> hammer0005 {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { hammer0005 }
+      <VertexRef> { 0 1 2 3 <Ref> { vpool } }
+    }
+  }
+  <Group> hammer0006 {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { hammer0006 }
+      <VertexRef> { 0 1 2 3 <Ref> { vpool } }
+    }
+  }
+  <Group> hammer0007 {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { hammer0007 }
+      <VertexRef> { 0 1 2 3 <Ref> { vpool } }
+    }
+  }
+  <Group> hammer0008 {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { hammer0008 }
+      <VertexRef> { 0 1 2 3 <Ref> { vpool } }
+    }
+  }
+  <Group> hammer0009 {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { hammer0009 }
+      <VertexRef> { 0 1 2 3 <Ref> { vpool } }
+    }
+  }
+  <Group> hammer0010 {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { hammer0010 }
+      <VertexRef> { 0 1 2 3 <Ref> { vpool } }
+    }
+  }
+}

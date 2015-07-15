@@ -1,0 +1,18 @@
+module: DataForm
+className: ConsentForm
+name: consentForm
+fname_config: PilotData/consentForm.yaml
+settings:
+    formId: consentForm
+    scale: 0.06
+    color_label: (1.0,0.5,0.5,1.0)
+    title: 'Consent Form'
+    text_consent: 'This experiment is part of a research conducted by
+     Lopez Luro Francisco as part of his Phd studies. The information you
+     may supply and that which may be collected from the study will only
+     be accessible by authorised personnel involved in the research.
+     No personal information will be gathered besides some demographics
+     (age, sex, vision problems, etc).
+
+
+     Do you agree and accept to participate in the experiment ?'

@@ -1,0 +1,14 @@
+className: ScreenText
+name: IntroScreen
+fname_message: fileWithMessage.txt
+text_message: "message directly here if fname_message is not set"
+keys:
+ - key: escape
+   callback: sendMessage
+   once: true
+   tuple_args: ('auto')
+ - key: n
+   comment: Sends auto message
+   callback: sendMessage
+   once: true
+   tuple_args: ('auto')

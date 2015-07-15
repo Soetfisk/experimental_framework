@@ -1,0 +1,5 @@
+className: EmptyState
+name: emptyState
+# RGB color tuple
+color_background: (50,50,50)
+timeout: 0.0

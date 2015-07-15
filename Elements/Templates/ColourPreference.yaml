@@ -1,0 +1,15 @@
+module: FullScreenImage
+className: ColourPreference
+name: selectionImage
+# tuples being compared
+tuple_pairs: (('image1','image2'),('image2','image3'))
+tuple_scale: (0.4,0.4)
+keys:
+ - key: arrow_left
+   callback: imageSelected
+   once: false
+   tuple_args: ("left")
+ - key: arrow_right
+   callback: imageSelected
+   once: false
+   tuple_args: ("right")

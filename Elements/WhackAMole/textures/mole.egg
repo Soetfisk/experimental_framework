@@ -1,0 +1,85 @@
+<Comment> {
+  "egg-texture-cards -o mole.egg mole_1.png mole_2.png mole_3.png mole_4.png mole_7.png mole_5.png"
+}
+<Texture> mole_7 {
+  mole_7.png
+}
+<Texture> mole_5 {
+  mole_5.png
+}
+<Texture> mole_4 {
+  mole_4.png
+}
+<Texture> mole_3 {
+  mole_3.png
+}
+<Texture> mole_2 {
+  mole_2.png
+}
+<Texture> mole_1 {
+  mole_1.png
+}
+<Group> {
+  <Switch> { 1 }
+  <Scalar> fps { 2 }
+  <VertexPool> vpool {
+    <Vertex> 0 {
+      -0.5 0.5 0
+      <UV> { 0 1 }
+    }
+    <Vertex> 1 {
+      -0.5 -0.5 0
+      <UV> { 0 0 }
+    }
+    <Vertex> 2 {
+      0.5 -0.5 0
+      <UV> { 1 0 }
+    }
+    <Vertex> 3 {
+      0.5 0.5 0
+      <UV> { 1 1 }
+    }
+  }
+  <Group> mole_1 {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { mole_1 }
+      <VertexRef> { 0 1 2 3 <Ref> { vpool } }
+    }
+  }
+  <Group> mole_2 {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { mole_2 }
+      <VertexRef> { 0 1 2 3 <Ref> { vpool } }
+    }
+  }
+  <Group> mole_3 {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { mole_3 }
+      <VertexRef> { 0 1 2 3 <Ref> { vpool } }
+    }
+  }
+  <Group> mole_4 {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { mole_4 }
+      <VertexRef> { 0 1 2 3 <Ref> { vpool } }
+    }
+  }
+  <Group> mole_7 {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { mole_7 }
+      <VertexRef> { 0 1 2 3 <Ref> { vpool } }
+    }
+  }
+  <Group> mole_5 {
+    <Polygon> {
+      <RGBA> { 1 1 1 1 }
+      <TRef> { mole_5 }
+      <VertexRef> { 0 1 2 3 <Ref> { vpool } }
+    }
+  }
+}
