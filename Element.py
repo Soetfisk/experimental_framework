@@ -3,6 +3,7 @@ from panda3d.core import *
 import sys
 from Utils.Debug import printOut
 from Utils.Utils import *
+from collections import OrderedDict
 #try:
 #    import json
 #except ImportError:
@@ -33,16 +34,16 @@ class Element(object):
         self.colours = getColors()
 
         dictionary = {}
-        if 'config' in kwargs:
+        if 'fname_config' in kwargs:
             try:
-                dictionary = yaml.load(open(kwargs['config']))
+                dictionary = yaml.load(open(kwargs['fname_config']))
             except Exception, e:
                 print e
-                printOut("Fatal error loading config file " + kwargs['config'], 0)
+                printOut("Fatal error loading config file " + kwargs['fname_config'], 0)
                 kwargs['world'].quit()
 
         for k, v in kwargs.items():
-            # make every argument from the config file an attribute, including a reference
+            # make every argument from the fname_config file an attribute, including a reference
             # to world through self.config.world
             if k in dictionary:
                 printOut("Warning, same key found in config file and in experiment file",0)
@@ -94,6 +95,22 @@ class Element(object):
 
         self.registeredKeys = []
 
+    def getConfigTempate(self):
+        return OrderedDict({
+            'className': 'className',
+            'module': 'moduleName',
+            'name': 'uniqueName',
+            'timeout': 0.0,
+            'keys': [
+                {
+                 'key': '',
+                 'callback': '',
+                 'tuple_args': ()
+                }
+            ]
+        })
+
+
     def setKeyboard(self, keyboard):
         self.kbd = keyboard
 
@@ -134,7 +151,7 @@ class Element(object):
             # in case is the letter 1,2,3..., or even a number 123
             key = str(key)
             once = getattr(k, 'once', False)
-            args = getattr(k, 'args', [])
+            args = getattr(k, 'tuple_args', [])
             # force args to be a list...
             if not isinstance(args, list):
                 args = [args]
@@ -272,4 +289,3 @@ class Element(object):
 #       service.setServiceImp( self.getUserData )
 #       # register service
 #       self.config.world.serviceMgr.registerService ( service )
-

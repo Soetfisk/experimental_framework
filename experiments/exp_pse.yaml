@@ -11,77 +11,78 @@ elements:
 ####################################
  - className: EmptyState
    name: start
-   timeout: 1.0
+   # RGB color tuple
+   color_background: (255,0,0)
+   timeout: 0.1
 
  - className: EmptyState
    name: end
 
+ - className: EmptyState
+   name: testingtesting
 ####################################
 # Text display elements.
 ####################################
 
  # introduction to the experiment
  - className: ScreenText
-   plain_text: PilotData/introPilot.txt
+   fname_message: PilotData/introPilot.txt
    name: IntroScreen
    # some keybindings defined in a separate YAML
-   config: PilotData/introScreen.yaml
+   fname_config: PilotData/introScreen.yaml
 
  - className: ScreenText
    name: colourBlindText
-   plain_text: PilotData/colourBlindText.txt
+   fname_message: PilotData/colourBlindText.txt
    # example defining the keybindings directly here
    keys:
     - key: escape
       callback: sendMessage
-    - key: a
-      callback: callMeLater
-      args: ('auto')
 
  - className: ScreenText
    name: colourBlindProblem
-   level: ('difficult','easy','hard')
-   point: (1,2,3)
-   plain_text: PilotData/colourBlindProblem.txt
+   # the LAST element is the option selected now, which has to be in the list
+   #option_level: ('easy','hard','easy')
+   fname_message: PilotData/colourBlindProblem.txt
 
  - module: ScreenText
    className: ScreenText
    name: PrePilotScreen
-   plain_text: PilotData/prePilot.txt
+   fname_message: PilotData/prePilot.txt
    keys:
     - key: escape
       callback: sendMessage
-      args: ('auto')
+      tuple_args: ('auto')
 
 # @TODO - write up intro text
  - className: ScreenText
    name: gameIntroText
-   plain_text: PilotData/gameIntroText.txt
+   fname_message: PilotData/gameIntroText.txt
    keys:
     - key: n
       callback: sendMessage
-      args: ('auto')
+      tuple_args: ('auto')
 
  - module: ScreenText
    className: ScreenText
    name: FinalScreen
-   plain_text: PilotData/finalText.txt
+   fname_message: PilotData/finalText.txt
 
  - className: HUDText
    name: MessageAdjustScale
-   text: "Please use the keys 'w' (increase), 's' (decrease) to adjust the size of the \nmodel (parachute+robot) so it occupies exactly 5 cm on your screen. \nFor finner adjustments use 'e' and 'd' accordingly.\n\nPress the key 'n' when you have finished the adjustment"
-   topLeft: (0.1, 0.2)
+   text_text: "Please use the keys 'w' (increase), 's' (decrease) to adjust the size of the \nmodel (parachute+robot) so it occupies exactly 5 cm on your screen. \nFor finner adjustments use 'e' and 'd' accordingly.\n\nPress the key 'n' when you have finished the adjustment"
+   tuple_topLeft: (0.1, 0.2)
    keys:
     - key: n
       callback: sendMessage
-      args: ('nextPressed')
+      tuple_args: ('nextPressed')
 
  # One stop timer, can be initialized at the beginning
  - module: HUDText
    className: HUDTimer
    name: timer1
    text: "0.0"
-   topLeft: (0.1, 0.08)
+   tuple_topLeft: (0.1, 0.08)
    hide: True
 
  # One stop timer, can be initialized at the beginning
@@ -102,139 +103,223 @@ elements:
  - module: DataForm
    className: ConsentForm
    name: consentForm
-   config: PilotData/consentForm.yaml
+   fname_config: PilotData/consentForm.yaml
 
- - className: ServerConfig
-   name: studyServer
-   serverName: 127.0.0.1
-   serverPort: 2357
-   keys:
-    - key: c
-      callback: getConfig
-    - key: p
-      callback: pushResults
-      args: ('this is a result')
+# - className: ServerConfig
+#   name: studyServer
+#   serverName: 127.0.0.1
+#   serverPort: 2357
+#   keys:
+#    - key: c
+#      callback: getConfig
+#    - key: p
+#      callback: pushResults
+#      tuple_args: ('this is a result')
 
 
  - module: FullScreenImage
    className: ColourPreference
    name: selectionImage
-   pairs: (('plate1','plate2'),('plate1','plate3'))
-   scale: (0.4,0.4)
+   tuple_pairs: (('plate1','plate2'),('plate1','plate3'))
+   tuple_scale: (0.4,0.4)
    keys:
     - key: arrow_left
       callback: imageSelected
       once: false
-      args: ("left")
+      tuple_args: ("left")
     - key: arrow_right
       callback: imageSelected
       once: false
-      args: ("right")
-
-
-
+      tuple_args: ("right")
 
 # Very specific Element, for testing for Colour Blindness
  - module: FullScreenImage
    className: ImageQuery
    name: colourBlindCheck
-   imageNameStr: PilotData/colorblind/plate%d.png
+   fname_imageNameStr: PilotData/colorblind/plate%d.png
 #   imageStrArgs: (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17)
-   imageStrArgs: (1,2,3)
+   tuple_imageStrArgs: (1,2,3)
 #   imageAnswers: (12,8,6,29,57,5,3,15,74,2,6,97,45,5,7,16,73)
-   imageAnswers: (12,8,6)
-   images: exp range(1,39)
-   scale: (0.5,0.5)
+   tuple_imageAnswers: (12,8,6)
+   tuple_scale: (0.5,0.5)
    myAttr: 123
    keys:
     - key: n
       callback: nextImage
       once: false
+# - module: Pilot
+#   className: ScreenAdjustment
+#   name: rescaleScreen
+#   fname_modelName: "PilotData/models/plane.egg"
+#   fname_texture: "PilotData/textures/soldierRed_100.png"
+#   fname_config: PilotData/screenAdjust.yaml
+#   # distance of the parachute from camera
+#   parDistCam: 250.0
+#   writeToGlobals:
+#     rescaleFactor: 12.0
+#   keys:
+#    - key: escape
+#      callback: sendMessage
+#      once: true
+#      tuple_args: ('auto')
 
- - module: Pilot
-   className: ScreenAdjustment
-   name: rescaleScreen
-   modelName: "PilotData/models/plane"
-   texture: "PilotData/textures/soldierRed_100.png"
-   config: PilotData/screenAdjust.yaml
-   # distance of the parachute from camera
-   parDistCam: 250.0
-   writeToGlobals:
-     rescaleFactor: 12.0
-   keys:
-    - key: escape
-      callback: sendMessage
-      args: ('auto')
-      once: true
-
- - className: Game
-   name: thegame
-   # creates handy references between elements in runtime
-   refsto: ('eyeTracker')
-   config: PilotData/gameConfig.yaml
-   saveReplay: PilotData/run/replayLogA.txt,w
-   logFile: PilotData/run/gameLogA.txt,a
-   pointsToEnd: 30
-   readFromGlobals:
-     rescaleFactor: 12.0
-   keys:
-    - key: p
-      callback: pauseFall
-    - key: o
-      callback: unPauseFall
-    - key: escape
-      callback: sendMessage
-      args: ('auto')
+# - className: Game
+#   name: thegame
+#   # creates handy references between elements in runtime
+#   tuple_refsto: ('eyeTracker')
+#   fname_config: PilotData/gameConfig.yaml
+#   fname_saveReplay: PilotData/run/replayLogA.txt
+#   fname_logFile: PilotData/run/gameLogA.txt
+#   pointsToEnd: 30
+#   readFromGlobals:
+#     rescaleFactor: 12.0
+#   keys:
+#    - key: p
+#      callback: pauseFall
+#    - key: o
+#      callback: unPauseFall
+#    - key: escape
+#      callback: sendMessage
+#      tuple_args: ('auto')
 
  - className: DataForm
    name: UserInfo
-   config: PilotData/pilotDataForm.yaml
+   settings:
+    outfiledir: run
+    outfileprefix: userdata
+    formId: userdata
+    scale: 0.06
+    maxlabel: 10
+    color_label: (1.0,0.5,0.5,1.0)
+    title: 'Please provide us with some information about you:'
+   input:
+    - label: Gender
+      type: Option
+      tuple_values: ("Male","Female")
+    - label: Do you have vision problems
+      type: Option
+      tuple_values: ("Yes","No")
+    - label: Do you have experience playing games
+      type: Option
+      tuple_values: ("Yes","No")
+    - label: Age
+      type: TextEntry
+      default: 0
 
- - className: Pilot
-   name: Pilot
-   pilotLog: run/pilotLog.txt,a
-   config: PilotData/pilotConfig.yaml
-   s_saveReplay: PilotData/run/replayLogA.txt,w
-   s_logFile: PilotData/run/pilot.txt,a
-   parDistCam: 250.0
-   readFromGlobals:
-     rescaleFactor: 12.0
+# - className: Pilot
+#   name: Pilot
+#   pilotLog: run/pilotLog.txt,a
+#   fname_config: PilotData/pilotConfig.yaml
+#   fname_saveReplay: PilotData/run/replayLogA.txt
+#   fname_logFile: PilotData/run/pilot.txt
+#   parDistCam: 250.0
+#   readFromGlobals:
+#     rescaleFactor: 12.0
 
  - module: DataForm
    className: DataForm
    name: PilotQuestionnaire
-   config: PilotData/pilotQuestionnaire.yaml
+   fname_config: PilotData/pilotQuestionnaire.yaml
+   settings:
+     formId: questionnaire
+     scale: 0.06
+     maxlabel: 10
+     color_label: (1.0,0.5,0.5,1.0)
+     title: 'Por favor responde a las siguientes preguntas:'
+   input:
+     - label: This is a question color color
+       type: TextEntry
+       default: ""
+     - label: Como cree usted que blah blah...
+       type: Option
+       tuple_values: ('Bueno', 'Muy Bueno', 'Pesimo')
 
  - module: DataForm
    className: UserQuestionnaire
    name: gameQuestions
-   config: PilotData/gameQuestionnaire.yaml
    keys:
+      # this is treated as a string, and split in two keys in the Element.py
     - key: i,i-repeat
       callback: scale
-      args: ('up')
+      tuple_args: ('up')
     - key: k,k-repeat
       callback: scale
-      args: ('down')
+      tuple_args: ('down')
     - key: n
       callback: sendMessage
-      args: ('auto')
+      tuple_args: ('auto')
+   settings:
+     formId: gameQuestionnaire
+     scale: 0.06
+     maxlabel: 10
+     color_label: (1.0,0.5,0.5,1.0)
+     title: 'Please answer the following questions:'
+     color_background: (0.3,0.3,0.3,1)
+   questions:
+    - text: Have you been able to distinguish between enemies and allies based on their colour ?
+      order: 0
+      answerType: Option
+      tuple_answerOptions: ('yes','no')
 
- - module: EyeTracker
-   className: Tobii_UDP_Client
-   name: eyeTracker
+    - text: Which colour was used for the enemies ?
+      order: 1
+      answerType: Option
+      tuple_answerOptions: ('Magenta','Green')
 
+    - text: Besides the colour, have you noticed any other difference between enemies and allies ?
+      order: 2
+      answerType: Option
+      tuple_answerOptions: ('yes','no')
+
+    - text: If that difference is among the following options, please select it.
+      order: 3
+      answerType: Option
+      tuple_answerOptions: ('different size','different speed','different graphics quality')
+
+    - text: The following images display two different graphics quality, please select one option based on your gameplay, ignoring the colour.
+      order: 4
+      answerType: Option
+      tuple_answerOptions: ('The left quality was used for the allies, and the right quality for the enemies',
+                   'The right quality was used for the allies, and the left quality for the enemies',
+                   'The left quality was used for both allies and enemies',
+                   'The right quality was used for both allies and enemies')
+      graphics:
+        - fname_image: PilotData/textures/red64.png
+          tuple_pos: (-0.3,0,-0.5)
+          scale: 0.3
+        - fname_image: PilotData/textures/red128.png
+          tuple_pos: (0.3,0,-0.5)
+          scale: 0.3
+
+# - module: EyeTracker
+#   className: Tobii_UDP_Client
+#   name: eyeTracker
+
+# not template yet...
  - module: EventLogger
    className: EventLogger
    name: eventLogger
 
-transitions:
-- trans: 'start @ selectionImage : auto'
-- trans: 'selectionImage @ colourBlindText:auto'
-- trans: 'colourBlindText @ colourBlindCheck:auto'
-- trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
-- trans: 'colourBlindCheck @ end:imageQueryOk'
+# no template yet
+ - module: WhackAMole
+   className: WhackAMole
+   name: mole1
+   fname_moleModel: Elements/WhackAMole/textures/mole.egg
+   fname_holeTop: Elements/WhackAMole/textures/tophole.png
+   fname_holeBottom: Elements/WhackAMole/textures/botomhole.png
+   fname_back: Elements/WhackAMole/textures/back.png
+   fname_mole: Elements/WhackAMole/textures/mole_1.png
+   fname_plainGrass: Elements/WhackAMole/textures/no_hole.jpg
+   int_gridSize: 8
+   int_moleCalibPoints: 8
+   int_waitForDown: 4
+   keys:
+   - key: mouse1
+     callback: hammerDown
 
+transitions:
+- trans: 'start @ mole1:auto'
+- trans: 'mole1 @ end:auto'
 
 #- trans: 'start @ eventLogger:auto'
 #- trans: 'start @ eyeTracker:auto'

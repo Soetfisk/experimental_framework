@@ -1,0 +1,11 @@
+elements:
+
+ - className: EmptyState
+   name: start
+   timeout: 0.1
+
+ - className: EmptyState
+   name: end
+
+transitions:
+- trans: 'start @ end:auto'

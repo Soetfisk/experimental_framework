@@ -1,0 +1,28 @@
+elements:
+
+ - className: EmptyState
+   name: start
+   timeout: 0.1
+
+ - className: EmptyState
+   name: end
+
+# - module: WhackAMole
+#   className: WhackAMole
+#   name: mole1
+#   fname_moleModel: Elements/WhackAMole/textures/mole.egg
+#   fname_holeTop: Elements/WhackAMole/textures/tophole.png
+#   fname_holeBottom: Elements/WhackAMole/textures/botomhole.png
+#   fname_back: Elements/WhackAMole/textures/back.png
+#   fname_mole: Elements/WhackAMole/textures/mole_1.png
+#   fname_plainGrass: Elements/WhackAMole/textures/no_hole.jpg
+#   int_gridSize: 8
+#   int_moleCalibPoints: 8
+#   int_waitForDown: 4
+#   keys:
+#   - key: mouse1
+#     callback: hammerDown
+
+transitions:
+- trans: 'start @ end:auto'
+#- trans: 'mole1 @ end:auto'

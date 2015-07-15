@@ -3,12 +3,12 @@
       {
         "className":"ScreenText",
         "name":"Screen1",
-        "plain_text":"Elements/ScreenText/text1.txt"
+        "fname_message":"Elements/ScreenText/text1.txt"
       },
       {
         "className":"ScreenText",
         "name":"Screen2",
-        "plain_text":"Elements/ScreenText/text2.txt"
+        "fname_message":"Elements/ScreenText/text2.txt"
       }
     ],
   "transitions": [

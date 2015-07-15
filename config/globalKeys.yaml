@@ -20,6 +20,9 @@ global_keys:
   - key: '1'
     callback: testOne
     comment: testOne
+  - key: f
+    callback: toggleFullScreen
+    comment: Toggles fullscreen without closing the game
 #  - key: control-g
 #    callback: advanceFSM
 #    comment: Advance State Machine

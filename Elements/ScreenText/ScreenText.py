@@ -23,7 +23,7 @@ class ScreenText(Element):
         # this defines:
         # self.sceneNP and self.hudNP
 
-        text = getattr(self.config, 'plain_text', None)
+        text = getattr(self.config, 'message', None)
         if text is None:
             printOut("Missing reference to what text to display when building ScreenText!", 0)
             sys.exit()
@@ -40,7 +40,7 @@ class ScreenText(Element):
         tN.setAlign(TextNode.ALeft)
         tN.setWordwrap(25)
         tNP = NodePath(tN)
-        tNP.setName("plain_text")
+        tNP.setName("message")
         tNP.setPos(leftBorder,0.0,topBorder)
         tNP.setScale(0.09)
 
@@ -59,4 +59,3 @@ class ScreenText(Element):
     def exitState(self):
         # print "leaving state ScreenText"
         Element.exitState(self)
-

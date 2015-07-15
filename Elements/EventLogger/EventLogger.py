@@ -9,16 +9,8 @@ from Logger import Logger
 
 class EventLogger(Element):
     """
-    As the name indicates, it's an empty state. It does nothing.
-    It can react to timeout events using:
-    timeout: float
-
     """
     def __init__(self, **kwargs):
-        """
-        See the Element class to find out what attributes are available
-        from scratch
-        """
         super(EventLogger, self).__init__(**kwargs)
         self.listener = DirectObject()
 
@@ -62,8 +54,3 @@ class EventLogger(Element):
             self.listener.accept(x, self.logEvent, [x])
             self.registeredEvents.append(x)
         return task.cont
-
-
-
-
-

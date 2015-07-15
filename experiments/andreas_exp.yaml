@@ -21,13 +21,13 @@ elements:
  # introduction to the experiment
  - className: ScreenText
    name: IntroScreen
-   plain_text: PilotData/introPilot.txt
+   fname_message: PilotData/introPilot.txt
    # some keybindings defined in a separate YAML
-   config: PilotData/introScreen.yaml
+   fname_config: PilotData/introScreen.yaml
 
  - className: ScreenText
    name: colourBlindText
-   plain_text: PilotData/colourBlindText.txt
+   fname_message: PilotData/colourBlindText.txt
    # example defining the keybindings directly here
    keys:
     - key: escape
@@ -36,7 +36,7 @@ elements:
 
  - className: ScreenText
    name: colourBlindProblem
-   plain_text: PilotData/colourBlindProblem.txt
+   fname_message: PilotData/colourBlindProblem.txt
 
  - module: FullScreenImage
    className: ColourPreference

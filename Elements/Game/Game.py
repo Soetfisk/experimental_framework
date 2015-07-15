@@ -43,12 +43,12 @@ class Game(Element):
         # creating logger for the replay
         # the string will look like "filename,mode"
         # if no value is found, 'nolog,w' is returned.
-        rl = getattr(self.config, 'saveReplay', 'nolog,w').split(',')
-        self.replayLog = Logger(rl[0], rl[1])
+        rl = getattr(self.config, 'saveReplay', 'nolog,w')
+        self.replayLog = Logger(rl[0], 'w')
         # creating logger for the game
         # the string will look like "filename,mode"
-        gl = getattr(self.config, 'logFile', 'nolog,a').split(',')
-        self.gameLog = Logger(gl[0], gl[1])
+        gl = getattr(self.config, 'logFile', 'nolog,a')
+        self.gameLog = Logger(gl[0], 'a')
 
     def readUserData(self):
         pass

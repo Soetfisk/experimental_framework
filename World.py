@@ -91,7 +91,7 @@ class World(DirectObject):
         self.baseTime = time.time()
 
         # Dictionary to store the elements (nodes) that will be part of
-        # an experimentation, will construct a Finite State Machine 
+        # an experimentation, will construct a Finite State Machine
         # with them
         self.elements = {}
 
@@ -359,13 +359,30 @@ class World(DirectObject):
 
         #render.explore()
 
+    def toggleFullScreen(self):
+        #const WindowProperties oldp = window->get_graphics_window()->get_properties();
+        #WindowProperties newp;
+        #if (oldp.get_fullscreen())
+        #    newp.set_fullscreen(false);
+        #else
+        #    newp.set_fullscreen(true);
+        #window->get_graphics_window()->request_properties(newp);
+        new_wp = WindowProperties()
+        old_wp = base.win.getProperties()
+        if old_wp.getFullscreen():
+            new_wp.setFullscreen(False)
+        else:
+            new_wp.setFullscreen(True)
+        base.win.requestProperties(new_wp)
+
+
     def setupCamera(self):
         """
         Attributes:
         screenWidth, screenHeight
         pos, lookAt, fov, ratio
         """
-        # setup the camera based purely on the JSON configuration
+        # setup the camera based purely on the YAML configuration
 
         self.camera = self.config.cameraConfig
 
@@ -377,11 +394,11 @@ class World(DirectObject):
                 # "win-size 1280 800"
                 w, h = o.split(' ')[1:]
                 printOut("Saving window config: %s %s" % (w, h), 4)
-                self.config.cameraConfig.screenWidth = int(w)
-                self.config.cameraConfig.screenHeight = int(h)
+                self.camera.screenWidth = int(w)
+                self.camera.screenHeight = int(h)
         # ===========================================================
-
         setattr(self.camera, 'ratio', self.camera.screenWidth / float(self.camera.screenHeight))
+
         # fovRads = (self.camera.fov * pi / 180.0)
 
         # make a triangle rectangle, from camera pos to the plane
@@ -419,10 +436,8 @@ class World(DirectObject):
         :param npath: nodepath to attach
         :param place: place where to attach, can be 3d or HUD
         """
-        parent = render
-        if place == 'HUD':
-            parent = aspect2d
-        npath.reparentTo(parent)
+        mapNode={'3d':render,'3D':render,'HUD':aspect2d}
+        npath.reparentTo(mapNode[place])
 
     #=========================================================================================
     #========== KEYBOARD - KEYS HANDLING =====================================================
@@ -448,8 +463,8 @@ class World(DirectObject):
                 method = getattr(self, key_record['callback'])
                 args = []
                 comment = ""
-                if key_record.has_key('args'):
-                    args = key_record['args']
+                if key_record.has_key('tuple_args'):
+                    args = key_record['tuple_args']
                 if key_record.has_key('comment'):
                     comment = key_record['comment']
                 if not k.registerKey(key_record['key'], 'World', method, comment, False, args):
@@ -519,5 +534,3 @@ class World(DirectObject):
     #        self.quit()
     #while(True):
     #    self.advanceFSM()
-
-
