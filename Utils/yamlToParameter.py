@@ -35,7 +35,8 @@ def handleOption(k,v):
     return { 'type': 'list', 'name':k, 'values': list(v[:-1]), 'value':v[-1]}
 
 def handleColor(k,v):
-    return { 'type': 'color', 'name':k, 'value': v }
+    # convert from string to tuple
+    return { 'type': 'color', 'name':k, 'value': eval(v) }
 
 def handleText(k,v):
     return { 'name': k, 'type': 'text', 'value': v }
@@ -52,7 +53,40 @@ mappings = {
     'text_': handleText,
 }
 
-def extractElement(yamlDict, name):
+def fromParameterToYaml(paramenter, name):
+     """
+    Recursive method to convert from YAML to the representation that ParameterTree
+    supports
+    It uses the naming convention from the attributes to derive a datatype
+    """
+     pass
+#    single = []
+#    groups = []
+#    for k,v in yamlDict.items():
+#        for m in mappings:
+#            if m == k[0:len(m)] and not isinstance(v,dict) and not isinstance(v,list):
+#                item = mappings[m](k,v)
+#                break
+#        else:
+#            item = {'type':type(v).__name__, 'name':k, 'value':v}
+#
+#        if isinstance(v,dict):
+#            item = fromYamlToParameter(v,k)
+#            groups.append(item)
+#        # the list consist of only dictionaries!!!
+#        elif isinstance(v,list) and len([e for e in v if isinstance(e,dict)])==len(v):
+#            item = fromYamlToParameter( {str(i):vv for (i,vv) in enumerate(v)},k )
+#            groups.append(item)
+#        elif isinstance(v,list):
+#            item = {'name': k, 'type': 'list', 'values': v, 'value': v[0]}
+#            single.append(item)
+#        else:
+#            single.append(item)
+#
+#    p = {'type':'group','name':yamlDict.get('name',name), 'children':single+groups }
+#    return p
+
+def fromYamlToParameter(yamlDict, name):
     """
     Recursive method to convert from YAML to the representation that ParameterTree
     supports
@@ -69,11 +103,11 @@ def extractElement(yamlDict, name):
             item = {'type':type(v).__name__, 'name':k, 'value':v}
 
         if isinstance(v,dict):
-            item = extractElement(v,k)
+            item = fromYamlToParameter(v,k)
             groups.append(item)
         # the list consist of only dictionaries!!!
         elif isinstance(v,list) and len([e for e in v if isinstance(e,dict)])==len(v):
-            item = extractElement( {str(i):vv for (i,vv) in enumerate(v)},k )
+            item = fromYamlToParameter( {str(i):vv for (i,vv) in enumerate(v)},k )
             groups.append(item)
         elif isinstance(v,list):
             item = {'name': k, 'type': 'list', 'values': v, 'value': v[0]}

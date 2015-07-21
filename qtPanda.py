@@ -12,30 +12,22 @@ from panda3d.core import loadPrcFileData
 from panda3d.core import WindowProperties
 from direct.showbase.ShowBase import ShowBase
 
-def loadUi(uifilename, parent=None):
-    loader = QtUiTools.QUiLoader()
-    uifile = QFile(uifilename)
-    uifile.open(QFile.ReadOnly)
-    ui = loader.load(uifile, parent)
-    uifile.close()
-    return ui
-
 class FrontEnd(QWidget):
     def __init__(self, pipe, ui):
         QWidget.__init__(self)
         absLayout = QVBoxLayout()
         absLayout.addWidget(ui)
         self.setLayout(absLayout)
-        #self.pandaView = ui.pandaPreview
+        self.pandaView = ui.pandaPreview
 
 
         self.pipe = pipe
 
-        #self.resize(800, 600)
+        self.resize(800, 600)
         self.setWindowTitle('Simple')
         self.show()
-        #self.pandaView.setParent(None)
-        #self.pandaView.show()
+        self.pandaView.setParent(None)
+        self.pandaView.show()
 
     def getViewportID(self):
         wid = self.winId()

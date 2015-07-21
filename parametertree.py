@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import glob, os
+import platform
 
 import PySide
 import pyqtgraph as pg
@@ -10,11 +11,13 @@ from pyqtgraph.parametertree import Parameter, ParameterTree, ParameterItem, reg
 
 import external.yaml as yaml
 from collections import OrderedDict
-from Utils.yamlToParameter import extractElement,pushUp
+from Utils.yamlToParameter import fromYamlToParameter,pushUp
 from functools import partial
 
 #============================================================================
 class Element():
+    # utility class that accesses the folder with Element templates and provides
+    # the YAML description along with their names.
     templates = {}
 
     def __init__(self):
@@ -23,130 +26,179 @@ class Element():
 
     @classmethod
     def findTemplates(cls, dir = "Elements/Templates"):
-        os.chdir(dir)
-        for file in glob.glob('*.yaml'):
-            cls.templates[file[:-5]] = pushUp(yaml.load(open(file)))
+        if cls.templates == {}:
+            for file in glob.glob(dir+'/*.yaml'):
+                # grab file name and remove extension, use that as a key.
+                off = file.rfind('\\')
+                cls.templates[file[off+1:-5]] = pushUp(yaml.load(open(file)))
         return cls.templates.keys()
 
     @classmethod
     def getTemplate(cls, elementName):
         return cls.templates.get(elementName,None)
 
-#============================================================================
-class YamlParameterTree(ParameterTree):
-    def __init__(self, appPtr):
-        ParameterTree.__init__(self)
-        self.appPtr = appPtr
-        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.customContextMenuRequested.connect(self.raiseContextMenu)
-        self.removeContextMenu = None
-        self.addTransitionMenu = None
 
-    def mouseClickEvent(self, ev):
-        if ev.button() == QtCore.Qt.RightButton:
-            if self.raiseContextMenu(ev):
-                ev.accept()
-
-    def raiseContextMenu(self, pos):
-        global_pos = self.mapToGlobal(pos)
-        self.selectedItem = None
-        self.selectedItem = self.itemAt(pos.x(),pos.y())
-        if self.selectedItem and self.selectedItem.param.parent():
-            pname = self.selectedItem.param.parent().name()
-            if pname == 'Elements' or pname == 'Transitions':
-                menu = self.getRemoveContextMenu()
-                menu.popup(QtCore.QPoint(global_pos.x(), global_pos.y()))
-            elif self.selectedItem.param.name() == 'Transitions':
-                menu = self.getAddTransitionCtxMenu()
-                menu.popup(QtCore.QPoint(global_pos.x(), global_pos.y()))
-            else:
-                pass
-
-        return True
-
-    def getAddTransitionCtxMenu(self):
-        if self.addTransitionMenu is None:
-            self.addTransitionMenu = QtGui.QMenu()
-            self.addTransitionMenu.setTitle("Remove")
-            addTransAction = QtGui.QAction("Add transition", self.addTransitionMenu)
-            addTransAction.triggered.connect(self.addTransition)
-            self.addTransitionMenu.addAction(addTransAction)
-            #self.getAddTransitionCtxMenu.addTransAction = addTransAction
-        return self.addTransitionMenu
-
-    # This method will be called when this item's _children_ want to raise
-    # a context menu that includes their parents' menus.
-    def getRemoveContextMenu(self):
-        if self.removeContextMenu is None:
-            self.removeContextMenu = QtGui.QMenu()
-            self.removeContextMenu.setTitle("Remove")
-            removeItemAction = QtGui.QAction("Remove", self.removeContextMenu)
-            removeItemAction.triggered.connect(self.removeItem)
-            self.removeContextMenu.addAction(removeItemAction)
-            #self.removeContextMenu.removeItem = removeItemAction
-        return self.removeContextMenu
-            #alpha = QtGui.QWidgetAction(self.menu)
-            #alphaSlider = QtGui.QSlider()
-            #alphaSlider.setOrientation(QtCore.Qt.Horizontal)
-            #alphaSlider.setMaximum(255)
-            #alphaSlider.setValue(255)
-            #alphaSlider.valueChanged.connect(self.setAlpha)
-            #alpha.setDefaultWidget(alphaSlider)
-            #self.menu.addAction(alpha)
-            #self.menu.alpha = alpha
-            #self.menu.alphaSlider = alphaSlider
-            #return self.menu
-
-    def removeItem(self):
-        parentParam = self.selectedItem.parent()
-        t = self.appPtr.paramTran
-        a = t.child('Transitions')
-        a.removeChild(a.names[self.selectedItem.param.name()])
-        self.selectedItem = None
-
-    def addTransition(self):
-        self.appPtr.addTransition()
-
-class TransactionsGroup(pTypes.GroupParameter):
+class TransitionsGroup(pTypes.GroupParameter):
+    # special class to group transitions in a tree.
+    # includes context menues to rename, remove and add transitions
+    # naming is automatic.
+    # also provides a method to return a YAML version of the transitions in the
+    # group
     def __init__(self, **opts):
         opts['type']='group'
-        opts['addText']='Add transaction'
-        opts['addList']=['str']
+        opts['addText']='Add'
+        opts['addList']=['transition','extract']
         pTypes.GroupParameter.__init__(self, **opts)
 
-    def addNew(self, typ):
-        val = {
-            'str':'pepe'
-        }[typ]
-        self.addChild(dict(name="TransactionsGroup %d" % (len(self.childs)+1), type=typ, value=val, removable=True, renamable=True))
+    def extractYamlTransitions(self):
+        result = []
+        for t in self.children():
+            children = [x.value() for x in t.children()]
+            tr = '{arg[0]} @ {arg[1]}:{arg[2]}'.format(arg=children)
+            result.append({'trans':tr })
+        print result
 
+    def addNew(self, typ):
+        if 'extract' in typ:
+            self.extractYamlTransitions()
+            return
+        t = {'from':'completeX', 'to':'completeX', 'msg':'completeX'}
+        id = len(self.childs)+1
+        while True:
+            try:
+                name = 'transition %d' % id
+                transition = fromYamlToParameter(t,name)
+                transition['renamable']=True
+                transition['removable']=True
+                self.addChild(transition)#dict(name="transition %d" % (len(self.childs)+1), type='group', children=val, removable=True, renamable=True))
+                break
+            except:
+                id += 1
+                pass
+
+class ElementsGroup(pTypes.GroupParameter):
+    """
+    Class to handle Elements in the property tree, rename, add, remove
+    Property NAME maintains consistency with the elements name inside.
+
+    When an element is created, the YAML version loaded from the file is
+    saved, so when we want to export it we can simply save the parts that
+    have changed.
+    """
+    def __init__(self, **opts):
+        opts['type']='group'
+        opts['addText']='Add'
+        opts['addList']=Element.findTemplates()
+
+        pTypes.GroupParameter.__init__(self, **opts)
+        #self.sigChildAdded.connect(self.childAddedA)
+
+        for e in self.children():
+             e.opts['expanded']=False
+             e.sigNameChanged.connect(self.elementNameChanged)
+             e.child('className').setReadonly(True)
+
+             for j in e.children():
+                 if j.name() == 'name':
+                     j.sigValueChanged.connect(self.elementNameChangedInside)
+                     break
+
+    def elementNameChangedInside(self, el):
+        el.parent().setName(el.value())
+
+
+
+    def elementNameChanged(self, el):
+        for j in el.children():
+            if j.name() == 'name':
+                j.setValue(el.name())
+                break
+
+    def addNew(self, typ):
+        id = len(self.childs)+1
+        name = str(typ)+str(id)
+        temp = fromYamlToParameter(Element.getTemplate(typ),name)
+        temp['renamable']=True
+        temp['removable']=True
+        temp['expanded']=False
+        for child in temp['children']:
+            if 'className' in child.values() or 'module' in child.values():
+                child['readonly'] = True
+
+        # this while loop is just to create a unique name
+        newDict = None
+        while True:
+            try:
+                name = str(typ)+str(id)
+                temp['name'] = name
+                newDict = None
+                for el in temp['children']:
+                    if 'name' in el.values():
+                        newDict = el
+                        temp['children'].remove(el)
+                        newDict['value']=name
+                        break
+                temp['children'].insert(1,newDict)
+                self.addChild(temp)
+                break
+            except:
+                id += 1
+                pass
+        child = self.child(name)
+        child.sigNameChanged.connect(self.elementNameChanged)
+        for j in child.children():
+            if j.name() == 'name':
+                j.sigValueChanged.connect(self.elementNameChangedInside)
+                break
+        for i in child.items:
+            i.contextMenu.addSeparator()
+            i.contextMenu.addAction('Test alone').triggered.connect(partial(testElement, child))
+
+def testElement(el):
+    elementYaml = {}
+    elementYaml[el.name()] = extractDictionary(el)
+    print elementYaml
+
+def extractDictionary(param):
+    if isinstance(param, pTypes.GroupParameter):
+        intermediate = {}
+        for c in param.children():
+            intermediate[c.name()] = extractDictionary(c)
+        return intermediate
+    elif param.opts['type'] == 'color':
+        return (param.value().red(),param.value().green(),param.value().blue(),param.value().alpha())
+    else:
+        return param.value()
 
 class Application():
-    def mouseClicked(self, evt):
-        pass
-    def __init__(self, yamlConfigFile = "experiments/empty.yaml"):
 
+    def __init__(self, yamlConfigFile = "experiments/empty.yaml"):
         # Must construct a QApplication before a QPaintDevice
         self.app = QtGui.QApplication([])
         self.win = QtGui.QWidget()
 
         # prepare parameters tree
         elements, transitions = self.setupParameterTrees(yamlConfigFile)
-        transitions.append(
-            TransactionsGroup(name="TransactionsXYZ",
-                              children=[
-                                  {'name': 'ScalableParam 1', 'type': 'str', 'value': "default param 1"},
-                                  {'name': 'ScalableParam 2', 'type': 'str', 'value': "default param 2"}, ]))
         self.paramElem = Parameter.create(name='ElementsTree', type='group', children=elements)
         self.paramTran = Parameter.create(name='TransitionsTree', type='group', children=transitions)
 
         # elements
-        self.elementsTree = YamlParameterTree(self)
+        self.elementsTree = ParameterTree()
         self.elementsTree.setParameters(self.paramElem, showTop=False)
         self.elementsTree.menu = None
 
+        # fix late context menus on parameter tree elements
+        elements = self.paramElem.child("Elements")
+        for c in elements.children():
+            for i in c.items:
+                try:
+                    i.contextMenu.addSeparator()
+                    i.contextMenu.addAction('Test alone').triggered.connect(partial(testElement,c))
+                except:
+                    pass
+
         # transitions
-        self.transitionsTree = YamlParameterTree(self)
+        self.transitionsTree = ParameterTree()
         self.transitionsTree.setParameters(self.paramTran, showTop=False)
 
         # divide whole window in two
@@ -170,22 +222,6 @@ class Application():
         propertySheetSplitter = QtGui.QSplitter()
         propertySheetSplitter.setOrientation(QtCore.Qt.Vertical)
 
-        menuBar = QtGui.QMenuBar()
-        actionMenu = menuBar.addMenu('Actions')
-        helpMenu = menuBar.addMenu('Help')
-        addElementMenu = actionMenu.addMenu('Add Element')
-        #addTransMenu = actionMenu.addMenu('Add Transition')
-
-        action = QtGui.QAction('Add Transition', propertySheetSplitter)
-        action.triggered.connect(self.addTransition)
-        actionMenu.addAction(action)
-
-        for e in Element.findTemplates():
-            action = QtGui.QAction(e, propertySheetSplitter)
-            action.triggered.connect(partial(self.addElement,e))
-            addElementMenu.addAction(action)
-
-        propertySheetSplitter.addWidget(menuBar)
         propertySheetSplitter.addWidget(self.elementsTree)
         propertySheetSplitter.addWidget(self.transitionsTree)
 
@@ -200,34 +236,27 @@ class Application():
         self.win.show()
         self.win.resize(800,800)
         # run
+        print self.getMainWindowId()
         QtGui.QApplication.instance().exec_()
 
-    def addTransition(self):
-        Transitions = self.paramTran.child('Transitions')
-        count = len(Transitions.children())
-        name = 'transition '+ str(count)
-        while name in Transitions.names.keys():
-            count+=1
-            name = 'transition '+ str(count)
-        t = extractElement(OrderedDict({'from':'completeX', 'to':'completeX', 'msg':'completeX'}),name)
-        Transitions.addChild(t)
-        self.transitionsTree.setParameters(self.paramTran)
-
-    def addElement(self, argument):
-        yamlTemplate = Element.getTemplate(argument)
-        propertyTemplate = extractElement(yamlTemplate, yamlTemplate['name'])
-        Elements = self.paramElem.child('Elements')
-        Elements.addChild(propertyTemplate)
+    def getMainWindowId(self):
+        wid = self.win.winId()
+        if platform.system() == "Windows":
+            import ctypes
+            ctypes.pythonapi.PyCObject_AsVoidPtr.restype = ctypes.c_void_p
+            ctypes.pythonapi.PyCObject_AsVoidPtr.argtypes = [ ctypes.py_object ]
+            wid = ctypes.pythonapi.PyCObject_AsVoidPtr(wid)
+        return wid
 
     def setupParameterTrees(self, yamlFile):
         """Build two parameters tree based on Elements and Transitions"""
-        #a = open("experiments/empty.yaml")
-        #f = open(yamlFile)
         self.yConfig = pushUp(yaml.load(open(yamlFile)))
         elements=[]
         for e in self.yConfig['elements']:
-            elements.append(extractElement(e,e['name']))
-        elementsGroup = {'type':'group','name':'Elements','children':elements}
+            elements.append(fromYamlToParameter(e,e['name']))
+            elements[-1]['renamable']=True
+            elements[-1]['removable']=True
+        elementsGroup = ElementsGroup(name='Elements', children=elements)
 
         transitions=[]
         for i,t in enumerate(self.yConfig['transitions']):
@@ -242,12 +271,16 @@ class Application():
             t['from']=tFrom
             t['to']=tTo
             t['msg']=msg
-            transitions.append(extractElement(t,'transition %d'%i))
-        transitionsGroup = {'type':'group','name':'Transitions','children':transitions}
+            myTransition = fromYamlToParameter(t,'transition %d'%i)
+            myTransition['removable']=True
+            myTransition['renamable']=True
+            transitions.append(myTransition)
+        transitions = TransitionsGroup(name="Transitions", children=transitions)
 
-        return ([elementsGroup], [transitionsGroup])
+        return ([elementsGroup], [transitions])
 
 
+"""
 ## If anything changes in the tree, print a message
 #def change(param, changes):
 #    return
@@ -277,7 +310,6 @@ class Application():
 #        ch2.sigValueChanging.connect(valueChanging)
 
 
-"""
 def save():
     global state
     state = p.saveState()
@@ -290,7 +322,6 @@ def restore():
 
 #p.param('Save/Restore functionality', 'Save State').sigActivated.connect(save)
 #p.param('Save/Restore functionality', 'Restore State').sigActivated.connect(restore)
-"""
 
 
 #def createNode(scene):
@@ -343,7 +374,7 @@ def restore():
 ## test save/restore
 #s = p.saveState()
 #p.restoreState(s)
-
+"""
 
 if __name__=='__main__':
     app = Application()
