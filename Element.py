@@ -4,26 +4,35 @@ import sys
 from Utils.Debug import printOut
 from Utils.Utils import *
 from collections import OrderedDict
-#try:
-#    import json
-#except ImportError:
-#    import simplejson as json
 
 #import external.yaml as yaml
 import yaml
 
 class Element(object):
     """
-    Base class for the Elements in the experiment.
-    Each element represents ONE stage in the experiment,
-    for example, one image, a text message, a timer,
-    a game!, a pilot...
+    The simulation is based on a Finite State Machine of
+    States/Elements, but with the exception that MORE than one
+    element can be active at a particular time...I know, sounds
+    horrible.
+    Each element represents some stimuli/functionality in the experiment,
+    for example, one image, a text message, a timer, a game!, a pilot...
+    It is a very flat hierarchy, and simplistic design.
     """
     def __init__(self,**kwargs):
         '''
-        Element constructor. Adds all kwargs as attributes. Creates some
-        useful attributes to give access to the World, and also to the
-        different scene parts (2d, 3d)
+        Element constructor. When the element is constructed is passed the YAML
+        configuration that is defined in the experiment file. Those kwargs will be
+        added as attributes. It also saves some useful attributes to give access
+        to the World, and also to the different scene parts (2d, 3d)
+        To allow for basic 2D transformations, each element can be manipulated in
+        run-time if the attribute "locked_xform" is defined as false.
+
+        If "locked_xform" is false, the user will be able to interact with the mouse and
+        keys <ctrl-1> for translation, <ctrl-2> for rotation, <ctrl-3> for scale
+        After the interaction, the tweaks will be saved in a file named after the experiment
+        name and the element name as: 'expXY_elName_xform.yaml'.
+        If the file exists, it will be overwritten.
+
         :param kwargs: dict
         :return: None
         '''
@@ -34,6 +43,8 @@ class Element(object):
         self.colours = getColors()
 
         dictionary = {}
+        # configuration can be in the experiment file or in a special file
+        # just for this element.
         if 'fname_config' in kwargs:
             try:
                 dictionary = yaml.load(open(kwargs['fname_config']))
@@ -42,6 +53,7 @@ class Element(object):
                 printOut("Fatal error loading config file " + kwargs['fname_config'], 0)
                 kwargs['world'].quit()
 
+        # ALL atributes are under "self.config"
         for k, v in kwargs.items():
             # make every argument from the fname_config file an attribute, including a reference
             # to world through self.config.world
@@ -58,12 +70,27 @@ class Element(object):
             else:
                 dictionary[k] = v
 
-        # keep a reference to the original YAML config
-        self.yaml_config = dictionary
-
         # make everything in the config file a simple object.
         self.config = objFromDict(dictionary)
         printOut("CONFIG LOADED FOR %s" % self.config.name, 4)
+
+        # all configuration options have been loaded.
+        # check if this Element can be moved around in run-time, and
+        # check if there is a xform file already in the filesystem.
+        xform_file = None
+        try:
+            xform_file = open('exp_' + self.config.name + '_xform_yaml')
+            xform_dict = yaml.load(xform_file)
+        except:
+            xform_dict = None
+        finally:
+            if xform_file:
+                xform_file.close()
+        setattr(self.config,'xform_dict',xform_dict)
+
+        # keep a reference to the original YAML config
+        self.yaml_config = dictionary
+
 
         # try to set some default values, each Element subclass can define
         # a set of default values that if not present in the config file are

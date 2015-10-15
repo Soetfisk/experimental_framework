@@ -11,15 +11,15 @@ elements:
 ####################################
  - className: EmptyState
    name: start
-   # RGB color tuple
-   color_background: (255,0,0)
    timeout: 0.1
+   # RGB color tuple
+#   color_background: (255,0,0)
 
  - className: EmptyState
    name: end
 
  - className: EmptyState
-   name: testingtesting
+   name: dummy
 ####################################
 # Text display elements.
 ####################################
@@ -72,6 +72,7 @@ elements:
    name: MessageAdjustScale
    text_text: "Please use the keys 'w' (increase), 's' (decrease) to adjust the size of the \nmodel (parachute+robot) so it occupies exactly 5 cm on your screen. \nFor finner adjustments use 'e' and 'd' accordingly.\n\nPress the key 'n' when you have finished the adjustment"
    tuple_topLeft: (0.1, 0.2)
+   locked: false
    keys:
     - key: n
       callback: sendMessage
@@ -82,8 +83,8 @@ elements:
    className: HUDTimer
    name: timer1
    text: "0.0"
-   tuple_topLeft: (0.1, 0.08)
-   hide: True
+   tuple_topLeft: (1.0, 1.0)
+   hide: False
 
  # One stop timer, can be initialized at the beginning
  - module: HUDText
@@ -318,12 +319,13 @@ elements:
      callback: hammerDown
 
 transitions:
-- trans: 'start @ mole1:auto'
-- trans: 'mole1 @ end:auto'
+- trans: 'start@timer1:auto'
+- trans: 'timer1@end:auto'
 
-#- trans: 'start @ eventLogger:auto'
-#- trans: 'start @ eyeTracker:auto'
-#- trans: 'IntroScreen @ thegame: auto'
+# - trans: 'start @ mole1:auto'
+# - trans: 'mole1 @ end:auto'
+# - trans: 'start @ eventLogger:auto'
+# - trans: 'start @ eyeTracker:auto'
 #- trans: 'IntroScreen @ countDown: auto'
 #- trans: 'thegame @ end: endOfGame'
 #- trans: 'countDown @ end: endOfGame'

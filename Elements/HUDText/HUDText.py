@@ -39,7 +39,7 @@ class HUDText(Element):
         tNP.setName(self.config.name)
         tNP.setScale(0.09)
 
-        topLeft = getattr(self.config,'topLeft',[0.0,0.0])
+        topLeft = getattr(self.config,'tuple_topLeft',[0.0,0.0])
 
         tNP.setPos(leftBorder + topLeft[0], 0, 1.0 - topLeft[1])
 

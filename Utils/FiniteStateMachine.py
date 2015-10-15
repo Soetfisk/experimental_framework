@@ -66,15 +66,16 @@ class FiniteStateMachine(object):
         updateLast = []
 
         for s in self.states.values():
-            sName = s.config.name
-            if sName in self.transitions.keys():
-                accepts = self.transitions[sName].keys()
-                if s.isActive() and event in accepts:
-                    # list of states to which transition.
-                    updateLast += self.transitions[sName][event]
-                    print "%s(%s) ---> %s" % (sName, event, self.transitions[sName][event])
-                    # exit state, and enter in one or many more.
-                    s.exitState()
+            if s.isActive():
+                sName = s.config.name
+                if sName in self.transitions.keys():
+                    accepts = self.transitions[sName].keys()
+                    if event in accepts:
+                        # list of states to which transition.
+                        updateLast += self.transitions[sName][event]
+                        print "%s(%s) ---> %s" % (sName, event, self.transitions[sName][event])
+                        # exit state, and enter in one or many more.
+                        s.exitState()
         for newState in list(set(updateLast)):
             self.states[newState].enterState()
 
