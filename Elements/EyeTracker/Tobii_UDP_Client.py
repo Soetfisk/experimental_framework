@@ -28,15 +28,17 @@ class Tobii_UDP_Client(EyeTrackerClient):
 
     def connect(self):
         self.udpSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.udpSocket.bind( (self.config.serverIp, self.config.serverPort ) )
-        self.udpSocket.settimeout(0.05)
+        self.udpSocket.settimeout(0.01)
+        # set address for recv_from and send_to automatically for the socket,
+        # so it is not really "connecting", just the lazy programmer...
+        self.udpSocket.connect((self.config.serverIp, self.config.serverPort))
+        #self.udpSocket.bind( (self.config.serverIp, self.config.serverPort ) )
 
         # create a task chain with ONE thread to listen for UDP packets
         taskMgr.setupTaskChain('listen_eyetracker', numThreads = 1, tickClock = None,
                        threadPriority = None , frameBudget = None,
                        frameSync = None, timeslicePriority = None)
         taskMgr.add( self.listenUdp, 'listenUdp', taskChain = 'listen_eyetracker' )
-
         self.seqNum = 0
 
     def disconnect(self):
@@ -65,7 +67,7 @@ class Tobii_UDP_Client(EyeTrackerClient):
 
     def listenUdp(self, t):
         try:
-            data, addr = self.udpSocket.recvfrom(128)
+            data = self.udpSocket.recv(128)
             if data:
                 gameTime = time.time()
                 gazeSample, timestamp = literal_eval(data)

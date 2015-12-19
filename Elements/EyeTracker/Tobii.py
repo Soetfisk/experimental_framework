@@ -22,18 +22,20 @@ The clock from the tracker can drift from the clock of the client (PC).
 
 # tobii imports
 try:
+    import tobii.sdk as sdk
     from tobii.sdk.basic import EyetrackerException
-    import tobii.sdk.mainloop 
-    import tobii.sdk.browsing
-    import tobii.sdk.eyetracker
-    from tobii.sdk.types import Point2D, Blob
+    import sdk.mainloop
+    import sdk.browsing
+    import sdk.eyetracker
+    from sdk.types import Point2D, Blob
 except:
     pass
 
 from direct.showbase.DirectObject import DirectObject
-from Debug import printOut
-class TobiiEyeTracker(DirectObject, simul=True):
-    def __init__(self):
+from Utils.Debug import printOut
+
+class TobiiEyeTracker(DirectObject):
+    def __init__(self, simul=False):
         """ constructor for the EyeTracker class """
         self.tracker = None
         self.trackerConnected = False
@@ -52,10 +54,13 @@ class TobiiEyeTracker(DirectObject, simul=True):
         """ Mandatory initialization of the whole library """
         
         # TOBII SDK
-        if (not self.simul):
-            tobii.sdk.init()
-            self.mainLoopThread = tobii.sdk.mainloop.MainloopThread()
-            self.mainLoopThread.start()
+        try:
+            if (not self.simul):
+                sdk.init()
+                self.mainLoopThread = sdk.mainloop.MainloopThread()
+                self.mainLoopThread.start()
+        except Exception,e:
+            print e
 
         # creates AND starts the browser right away.
         # The trick of using a lambda function is to actually call the callback from

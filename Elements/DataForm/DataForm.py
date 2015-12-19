@@ -61,7 +61,7 @@ class DataForm(Element):
         # background colour
         colour = self.colours['dark_grey']
         # guiLabels colour
-        labelColour = self.config.settings.labelcolour
+        labelColour = getattr(self.config.settings, 'color_label', (1.0,1.0,1.0,1.0))
         # global scale of the frame
         scale    = self.config.settings.scale
         # canvas with scrolling capabilities
@@ -111,7 +111,7 @@ class DataForm(Element):
                         command=self.setText, extraArgs=[],
                         pos=(0,1,widgetYpos), numLines = 1, focus=0)
             elif ( str(i.type) == 'Option' ):
-                widget = DirectOptionMenu( text="options", scale=1.10*scale, items=i.values,
+                widget = DirectOptionMenu( text="options", scale=1.10*scale, items=i.tuple_values,
                         popupMarkerBorder=(1,0),
                         initialitem=0, command=self.optionMenu, extraArgs=[],
                         pos=(0,1,widgetYpos))

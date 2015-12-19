@@ -118,6 +118,7 @@ class WhackAMole(Element):
         self.moles=[]
         self.calibPoints=[]
         self.grass=[]
+        self.moleIsDown = False
 
 
         try:
@@ -239,8 +240,19 @@ class WhackAMole(Element):
         Element.enterState(self)
         self.hudNP.show()
         taskMgr.add(self.updateGame,'whack-a-mole')
+        self.config.world.accept('moleUp', self.moleMoved,['up'])
+        self.config.world.accept('moleDown', self.moleMoved,['down'])
+
+    def moleMoved(self, where):
+        if where == 'down':
+            self.moleIsDown = True
+        else:
+            self.moleIsDown = False
 
     def updateGame(self, task):
+        if len(self.calibPoints)==0 and self.moleIsDown:
+            #self.sendMessage('calibrationFinished')
+            return task.cont
         # if None it means there is no mole up
         elapsed = time.time()-self.lastTime
         if self.moleUp != None:
@@ -249,9 +261,6 @@ class WhackAMole(Element):
                 if (self.moleUpHitCount>1):
                     # remove element at index moleUp
                     self.calibPoints.remove(self.moleUp)
-                    if len(self.calibPoints)==0:
-                        messenger.send('calibrationFinished')
-                        return task.done
                 self.moleUpHitCount = 0
                 self.moleUp = None
                 self.lastTime=time.time()

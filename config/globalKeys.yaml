@@ -17,9 +17,6 @@ global_keys:
   - key: control-r
     callback: restartSimulation
     comment: restartSimulation
-  - key: '1'
-    callback: testOne
-    comment: testOne
   - key: f
     callback: toggleFullScreen
     comment: Toggles fullscreen without closing the game

@@ -1,0 +1,156 @@
+elements:
+
+####################################
+# Initial and final states in the FSM.
+####################################
+ - className: EmptyState
+   name: start
+   timeout: 0.1
+
+ - className: EmptyState
+   name: end
+
+####################################
+# Text display elements.
+####################################
+
+ # introduction to the experiment
+ - className: ScreenText
+   fname_message: HiddenCalibration/introExperiment.txt
+   name: introText
+
+ - module: DataForm
+   className: ConsentForm
+   name: consentForm
+   fname_config: HiddenCalibration/consentForm.yaml
+
+ - className: ScreenText
+   name: whackIntroText
+   fname_message: HiddenCalibration/whackIntroText.txt
+   keys:
+    - key: n
+      callback: sendMessage
+      tuple_args: ('auto')
+
+ - module: ScreenText
+   name: FinalScreen
+   fname_message: HiddenCalibration/finalText.txt
+
+ - className: DataForm
+   name: userInfo
+   settings:
+    outfiledir: run
+    outfileprefix: userdata
+    formId: userdata
+    scale: 0.06
+    maxlabel: 10
+    color_label: (1.0,0.5,0.5,1.0)
+    title: 'Please provide us with some information about you:'
+   # form description
+   input:
+    - label: Gender
+      type: Option
+      tuple_values: ("Male","Female")
+    - label: Do you have vision problems
+      type: Option
+      tuple_values: ("Yes","No")
+    - label: Do you have experience playing games
+      type: Option
+      tuple_values: ("Yes","No")
+    - label: Age
+      type: TextEntry
+      default: 0
+
+# - module: EyeTracker
+#   className: Tobii_UDP_Client
+#   name: eyeTracker
+
+# not template yet...
+ - module: EventLogger
+   className: EventLogger
+   name: eventLogger
+
+# no template yet
+ - className: WhackAMole
+   name: whackAMole
+   fname_moleModel: Elements/WhackAMole/textures/mole.egg
+   fname_holeTop: Elements/WhackAMole/textures/tophole.png
+   fname_holeBottom: Elements/WhackAMole/textures/botomhole.png
+   fname_back: Elements/WhackAMole/textures/back.png
+   fname_mole: Elements/WhackAMole/textures/mole_1.png
+   fname_plainGrass: Elements/WhackAMole/textures/no_hole.jpg
+   int_gridSize: 8
+   int_moleCalibPoints: 4
+   int_waitForDown: 4
+   keys:
+   - key: mouse1
+     callback: hammerDown
+
+ - className: SlidingTile
+   name: slidingTile
+   gridWidth: 3
+   gridHeight: 3
+   scale: 0.4
+   color_tile: (18/255.0,152/255.0,196/255.0,1.0)
+   keys:
+   - key: g
+     callback: printPuzzle
+   - key: s
+     callback: shuffle
+
+# - trans: 'start @ mole1:auto'
+# - trans: 'mole1 @ end:auto'
+# - trans: 'start @ eventLogger:auto'
+# - trans: 'start @ eyeTracker:auto'
+#- trans: 'IntroScreen @ countDown: auto'
+#- trans: 'thegame @ end: endOfGame'
+#- trans: 'countDown @ end: endOfGame'
+#- trans: 'IntroScreen @ consentForm:auto'
+#- trans: 'consentForm @ UserInfo:yesPressed'
+#- trans: 'consentForm @ end:noPressed'
+#- trans: 'UserInfo @ colourBlindText:nextPressed'
+#- trans: 'colourBlindText @ colourBlindCheck:auto'
+#- trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
+#- trans: 'colourBlindProblem @ end:auto'
+
+# TWO STATES ACTIVATED HERE
+#- trans: 'colourBlindCheck @ MessageAdjustScale:imageQueryOk'
+#- trans: 'colourBlindCheck @ rescaleScreen:imageQueryOk'
+
+# TWO STATES DEACTIVATE INTO ONE
+#- trans: 'rescaleScreen @ gameIntroText:nextPressed'
+#- trans: 'MessageAdjustScale @ gameIntroText:nextPressed'
+
+#- trans: 'start @ gameIntroText:xxx'
+#- trans: 'gameIntroText @ thegame:auto'
+#- trans: 'gameIntroText @ countDown:auto'
+
+#- trans: 'countDown @ end: endOfGame'
+#- trans: 'thegame @ end: endOfGame'
+
+#- trans: 'countDown @ gameQuestions:endOfGame'
+#- trans: 'thegame @ gameQuestions:endOfGame'
+
+#- trans: 'gameQuestions @ PrePilotScreen:auto'
+#- trans: 'PrePilotScreen @ end:auto'
+
+#- trans: 'PrePilotScreen @ Pilot:auto'
+#- trans: 'Pilot @ PilotQuestionnaire: auto'
+
+# SERVER UPLOAD INFORMATION
+# - trans: 'PilotQuestionnaire @ studyServer: auto'
+# STUDY SERVER UPLOAD TO FINAL SCREEN
+# - trans: 'studyServer @ FinalScreen: dataSaved'
+# END
+# - trans: 'FinalScreen@end:auto'
+transitions:
+- trans: 'start@slidingTile:auto'
+- trans: 'slidingTile@introText:auto'
+- trans: 'introText@end:auto'
+#- trans: 'introText@consentForm:auto'
+#- trans: 'consentForm@userInfo:yesPressed'
+#- trans: 'consentForm@end:noPressed'
+#- trans: 'userInfo@whackIntroText:nextPressed'
+#- trans: 'whackIntroText@whackAMole:auto'
+#- trans: 'start@whackAMole:auto'
+#- trans: 'whackAMole@end:calibrationFinished'

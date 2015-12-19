@@ -6,9 +6,28 @@ from Element import *
 from Logger import Logger
 
 # Basic protocol to communicate with the Eye Tracker
-# NO CALIBRATION YET
-TRACKER_MSG = enum(CONNECT=0, DISCONNECT=1, START_TRACKING=2, STOP_TRACKING=3)
-
+CLIENT_MSG_ID = enum(
+	DUMMY_MSG		= 0,
+	INIT_TRACKER	= 1,
+	START_CALIB		= 1<<1,
+	STOP_CALIB		= 1<<2,
+	ADD_CALIB_POINT	= 1<<3,
+	REM_CALIB_POINT = 1<<4,
+	START_TRACKING  = 1<<5,
+	STOP_TRACKING   = 1<<6
+)
+SERVER_MSG_ID = enum(
+	DUMMY_MSG = 0,
+	OK        = 1,
+	ERR       = 2,
+	GAZE_DATA = 4
+)
+TRACKER_STATUS = enum(
+    DISCONNECTED = 0,
+    CONNECTED = 1,
+    CALIBRATING = 2,
+    TRACKING = 4,
+)
 
 class EyeTrackerClient(Element):
     def __init__(self, **kwargs):
@@ -27,12 +46,9 @@ class EyeTrackerClient(Element):
         self.hideElement()
 
         """ constructor for the EyeTracker class """
-        self.connected = False
-        self.tracking = False
+        self.status = TRACKER_STATUS.DISCONNECTED
         # gazeData is (timeStamp, x, y)
         self.gazeData = []
-        # fixations is (timeStamp, x, y, duration)
-        self.fixations = []
 
         if self.config.logGaze:
             self.gazeLogger = Logger("run/gazeData_"+self.config.world.participantId+".log",mode='w')
@@ -57,7 +73,7 @@ class EyeTrackerClient(Element):
         :param smooth: Bool
         :return: (float,float) or None
         """
-        if self.tracking:
+        if self.status == TRACKER_STATUS.TRACKING:
             self.gazeMutex.acquire()
             return self.gazeData[-1][0]
             self.gazeMutex.release()

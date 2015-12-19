@@ -2,7 +2,11 @@
 from direct.gui.DirectGui import *
 from direct.task.Task import *
 from panda3d.core import *
+from direct.gui.OnscreenText import OnscreenText
+import random as rnd
+
 from Element import *
+
 
 #sys utils
 import sys
@@ -23,7 +27,7 @@ class ScreenText(Element):
         # this defines:
         # self.sceneNP and self.hudNP
 
-        text = getattr(self.config, 'message', None)
+        text = getattr(self.config, 'fname_message', None)
         if text is None:
             printOut("Missing reference to what text to display when building ScreenText!", 0)
             sys.exit()
@@ -49,6 +53,7 @@ class ScreenText(Element):
         # attach the text node to the HUD section
         tNP.reparentTo(self.hudNP)
         # hide the whole node
+
         self.hideElement()
 
     def enterState(self):
