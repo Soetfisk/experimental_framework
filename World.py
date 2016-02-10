@@ -25,10 +25,6 @@ from panda3d.core import TextNode
 from panda3d.core import WindowProperties
 import direct.directbase.DirectStart
 
-
-# python threading for Eye-tracker
-from Tracker import Tracker
-
 # logger class
 from Logger import Logger
 # debug class
@@ -114,9 +110,6 @@ class World(DirectObject):
 
         # do some basic setup common to the whole framework
         self.generalSetup()
-
-        # for the Eye-tracker
-        self.tracker = Tracker()
 
         # build FSM of the experiment
         self.fsm = self.setupFSM(experiment)
@@ -524,7 +517,6 @@ class World(DirectObject):
     def quit(self):
         self.log.logEvent("Simulation finished\n", time.time())
         self.log.stopLog()
-        self.tracker.stopTrack()
         sys.exit()
 
     #    def _quit(self):

@@ -6,27 +6,32 @@ from Element import *
 from Logger import Logger
 
 # Basic protocol to communicate with the Eye Tracker
+# message from Client to EyeTracker server
 CLIENT_MSG_ID = enum(
 	DUMMY_MSG		= 0,
-	INIT_TRACKER	= 1,
-	START_CALIB		= 1<<1,
-	STOP_CALIB		= 1<<2,
-	ADD_CALIB_POINT	= 1<<3,
-	REM_CALIB_POINT = 1<<4,
-	START_TRACKING  = 1<<5,
-	STOP_TRACKING   = 1<<6
+	START_CALIB		= 1,
+	STOP_CALIB		= 2,
+	ADD_CALIB_POINT	= 3,
+	REM_CALIB_POINT = 4,
+	START_TRACKING  = 5,
+	STOP_TRACKING   = 6,
+    GET_STATUS      = 7,
+    REM_LAST_CALIB_POINT = 8,
 )
+# message from Eyetracker Server to Client
 SERVER_MSG_ID = enum(
 	DUMMY_MSG = 0,
 	OK        = 1,
 	ERR       = 2,
-	GAZE_DATA = 4
+	GAZE_DATA = 4,
+    TRACKER_STATUS = 5
 )
+
 TRACKER_STATUS = enum(
-    DISCONNECTED = 0,
-    CONNECTED = 1,
-    CALIBRATING = 2,
-    TRACKING = 4,
+    DISCONNECTED    = 0,
+    CONNECTED       = 1,
+    CALIBRATING     = 2,
+    TRACKING        = 3,
 )
 
 class EyeTrackerClient(Element):
@@ -38,22 +43,26 @@ class EyeTrackerClient(Element):
         """
         if getattr(self, "defaults", None) is None:
             self.defaults = {}
+        # setting logGaze before constructing Element, so it will
+        # end up in self.config.logGaze == True
         self.defaults["logGaze"] = True
 
+        # call Element constructor
         super(EyeTrackerClient, self).__init__(**kwargs)
 
-        # this is not a visible element.
+        # this is not a visible element!!!
         self.hideElement()
 
         """ constructor for the EyeTracker class """
         self.status = TRACKER_STATUS.DISCONNECTED
-        # gazeData is (timeStamp, x, y)
+        # gazeData is a list of triplets (timeStamp, x, y)
         self.gazeData = []
 
         if self.config.logGaze:
+            # one gaze log per participant
             self.gazeLogger = Logger("run/gazeData_"+self.config.world.participantId+".log",mode='w')
         else:
-            self.gazeLogger = Logger("noLog", mode='w')
+            self.gazeLogger = Logger("noLog")
         self.gazeLogger.startLog()
 
         # create a mutex for accessing the gazeData list
@@ -75,21 +84,47 @@ class EyeTrackerClient(Element):
         """
         if self.status == TRACKER_STATUS.TRACKING:
             self.gazeMutex.acquire()
+            # get LAST sample written (no filter)
             return self.gazeData[-1][0]
             self.gazeMutex.release()
         else:
             return None
 
-    def connect(self):
-        pass
-
-    def disconnect(self):
-        pass
+    def appendSample(self, timestamp, x, y):
+        self.gazeMutex.acquire()
+        self.gazeData.append((timestamp,x,y))
+        self.gazeMutex.release()
 
     def startTracking(self):
         pass
 
-    def stopTracking(self):
+    def stopTracking(selfs):
+        pass
+
+    def startCalibration(self):
+        pass
+
+    def stopCalibration(self):
+        pass
+
+    def addCalibrationPoint(self, x, y):
+        pass
+
+    def removeCalibrationPoint(self, x, y):
+        pass
+
+    def connect(self):
+        """
+        Implemented in subclass
+        :return:
+        """
+        pass
+
+    def disconnect(self):
+        """
+        Implemented in subclass
+        :return:
+        """
         pass
 
     def enterState(self):
@@ -99,7 +134,5 @@ class EyeTrackerClient(Element):
     def exitState(self):
         self.gazeLogger.logEvent("INFO - Closing EyeTracker client\n")
         self.gazeLogger.stopLog()
-        #if (getattr(self.config, 'logGaze', False)):
-        #    self.saveGazeData()
         super(EyeTrackerClient, self).exitState()
 

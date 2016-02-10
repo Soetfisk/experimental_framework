@@ -61,9 +61,51 @@ elements:
       type: TextEntry
       default: 0
 
-# - module: EyeTracker
-#   className: Tobii_UDP_Client
-#   name: eyeTracker
+ - module: EyeTracker
+   className: Tobii_UDP_Client
+   name: eyeTracker
+   bool_printGaze: True
+   keys:
+   - key: s
+     callback: startTracking
+   - key: d
+     callback: stopTracking
+   - key: g
+     callback: startCalibration
+   - key: h
+     callback: stopCalibration
+   - key: 1
+     callback: addCalibrationPoint
+     tuple_args: (0.0,0.0)
+   - key: 2
+     callback: addCalibrationPoint
+     tuple_args: (0.5,0.0)
+   - key: 3
+     callback: addCalibrationPoint
+     tuple_args: (1.0,0.0)
+   - key: 4
+     callback: addCalibrationPoint
+     tuple_args: (0.0,0.5)
+   - key: 5
+     callback: addCalibrationPoint
+     tuple_args: (0.5,0.5)
+   - key: 6
+     callback: addCalibrationPoint
+     tuple_args: (0.5,1.0)
+   - key: 7
+     callback: addCalibrationPoint
+     tuple_args: (0.0,1.0)
+   - key: 8
+     callback: addCalibrationPoint
+     tuple_args: (0.5,1.0)
+   - key: 9
+     callback: addCalibrationPoint
+     tuple_args: (1.0,1.0)
+   - key: 0
+     callback: removeCalibrationPoint
+     tuple_args: (1.0,1.0)
+   - key: p
+     callback: removeLastCalibrationPoint
 
 # not template yet...
  - module: EventLogger
@@ -144,9 +186,10 @@ elements:
 # END
 # - trans: 'FinalScreen@end:auto'
 transitions:
-- trans: 'start@slidingTile:auto'
-- trans: 'slidingTile@introText:auto'
+- trans: 'start@introText:auto'
+- trans: 'start@eyeTracker:auto'
 - trans: 'introText@end:auto'
+- trans: 'eyeTracker@end:auto'
 #- trans: 'introText@consentForm:auto'
 #- trans: 'consentForm@userInfo:yesPressed'
 #- trans: 'consentForm@end:noPressed'

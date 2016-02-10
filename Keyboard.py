@@ -54,7 +54,7 @@ class Keyboard():
 
     def getTextKey(self, key):
         """for a given key, returns the comment that explains what it does"""
-        printOut("getTextKey with %s" % key, 2)
+        printOut("getTextKey with %s" % key, 3)
         # keys are stored in a tuple like:  (registrant, callback, comment, display)
         return "Key %s: %s" % (key, self.data[key][2])
 

@@ -5,7 +5,7 @@ from Utils.Debug import printOut
 class Logger(object):
     """simple class to dump timestamps and
     events from the game"""
-    def __init__(self,fileName, mode):
+    def __init__(self,fileName, mode = 'a'):
         "Creates a log, throws exception of error opening file"
 
         # set this to -1 until we start logging
@@ -27,29 +27,17 @@ class Logger(object):
         else:
             self.logging = False
 
-        if self.logging is False:
-            # avoid any call to this functions with a dummy function
-            self.startLog = self._startLog
-            self.logEvent = self._logEvent
-            self.stopLog  = self._stopLog
-
-    def _noLog(self):
-        pass
-
     def isLogging(self):
         return self.logging
 
-    def _startLog(self,t):
-        pass
     def startLog(self,t=-1):
+        if not self.logging:
+            return
         if t==-1:
             t = time.time()
         self.baseTime = t
         # instead of writing into a file, dump all in memory, and write at the end
         self.logStarted=True
-
-    def _logEvent(self, event, ts):
-        pass
 
     def writeln(self, text):
         """
@@ -67,17 +55,29 @@ class Logger(object):
         key and arguments or extra description of the event
         if necessary"""
         # format output...
+        if not self.logging:
+            return
+
         if (ts==-1):
             ts = time.time()
 
         self.logList.append("%7.4f:%s" % (ts - self.baseTime, event))
 
-    def _stopLog(self):
-        pass
     def stopLog(self):
-        self.closeLog(time.time())
+        """
+        Stop logging.
+        :return: None
+        """
+        if not self.logging:
+            return
+        self._closeLog(time.time())
 
-    def closeLog(self, ts=-1):
+    def _closeLog(self, ts=-1):
+        """
+        Private function, used by stopLog, to close the log file if necessary
+        :param ts: timestamp
+        :return: None
+        """
         if (ts == -1):
             ts = time.time()
 
@@ -86,8 +86,6 @@ class Logger(object):
             printOut("Warning: timestamps will not make sense",1)
             self.baseTime=0
 
-
-        #print "Closing log on " + str(self.outfile)
         ts2 = ts - self.baseTime
         # write backlog
         for l in self.logList:
