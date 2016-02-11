@@ -65,8 +65,8 @@ class Tobii_UDP_Client(EyeTrackerClient):
                        frameSync = None, timeslicePriority = None)
         # This task will listen for protocol messages from the server and also for
         # gaze data in a single thread.
-        taskMgr.add( self.listenUdp, 'listenUdp', taskChain = 'listen_eyetracker' )
         self.seqNum = 0
+
     def startTracking(self):
         if self.clientStatus != CLIENT_STATUS.NONE:
             print "Client must be in NONE state to start tracking."
@@ -75,13 +75,20 @@ class Tobii_UDP_Client(EyeTrackerClient):
         msg = '' + pack('b',CLIENT_MSG_ID.START_TRACKING)
         self.udpServerSocket.send(msg)
         self.clientStatus = CLIENT_STATUS.TRACKING
+        print "STARTING TRACKING."
+        taskMgr.add( self.listenUdp, 'listenUdp', taskChain = 'listen_eyetracker' )
+
     def stopTracking(self):
         if self.clientStatus != CLIENT_STATUS.TRACKING:
             print "Client must be in TRACKING state to stop tracking."
+            print "Client is in state: %d" % self.clientStatus
             return
         msg = '' + pack('b',CLIENT_MSG_ID.STOP_TRACKING)
+        taskMgr.remove( 'listenUdp' )
         self.udpServerSocket.send(msg)
         self.clientStatus = CLIENT_STATUS.NONE
+        print "STOPING TRACKING."
+
     def startCalibration(self):
         if self.clientStatus != CLIENT_STATUS.NONE:
             print "client must in NONE state to start calibrating"
@@ -89,6 +96,7 @@ class Tobii_UDP_Client(EyeTrackerClient):
         msg = '' + pack('b',CLIENT_MSG_ID.START_CALIB)
         self.udpServerSocket.send(msg)
         self.clientStatus = CLIENT_STATUS.CALIBRATING
+
     def stopCalibration(self):
         if self.clientStatus != CLIENT_STATUS.CALIBRATING:
             print "client must be in CALIBRATING state to stop calibration"
@@ -134,16 +142,52 @@ class Tobii_UDP_Client(EyeTrackerClient):
         if self.clientStatus is CLIENT_STATUS.TRACKING:
             # listen for gaze data, 24 bytes! (long long, double, double)
             try:
-                # packages here should always be 24 bytes (timestamp long long, double x, double y)
-                data, addr = self.udpGazeSocket.recvfrom(24)
+                # packages here should always be 97 bytes (timestamp long long, double x, double y)
+                #
+                # 8 bytes for timestamp                                  Q long long
+                # 4 bytes for tracker_status ENUM                        B unsigned char
+                # 4 bytes padding                                        B unsigned char
+                # 88 bytes left eye in double3 double3 double3 double2   ddd ddd ddd dd
+                # 88 bytes right eye in double3 double3 double3 double2  ddd ddd ddd dd
+                # The 88 bytes are:
+                #  struct tobiigaze_point_3d eye_position_from_eye_tracker_mm;
+                #  struct tobiigaze_point_3d eye_position_in_track_box_normalized;
+                #  struct tobiigaze_point_3d gaze_point_from_eye_tracker_mm;
+                #  struct tobiigaze_point_2d gaze_point_on_display_normalized;
+
+                data, addr = self.udpGazeSocket.recvfrom(192)
                 if len(data)>0:
-                    timestamp,x,y  = unpack('Qdd', data)
-                    # TODO: append samples!
-                    # self.appendSample(timestamp,x,y)
-                    print timestamp,x,y
+                    gaze_data  = unpack('QBB' + 2*(3*'ddd' + 'dd'), data)
+                    left2D = (gaze_data[-13],gaze_data[-12])
+                    right2D = (gaze_data[-2], gaze_data[-1])
+                    avg = ((left2D[0]+right2D[0]) / 2.0 ,(left2D[1]+right2D[1]) / 2.0)
+
+                    if gaze_data[1] == 0: # NO EYE DATA PRESENT
+                        print "no eye data present"
+                        return Task.cont
+                    elif gaze_data[1] == 1: # BOTH EYES TRACKED
+                        pass
+                        # avg = (left2D[0]+right2D[0] / 2.0 ,left2D[1]+right2D[1] / 2.0)
+                    elif gaze_data[1] in {2,3}: # LEFT EYE TRACKED
+                        avg = (left2D[0] ,left2D[1])
+                    elif gaze_data[1] in {5,6}: # RIGHT EYE TRACKED
+                        avg = (right2D[0] ,right2D[1])
+                    elif gaze_data[1] == 4:       # WE DONT KNOW
+                        print 'tracking one eye!, unknown which'
+                        print 'left X: ', left2D[0]
+                        print 'right X: ', right2D[0]
+
+                    self.appendSample(data[0], avg[0], avg[1] )
+                    print gaze_data[0], avg[0], avg[1]
+                else:
+                    print "read something empty ?"
+
             except socket.timeout,te:
                 # sleep 10 millisecond, this is a 30hz eye-tracker!
                 # print te
+                print "No gaze data available"
                 time.sleep(0.01)
+        else:
+            print 'executing listenUdp whilst not tracking ?!?!'
         return Task.cont
 
