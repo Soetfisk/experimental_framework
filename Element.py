@@ -173,7 +173,15 @@ class Element(object):
         printOut("Registering keys for the current element", 4)
         for k in keys:
             comment = getattr(k, 'comment', '')
-            cb = getattr(self, k.callback, None)
+            # support for references using dot notation only!
+            # for example:
+            # callback: anotherObject.attribute.method
+            tokens = k.callback.split('.')
+            prevToken = self
+            for t in tokens:
+                cb = getattr(prevToken, t, None)
+                prevToken = cb
+
             key = getattr(k, 'key', None)
             # in case is the letter 1,2,3..., or even a number 123
             key = str(key)
@@ -233,7 +241,6 @@ class Element(object):
         printOut("Entering state %s" % self.config.name, 1)
         #self.config.world.resetKeys()
         self.showElement()
-        self.registerKeys()
 
         # is there a timeout set for this state ?
         t = getattr(self.config, 'timeout', None)
@@ -271,10 +278,13 @@ class Element(object):
         for ref in refs:
             if ref in self.config.world.elements:
                 el = self.config.world.elements[ref]
-                setattr(self.config,ref, el)
+                setattr(self,ref, el)
             else:
                 printOut("ERROR: Element %s trying to set a reference to non-existent element %s!" %
                          (self.config.name, ref ),0)
+
+        # lastly, register keys.
+        self.registerKeys()
 
     def removeElement(self):
         self.sceneNP.detachNode()

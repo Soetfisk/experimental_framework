@@ -7,7 +7,6 @@ from ast import literal_eval
 from Utils.Debug import *
 from struct import *
 
-
 CLIENT_STATUS = enum(
     CALIBRATING = 0,
     TRACKING = 1,

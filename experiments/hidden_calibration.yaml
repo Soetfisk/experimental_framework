@@ -18,6 +18,12 @@ elements:
  - className: ScreenText
    fname_message: HiddenCalibration/introExperiment.txt
    name: introText
+   refsto: [eyeTracker]
+   keys:
+   - key: e
+     callback: eyeTracker.startTracking
+   - key: r
+     callback: eyeTracker.stopTracking
 
  - module: DataForm
    className: ConsentForm

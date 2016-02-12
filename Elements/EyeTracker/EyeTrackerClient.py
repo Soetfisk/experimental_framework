@@ -85,8 +85,9 @@ class EyeTrackerClient(Element):
         if self.status == TRACKER_STATUS.TRACKING:
             self.gazeMutex.acquire()
             # get LAST sample written (no filter)
-            return self.gazeData[-1][0]
+            lastSample = self.gazeData[-1][-2:]
             self.gazeMutex.release()
+            return lastSample
         else:
             return None
 
