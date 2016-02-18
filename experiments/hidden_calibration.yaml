@@ -121,14 +121,14 @@ elements:
 # no template yet
  - className: WhackAMole
    name: whackAMole
-   fname_moleModel: Elements/WhackAMole/textures/mole.egg
+   fname_moleModel: Elements/WhackAMole/textures/mole2.egg
    fname_holeTop: Elements/WhackAMole/textures/tophole.png
    fname_holeBottom: Elements/WhackAMole/textures/botomhole.png
    fname_back: Elements/WhackAMole/textures/back.png
    fname_mole: Elements/WhackAMole/textures/mole_1.png
    fname_plainGrass: Elements/WhackAMole/textures/no_hole.jpg
    int_gridSize: 8
-   int_moleCalibPoints: 4
+   int_moleCalibPoints: 10
    int_waitForDown: 4
    keys:
    - key: mouse1
@@ -192,9 +192,9 @@ elements:
 # END
 # - trans: 'FinalScreen@end:auto'
 transitions:
-- trans: 'start@introText:auto'
+- trans: 'start@whackAMole:auto'
 - trans: 'start@eyeTracker:auto'
-- trans: 'introText@end:auto'
+- trans: 'whackAMole@end:auto'
 - trans: 'eyeTracker@end:auto'
 #- trans: 'introText@consentForm:auto'
 #- trans: 'consentForm@userInfo:yesPressed'

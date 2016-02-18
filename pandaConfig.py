@@ -10,9 +10,9 @@
 
 options = [
 "win-origin t",
-"win-size 1024 768",
+"win-size 1920 1080",
 "win-fixed-size t",
-"fullscreen f",
+"fullscreen t",
 "cursor-hidden f",
 "show-frame-rate-meter f"
 ]

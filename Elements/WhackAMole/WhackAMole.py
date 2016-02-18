@@ -164,7 +164,7 @@ class WhackAMole(Element):
         self.hammer.setScale(0.5,0.5,0.5)
         self.hammer.reparentTo(self.hudNP)
 
-        self.hammerAnim.setPlayRate(-1)
+        self.hammerAnim.setPlayRate(-1.5)
         self.camRatio = self.config.world.camera.ratio
 
         # remove some calibration points until reaching the limit from the config file
@@ -197,7 +197,11 @@ class WhackAMole(Element):
         moleAnim = self.moles[self.moleUp].getMoleAnim()
         moleAnim.play(3,5)
         #self.hideMole()
-
+    def moleThirdHit(self):
+        if self.moleUp==None:
+            return
+        moleAnim = self.moles[self.moleUp].getMoleAnim()
+        moleAnim.play(5,6)
 
     def hammerDown(self):
         if self.hammerAnim.getFrame()!=0:
@@ -221,6 +225,8 @@ class WhackAMole(Element):
                 # this is the second hit
                 elif self.moleUpHitCount == 1:
                     self.moleSecondHit()
+                elif self.moleUpHitCount == 2:
+                    self.moleThirdHit()
                 # more than 2 hits
                 else:
                     pass
@@ -256,9 +262,9 @@ class WhackAMole(Element):
         # if None it means there is no mole up
         elapsed = time.time()-self.lastTime
         if self.moleUp != None:
-            if (self.moleUpHitCount > 1 or elapsed > self.waitForDown):
+            if (self.moleUpHitCount > 2 or elapsed > self.waitForDown):
                 self.moles[self.moleUp].moleDown()
-                if (self.moleUpHitCount>1):
+                if (self.moleUpHitCount>2):
                     # remove element at index moleUp
                     self.calibPoints.remove(self.moleUp)
                 self.moleUpHitCount = 0
