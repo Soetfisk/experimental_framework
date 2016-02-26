@@ -61,6 +61,8 @@ class Logger(object):
         if (ts==-1):
             ts = time.time()
 
+        if event[-1]!='\n':
+            event = event + '\n'
         self.logList.append("%7.4f:%s" % (ts - self.baseTime, event))
 
     def stopLog(self):

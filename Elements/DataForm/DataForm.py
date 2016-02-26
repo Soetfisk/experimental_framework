@@ -213,10 +213,18 @@ class DataForm(Element):
         s = self.config.settings
         filename = "%s/%s_%s.txt" % (s.outfiledir, s.outfileprefix, self.config.world.participantId)
         try:
+            # write comma separated values
             out = open(filename, 'w')
-            out.write("participant id: %s\n" % self.config.world.participantId)
+            # header
+            out.write("# participant id, ")
             for (k,v) in self.userInput.items():
-                out.write("%s: %s\n" %(k,v))
+                out.write("%s," %k)
+            out.write("\n")
+            # values
+            out.write("%s," % self.config.world.participantId)
+            for (k,v) in self.userInput.items():
+                out.write("%s," %v)
+
             out.close()
         except Exception, e:
             printOut(str(e), 0)

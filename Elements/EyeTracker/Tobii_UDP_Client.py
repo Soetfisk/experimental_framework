@@ -7,11 +7,6 @@ from ast import literal_eval
 from Utils.Debug import *
 from struct import *
 
-CLIENT_STATUS = enum(
-    CALIBRATING = 0,
-    TRACKING = 1,
-    NONE = 2
-)
 
 # @TODO Implement TCP client, protocol over TCP to connect to C Client,
 # @TODO
@@ -32,12 +27,28 @@ class Tobii_UDP_Client(EyeTrackerClient):
         self.defaults["gazeDataIp"] = "127.0.0.1"
         self.defaults["gazeDataPort"] = 5432
 
+        # call constructor, which in turn calls Element constructor
         super(Tobii_UDP_Client, self).__init__(**kwargs)
 
         # fill in some empty samples in case I am asked for samples right away
-        self.gazeData = [((0.0,0.0), 0)] * 20
-
         self.clientStatus = CLIENT_STATUS.NONE
+
+        gazeTex = loader.loadTexture('Elements/Game/models/textures/outter_circle.png')
+        gazeTex.setMinfilter(Texture.FTLinearMipmapLinear)
+        gazeTex.setAnisotropicDegree(2)
+
+        gazeNode = loader.loadModel("Elements/Game/models/plane")
+        gazeNode.reparentTo(self.hudNP)
+        gazeNode.setScale(0.1,1.0,0.1)
+        gazeNode.setTransparency(1)
+        gazeNode.setTexture(gazeTex)
+        gazeNode.setPos(-1.7,0,0)
+        self.gazeNode = gazeNode
+        cam = self.config.world.getCamera()
+        w,h = map(float,(cam.screenWidth,cam.screenHeight))
+        self.normX = w/h
+        self.hudNP.setBin('fixed',10)
+
     def connectSockets(self):
 
         """
@@ -66,6 +77,12 @@ class Tobii_UDP_Client(EyeTrackerClient):
         # gaze data in a single thread.
         self.seqNum = 0
 
+    def toggleTracking(self):
+        if self.clientStatus == CLIENT_STATUS.TRACKING:
+            self.stopTracking()
+        if self.clientStatus == CLIENT_STATUS.NONE:
+            self.startTracking()
+
     def startTracking(self):
         if self.clientStatus != CLIENT_STATUS.NONE:
             print "Client must be in NONE state to start tracking."
@@ -92,6 +109,7 @@ class Tobii_UDP_Client(EyeTrackerClient):
         if self.clientStatus != CLIENT_STATUS.NONE:
             print "client must in NONE state to start calibrating"
             return
+        self.gazeLogger.logEvent('Starting calibration')
         msg = '' + pack('b',CLIENT_MSG_ID.START_CALIB)
         self.udpServerSocket.send(msg)
         self.clientStatus = CLIENT_STATUS.CALIBRATING
@@ -101,23 +119,24 @@ class Tobii_UDP_Client(EyeTrackerClient):
             print "client must be in CALIBRATING state to stop calibration"
             return
         # stop and compute!
+        self.gazeLogger.logEvent('Stoping calibration')
         msg = '' + pack('b',CLIENT_MSG_ID.STOP_CALIB)
         self.udpServerSocket.send(msg)
         self.clientStatus = CLIENT_STATUS.NONE
     def addCalibrationPoint(self,x,y):
         if self.clientStatus == CLIENT_STATUS.CALIBRATING:
-            print "adding calibration point at: %f,%f" % (x,y)
+            self.gazeLogger.logEvent("adding calibration point at: %f,%f" % (x,y))
             msg = '' + pack('bdd',CLIENT_MSG_ID.ADD_CALIB_POINT,x,y)
             self.udpServerSocket.send(msg)
         else:
             print "not in calibration mode, current state:",self.clientStatus
     def removeCalibrationPoint(self,x,y):
         if self.clientStatus == CLIENT_STATUS.CALIBRATING:
-            print "removing calibration point at: %f,%f" % (x,y)
+            self.gazeLogger.logEvent("removing calibration point at: %f,%f" % (x,y))
             msg = '' + pack('bdd',CLIENT_MSG_ID.REM_CALIB_POINT,x,y)
             self.udpServerSocket.send(msg)
         else:
-            print "not in calibration mode, current state:",self.clientStatus
+            self.gazeLogger.logEvent("not in calibration mode, current state:",self.clientStatus)
     def removeLastCalibrationPoint(self):
         if self.clientStatus == CLIENT_STATUS.CALIBRATING:
             print "removing last calibration point at server"
@@ -126,12 +145,19 @@ class Tobii_UDP_Client(EyeTrackerClient):
 
     def enterState(self):
         EyeTrackerClient.enterState(self)
-        self.gazeLogger.writeln("GameTime, Gaze coords, timestamp in us")
+        self.gazeLogger.writeln("# timestamp(us), gaze_pos(x,y)")
         # ONLY Establish socket connections, but does nothing with the EyeTracker.
         self.connectSockets()
+        if not self.config.showGaze:
+            self.gazeNode.hide()
+
     def exitState(self):
         # self.stopTracking()
         # remove task, and close sockets.
+        if self.clientStatus == CLIENT_STATUS.TRACKING:
+            self.stopTracking()
+        if self.clientStatus == CLIENT_STATUS.CALIBRATING:
+            self.stopCalibration()
         taskMgr.remove('listenUdp')
         self.udpServerSocket.close()
         self.udpGazeSocket.close()
@@ -139,13 +165,12 @@ class Tobii_UDP_Client(EyeTrackerClient):
 
     def listenUdp(self, t):
         if self.clientStatus is CLIENT_STATUS.TRACKING:
-            # listen for gaze data, 24 bytes! (long long, double, double)
             try:
-                # packages here should always be 97 bytes (timestamp long long, double x, double y)
+                # Format of a package coming from the UDP Server connected to the eye-tracker
                 #
                 # 8 bytes for timestamp                                  Q long long
                 # 4 bytes for tracker_status ENUM                        B unsigned char
-                # 4 bytes padding                                        B unsigned char
+                # 4 bytes padding from Compiler                          B unsigned char
                 # 88 bytes left eye in double3 double3 double3 double2   ddd ddd ddd dd
                 # 88 bytes right eye in double3 double3 double3 double2  ddd ddd ddd dd
                 # The 88 bytes are:
@@ -162,7 +187,7 @@ class Tobii_UDP_Client(EyeTrackerClient):
                     avg = ((left2D[0]+right2D[0]) / 2.0 ,(left2D[1]+right2D[1]) / 2.0)
 
                     if gaze_data[1] == 0: # NO EYE DATA PRESENT
-                        print "no eye data present"
+                        self.gazeLogger.logEvent("no eye data present")
                         return Task.cont
                     elif gaze_data[1] == 1: # BOTH EYES TRACKED
                         pass
@@ -172,21 +197,23 @@ class Tobii_UDP_Client(EyeTrackerClient):
                     elif gaze_data[1] in {5,6}: # RIGHT EYE TRACKED
                         avg = (right2D[0] ,right2D[1])
                     elif gaze_data[1] == 4:       # WE DONT KNOW
-                        print 'tracking one eye!, unknown which'
-                        print 'left X: ', left2D[0]
-                        print 'right X: ', right2D[0]
+                        self.gazeLogger.logEvent('tracking one eye!, unknown which')
+                        self.gazeLogger.logEvent('left X: ', left2D[0])
+                        self.gazeLogger.logEvent('right X: ', right2D[0])
 
                     self.appendSample(data[0], avg[0], avg[1] )
-                    print gaze_data[0], avg[0], avg[1]
+                    last = self.getLastSample(smooth=True)
+                    if self.config.showGaze:
+                        self.gazeNode.setPos((last[0] * (2*self.normX) - self.normX), 0, - (last[1] * 2 - 1))
                 else:
-                    print "read something empty ?"
+                    printOut("read something empty from UDP socket with Tobii_UDP_Client?",1)
 
             except socket.timeout,te:
                 # sleep 10 millisecond, this is a 30hz eye-tracker!
                 # print te
-                print "No gaze data available"
+                self.gazeLogger.logEvent("No gaze data available")
                 time.sleep(0.01)
         else:
-            print 'executing listenUdp whilst not tracking ?!?!'
+            printOut('executing listenUdp whilst not tracking ?!?!, this seems like a bug!',1)
         return Task.cont
 

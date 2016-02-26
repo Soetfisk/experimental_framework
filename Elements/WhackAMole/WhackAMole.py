@@ -204,23 +204,41 @@ class WhackAMole(Element):
         moleAnim.play(5,6)
 
     def hammerDown(self):
+        cam = self.config.world.getCamera()
+        w,h = map(float,(cam.screenWidth,cam.screenHeight))
+
         if self.hammerAnim.getFrame()!=0:
             return
         self.hammerAnim.play()
 
         if self.moleUp!=None:
             # the hammer is a SPRITE!
-            topY = self.hammer.getTightBounds()[1].getZ()
-            bottomY = self.hammer.getTightBounds()[0].getZ()
+            bounds = self.hammer.getTightBounds()
+            topY = bounds[1].getZ()
+            bottomY = bounds[0].getZ()
             pos = self.hammer.getPos()
-            pos[2] = (topY - (topY - bottomY)*0.30)
-            dist = (pos - self.moles[self.moleUp].moleHole.getPos()).length()
-            if dist > 0.10:
+            pos[2] = (topY - (topY - bottomY)*0.35)
+            molePos = self.moles[self.moleUp].moleHole.getPos()
+            # is the hammer hitting the mole ?
+            dist = (pos - molePos).length()
+            if dist > 0.05:
                 return
             else:
                 # there was a hit!
                 # this is the first hit
                 if self.moleUpHitCount == 0:
+
+                    calibPoint = ( (molePos[0]+(w/h)) / (2*(w/h)) , -0.5 * molePos[2] + 0.5)
+                    print calibPoint
+                    # normalize calibration point, screen is in 2D.
+                    # width in [ -w/h, w/h ]
+                    # height in [ 1, -1 ]
+                    # Eye-tracker is top left (0,0), bottom right (1,1)
+                    self.lastCalibPointSent = calibPoint
+
+                    self.eyeTracker.addCalibrationPoint(calibPoint[0],
+                                                        calibPoint[1])
+
                     self.moleFirstHit()
                 # this is the second hit
                 elif self.moleUpHitCount == 1:
@@ -248,6 +266,13 @@ class WhackAMole(Element):
         taskMgr.add(self.updateGame,'whack-a-mole')
         self.config.world.accept('moleUp', self.moleMoved,['up'])
         self.config.world.accept('moleDown', self.moleMoved,['down'])
+        try:
+            pass
+            #self.eyeTracker.startCalibration()
+            #self.eyeTracker.startTracking()
+            pass
+        except Exception,e:
+            print e
 
     def moleMoved(self, where):
         if where == 'down':
@@ -284,6 +309,12 @@ class WhackAMole(Element):
             return task.cont
 
     def exitState(self):
-        Element.exitState(self)
         self.unregisterKeys()
+        try:
+            #self.eyeTracker.stopCalibration()
+            #self.eyeTracker.stopTracking()
+            pass
+        except Exception,e:
+            print e
+        Element.exitState(self)
 

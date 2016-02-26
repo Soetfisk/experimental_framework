@@ -1,4 +1,6 @@
 
-Play whackAMole!
+In the following screen you will play a simple game, in which you have to hit some moles that have infested your backyard!, After you hit them three times in a row they will not come back from that hole...
+
+Use the mouse to aim, and the left-mouse button to use the hammer.
 
 press 'escape' key to advance...

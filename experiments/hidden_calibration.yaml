@@ -10,6 +10,9 @@ elements:
  - className: EmptyState
    name: end
 
+ - className: EmptyState
+   name: bubble
+
 ####################################
 # Text display elements.
 ####################################
@@ -18,12 +21,6 @@ elements:
  - className: ScreenText
    fname_message: HiddenCalibration/introExperiment.txt
    name: introText
-   refsto: [eyeTracker]
-   keys:
-   - key: e
-     callback: eyeTracker.startTracking
-   - key: r
-     callback: eyeTracker.stopTracking
 
  - module: DataForm
    className: ConsentForm
@@ -69,49 +66,16 @@ elements:
 
  - module: EyeTracker
    className: Tobii_UDP_Client
+
    name: eyeTracker
-   bool_printGaze: True
+   printGaze: True
+   showGaze: True
+   smoothWindow: 10
    keys:
-   - key: s
+   - key: t
      callback: startTracking
-   - key: d
+   - key: y
      callback: stopTracking
-   - key: g
-     callback: startCalibration
-   - key: h
-     callback: stopCalibration
-   - key: 1
-     callback: addCalibrationPoint
-     tuple_args: (0.0,0.0)
-   - key: 2
-     callback: addCalibrationPoint
-     tuple_args: (0.5,0.0)
-   - key: 3
-     callback: addCalibrationPoint
-     tuple_args: (1.0,0.0)
-   - key: 4
-     callback: addCalibrationPoint
-     tuple_args: (0.0,0.5)
-   - key: 5
-     callback: addCalibrationPoint
-     tuple_args: (0.5,0.5)
-   - key: 6
-     callback: addCalibrationPoint
-     tuple_args: (0.5,1.0)
-   - key: 7
-     callback: addCalibrationPoint
-     tuple_args: (0.0,1.0)
-   - key: 8
-     callback: addCalibrationPoint
-     tuple_args: (0.5,1.0)
-   - key: 9
-     callback: addCalibrationPoint
-     tuple_args: (1.0,1.0)
-   - key: 0
-     callback: removeCalibrationPoint
-     tuple_args: (1.0,1.0)
-   - key: p
-     callback: removeLastCalibrationPoint
 
 # not template yet...
  - module: EventLogger
@@ -130,25 +94,54 @@ elements:
    int_gridSize: 8
    int_moleCalibPoints: 10
    int_waitForDown: 4
+   refsto: [eyeTracker]
    keys:
    - key: mouse1
      callback: hammerDown
+   - key: q
+     callback: sendMessage
+     tuple_args: ('endGame')
 
- - className: SlidingTile
-   name: slidingTile
+ - className: SelectNumbers
+   name: selectNumbers
    gridWidth: 3
    gridHeight: 3
    scale: 0.4
    color_tile: (18/255.0,152/255.0,196/255.0,1.0)
    keys:
-   - key: g
-     callback: printPuzzle
-   - key: s
-     callback: shuffle
+   - key: 0
+     callback: sendMessage
+     tuple_args: ('endGame1')
+
+ - className: SelectColours
+   name: selectColours
+   gridWidth: 3
+   gridHeight: 3
+   scale: 0.4
+   keys:
+   - key: 0
+     callback: sendMessage
+     tuple_args: ('endGame1')
+
+
+transitions:
+ - trans: 'start @ eyeTracker:auto'
+
+ - trans: 'start @ introText:auto'
+ - trans: 'introText @ consentForm:auto'
+
+ - trans: 'consentForm @ userInfo:yesPressed'
+
+ - trans: 'consentForm @ end:noPressed'
+ - trans: 'eyeTracker @ end:noPressed'
+
+ - trans: 'userInfo @ whackIntroText:nextPressed'
+ - trans: 'whackIntroText @ whackAMole:auto'
+
+ - trans: 'whackAMole @ end: auto'
 
 # - trans: 'start @ mole1:auto'
 # - trans: 'mole1 @ end:auto'
-# - trans: 'start @ eventLogger:auto'
 # - trans: 'start @ eyeTracker:auto'
 #- trans: 'IntroScreen @ countDown: auto'
 #- trans: 'thegame @ end: endOfGame'
@@ -191,11 +184,12 @@ elements:
 # - trans: 'studyServer @ FinalScreen: dataSaved'
 # END
 # - trans: 'FinalScreen@end:auto'
-transitions:
-- trans: 'start@whackAMole:auto'
-- trans: 'start@eyeTracker:auto'
-- trans: 'whackAMole@end:auto'
-- trans: 'eyeTracker@end:auto'
+#- trans: 'start@eyeTracker:auto'
+#- trans: 'start@selectColours:auto'
+#- trans: 'selectColours@end:endGame1'
+
+#- trans: 'bubble@end:auto'
+#- trans: 'eyeTracker@end:auto'
 #- trans: 'introText@consentForm:auto'
 #- trans: 'consentForm@userInfo:yesPressed'
 #- trans: 'consentForm@end:noPressed'

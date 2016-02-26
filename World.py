@@ -369,6 +369,9 @@ class World(DirectObject):
         base.win.requestProperties(new_wp)
 
 
+    def getCamera(self):
+        return self.camera
+
     def setupCamera(self):
         """
         Attributes:
@@ -515,6 +518,12 @@ class World(DirectObject):
         messenger.toggleVerbose()
 
     def quit(self):
+        self.log.logEvent("quiting simulation")
+        self.log.logEvent("calling ExitState on any active element")
+        for e in self.elements.values():
+            if e.isActive():
+                e.exitState()
+
         self.log.logEvent("Simulation finished\n", time.time())
         self.log.stopLog()
         sys.exit()

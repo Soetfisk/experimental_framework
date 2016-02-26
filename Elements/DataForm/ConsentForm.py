@@ -83,10 +83,12 @@ class ConsentForm(Element):
 
     def yesPressed(self):
         self.answer = 'yes'
+        self.log('Consent accepted')
         self.sendMessage('yesPressed')
 
     def noPressed(self):
         self.answer = 'no'
+        self.log('Consent not accepted')
         self.sendMessage('noPressed')
 
     def enterState(self):

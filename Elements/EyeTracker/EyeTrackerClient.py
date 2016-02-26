@@ -34,6 +34,12 @@ TRACKER_STATUS = enum(
     TRACKING        = 3,
 )
 
+CLIENT_STATUS = enum(
+    CALIBRATING = 0,
+    TRACKING = 1,
+    NONE = 2
+)
+
 class EyeTrackerClient(Element):
     def __init__(self, **kwargs):
         """
@@ -56,7 +62,12 @@ class EyeTrackerClient(Element):
         """ constructor for the EyeTracker class """
         self.status = TRACKER_STATUS.DISCONNECTED
         # gazeData is a list of triplets (timeStamp, x, y)
-        self.gazeData = []
+        if (getattr(self.config,"smoothWindow",None) == None):
+            self.config.smoothWindow = 5.0
+        else:
+            self.config.smoothWindow = float(self.config.smoothWindow)
+        self.gazeData = [(0,0,0)] * int(self.config.smoothWindow)
+        self.smoothSampleXY = [0.0,0.0]
 
         if self.config.logGaze:
             # one gaze log per participant
@@ -76,24 +87,29 @@ class EyeTrackerClient(Element):
         """
         return None
 
-    def getLastSample(self, smooth=False, avg=1):
+    def getLastSample(self, smooth=True):
         """
         Get last tracker sample, for now no smoothing or filter is applied
         :param smooth: Bool
         :return: (float,float) or None
         """
-        if self.status == TRACKER_STATUS.TRACKING:
-            self.gazeMutex.acquire()
-            # get LAST sample written (no filter)
-            lastSample = self.gazeData[-1][-2:]
-            self.gazeMutex.release()
-            return lastSample
+        value = (-1,-1)
+        self.gazeMutex.acquire()
+        if smooth:
+            value = self.smoothSampleXY
         else:
-            return None
+            value = self.gazeData[-1][-2:]
+        self.gazeMutex.release()
+        return value
+
 
     def appendSample(self, timestamp, x, y):
+        s = self.config.smoothWindow
         self.gazeMutex.acquire()
         self.gazeData.append((timestamp,x,y))
+        # discard oldest, add new.
+        self.smoothSampleXY[0] +=  (-self.gazeData[-int(s+1)][1]/s) + (x/s)
+        self.smoothSampleXY[1] +=  (-self.gazeData[-int(s+1)][2]/s) + (y/s)
         self.gazeMutex.release()
 
     def startTracking(self):
