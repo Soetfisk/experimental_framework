@@ -518,20 +518,19 @@ class World(DirectObject):
         messenger.toggleVerbose()
 
     def quit(self):
-        self.log.logEvent("quiting simulation")
-        self.log.logEvent("calling ExitState on any active element")
-        for e in self.elements.values():
-            if e.isActive():
-                e.exitState()
+        try:
+            self.log.logEvent("quiting simulation")
+            self.log.logEvent("calling ExitState on any active element")
+            for e in self.elements.values():
+                if e.isActive():
+                    e.exitState()
 
-        self.log.logEvent("Simulation finished\n", time.time())
-        self.log.stopLog()
-        sys.exit()
-
-    #    def _quit(self):
-    # this will implicitly quit, but each state will have
-    # the opportunity to clear out the logs
-    #self.fsm.request("Off")
-    #        self.quit()
-    #while(True):
-    #    self.advanceFSM()
+            self.log.logEvent("Simulation finished\n", time.time())
+            self.log.stopLog()
+        except Exception,e:
+            printOut("Error whilst closing!")
+            print e
+        finally:
+            # sleep 1 second of grace
+            time.sleep(1)
+            sys.exit()

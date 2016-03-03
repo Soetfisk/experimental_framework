@@ -33,21 +33,7 @@ class Tobii_UDP_Client(EyeTrackerClient):
         # fill in some empty samples in case I am asked for samples right away
         self.clientStatus = CLIENT_STATUS.NONE
 
-        gazeTex = loader.loadTexture('Elements/Game/models/textures/outter_circle.png')
-        gazeTex.setMinfilter(Texture.FTLinearMipmapLinear)
-        gazeTex.setAnisotropicDegree(2)
 
-        gazeNode = loader.loadModel("Elements/Game/models/plane")
-        gazeNode.reparentTo(self.hudNP)
-        gazeNode.setScale(0.1,1.0,0.1)
-        gazeNode.setTransparency(1)
-        gazeNode.setTexture(gazeTex)
-        gazeNode.setPos(-1.7,0,0)
-        self.gazeNode = gazeNode
-        cam = self.config.world.getCamera()
-        w,h = map(float,(cam.screenWidth,cam.screenHeight))
-        self.normX = w/h
-        self.hudNP.setBin('fixed',10)
 
     def connectSockets(self):
 
@@ -82,6 +68,7 @@ class Tobii_UDP_Client(EyeTrackerClient):
             self.stopTracking()
         if self.clientStatus == CLIENT_STATUS.NONE:
             self.startTracking()
+
 
     def startTracking(self):
         if self.clientStatus != CLIENT_STATUS.NONE:
@@ -123,6 +110,7 @@ class Tobii_UDP_Client(EyeTrackerClient):
         msg = '' + pack('b',CLIENT_MSG_ID.STOP_CALIB)
         self.udpServerSocket.send(msg)
         self.clientStatus = CLIENT_STATUS.NONE
+
     def addCalibrationPoint(self,x,y):
         if self.clientStatus == CLIENT_STATUS.CALIBRATING:
             self.gazeLogger.logEvent("adding calibration point at: %f,%f" % (x,y))
@@ -152,15 +140,17 @@ class Tobii_UDP_Client(EyeTrackerClient):
             self.gazeNode.hide()
 
     def exitState(self):
-        # self.stopTracking()
         # remove task, and close sockets.
         if self.clientStatus == CLIENT_STATUS.TRACKING:
             self.stopTracking()
         if self.clientStatus == CLIENT_STATUS.CALIBRATING:
             self.stopCalibration()
         taskMgr.remove('listenUdp')
-        self.udpServerSocket.close()
-        self.udpGazeSocket.close()
+        try:
+            self.udpServerSocket.close()
+            self.udpGazeSocket.close()
+        except Exception,e:
+            print e
         EyeTrackerClient.exitState(self)
 
     def listenUdp(self, t):

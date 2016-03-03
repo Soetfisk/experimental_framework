@@ -79,6 +79,23 @@ class EyeTrackerClient(Element):
         # create a mutex for accessing the gazeData list
         self.gazeMutex = Mutex('gazeMutex')
 
+        gazeTex = loader.loadTexture('Elements/Game/models/textures/outter_circle.png')
+        gazeTex.setMinfilter(Texture.FTLinearMipmapLinear)
+        gazeTex.setAnisotropicDegree(2)
+
+        gazeNode = loader.loadModel("Elements/Game/models/plane")
+        gazeNode.reparentTo(self.hudNP)
+        gazeNode.setScale(0.1,1.0,0.1)
+        gazeNode.setTransparency(1)
+        gazeNode.setTexture(gazeTex)
+        gazeNode.setPos(-1.7,0,0)
+        self.gazeNode = gazeNode
+        cam = self.config.world.getCamera()
+        w,h = map(float,(cam.screenWidth,cam.screenHeight))
+        self.normX = w/h
+        self.hudNP.setBin('fixed',10)
+
+
     def getLastSampleAndTime(self, smooth=False):
         """
         Get last tracker sample, for now no smoothing or filter is applied
@@ -86,6 +103,19 @@ class EyeTrackerClient(Element):
         :return: (float,float) or None
         """
         return None
+
+    def toggleGaze(self):
+        print "toggle!"
+        if self.gazeNode.isHidden():
+            self.showGaze()
+        else:
+            self.hideGaze()
+
+    def showGaze(self):
+        self.gazeNode.show()
+
+    def hideGaze(self):
+        self.gazeNode.hide()
 
     def getLastSample(self, smooth=True):
         """

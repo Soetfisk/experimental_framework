@@ -39,6 +39,32 @@ elements:
    name: FinalScreen
    fname_message: HiddenCalibration/finalText.txt
 
+ - className: ScreenText
+   name: colourBlindText
+   fname_message: PilotData/colourBlindText.txt
+   # example defining the keybindings directly here
+
+ - className: ScreenText
+   name: colourBlindProblem
+   # the LAST element is the option selected now, which has to be in the list
+   #option_level: ('easy','hard','easy')
+   fname_message: PilotData/colourBlindProblem.txt
+
+# Very specific Element, for testing for Colour Blindness
+ - module: FullScreenImage
+   className: ImageQuery
+   name: colourBlindCheck
+   fname_imageNameStr: PilotData/colorblind/plate%d.png
+#   imageStrArgs: (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17)
+   tuple_imageStrArgs: (1,2,3)
+#   imageAnswers: (12,8,6,29,57,5,3,15,74,2,6,97,45,5,7,16,73)
+   tuple_imageAnswers: (12,8,6)
+   tuple_scale: (0.5,0.5)
+#   keys:
+#    - key: n
+#      callback: nextImage
+#      once: false
+
  - className: DataForm
    name: userInfo
    settings:
@@ -69,13 +95,15 @@ elements:
 
    name: eyeTracker
    printGaze: True
-   showGaze: True
+   showGaze: False
    smoothWindow: 10
    keys:
    - key: t
      callback: startTracking
    - key: y
      callback: stopTracking
+   - key: k
+     callback: toggleGaze
 
 # not template yet...
  - module: EventLogger
@@ -85,7 +113,7 @@ elements:
 # no template yet
  - className: WhackAMole
    name: whackAMole
-   fname_moleModel: Elements/WhackAMole/textures/mole2.egg
+   fname_moleModel: Elements/WhackAMole/textures/mole.egg
    fname_holeTop: Elements/WhackAMole/textures/tophole.png
    fname_holeBottom: Elements/WhackAMole/textures/botomhole.png
    fname_back: Elements/WhackAMole/textures/back.png
@@ -135,10 +163,23 @@ transitions:
  - trans: 'consentForm @ end:noPressed'
  - trans: 'eyeTracker @ end:noPressed'
 
- - trans: 'userInfo @ whackIntroText:nextPressed'
+ - trans: 'userInfo @ colourBlindText:nextPressed'
+
+ - trans: 'colourBlindText @ colourBlindCheck:auto'
+ - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
+
+ - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryOk'
+
+
+#- trans: 'UserInfo @ colourBlindText:nextPressed'
+ - trans: 'colourBlindText @
+ - trans:
  - trans: 'whackIntroText @ whackAMole:auto'
 
  - trans: 'whackAMole @ end: auto'
+ - trans: 'colourBlindProblem @ end:auto'
+ - trans: 'eyeTracker @ end:imageQueryBad'
+
 
 # - trans: 'start @ mole1:auto'
 # - trans: 'mole1 @ end:auto'
