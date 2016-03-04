@@ -24,7 +24,7 @@ class ColourPreference(Element):
         # build basic element  
         super(ColourPreference,self).__init__(**kwargs)
 
-        sx, sz = getattr(self.config,'scale',[1.0,1.0])
+        sx, sz = getattr(self.config,'tuple_scale',[1.0,1.0])
         self.imageNodes={}
 
         filepath = "PilotData/colorblind/"

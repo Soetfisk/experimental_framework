@@ -107,8 +107,10 @@ class EyeTrackerClient(Element):
     def toggleGaze(self):
         print "toggle!"
         if self.gazeNode.isHidden():
+            self.config.showGaze = True
             self.showGaze()
         else:
+            self.config.showGaze = False
             self.hideGaze()
 
     def showGaze(self):
@@ -177,6 +179,8 @@ class EyeTrackerClient(Element):
     def enterState(self):
         super(EyeTrackerClient, self).enterState()
         self.gazeLogger.logEvent("INFO - Starting EyeTracker client\n")
+        if not self.config.showGaze:
+            self.gazeNode.hide()
 
     def exitState(self):
         self.gazeLogger.logEvent("INFO - Closing EyeTracker client\n")

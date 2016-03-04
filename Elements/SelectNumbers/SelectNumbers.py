@@ -51,7 +51,7 @@ class SelectNumbers(Element):
                                       pad=(.1,.1),
                                       pos=(0.6, 0, -0.9),
                                       command=self.changeSize,
-                                      extraArgs=[1.1])
+                                      extraArgs=[1.5])
 
         self.smaller = DirectButton(parent = self.hudNP,
                                       text="Smaller", #pad=pad0,
@@ -59,7 +59,7 @@ class SelectNumbers(Element):
                                       scale=0.082,
                                       pos=(1.0, 0, -0.906),
                                       command=self.changeSize,
-                                      extraArgs=[0.9])
+                                      extraArgs=[0.5])
 
         self.shuffleButton = DirectButton(parent = self.hudNP,
                                       text="Shuffle", #pad=pad0,
@@ -71,6 +71,7 @@ class SelectNumbers(Element):
                                       extraArgs=[1.0])
         #self.shuffleButton.setTransparency(TransparencyAttrib.MAlpha)
         #self.shuffleButton.setAlphaScale(0.3)
+
 
     def changeSize(self, scale):
         """

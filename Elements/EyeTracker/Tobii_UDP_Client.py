@@ -136,8 +136,6 @@ class Tobii_UDP_Client(EyeTrackerClient):
         self.gazeLogger.writeln("# timestamp(us), gaze_pos(x,y)")
         # ONLY Establish socket connections, but does nothing with the EyeTracker.
         self.connectSockets()
-        if not self.config.showGaze:
-            self.gazeNode.hide()
 
     def exitState(self):
         # remove task, and close sockets.

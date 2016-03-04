@@ -28,6 +28,22 @@ elements:
    fname_config: HiddenCalibration/consentForm.yaml
 
  - className: ScreenText
+   name: game1Intro
+   fname_message: HiddenCalibration/game1Intro.txt
+   keys:
+    - key: n
+      callback: sendMessage
+      tuple_args: ('auto')
+
+ - className: ScreenText
+   name: game2Intro
+   fname_message: HiddenCalibration/game2Intro.txt
+   keys:
+    - key: n
+      callback: sendMessage
+      tuple_args: ('auto')
+
+ - className: ScreenText
    name: whackIntroText
    fname_message: HiddenCalibration/whackIntroText.txt
    keys:
@@ -35,7 +51,7 @@ elements:
       callback: sendMessage
       tuple_args: ('auto')
 
- - module: ScreenText
+ - className: ScreenText
    name: FinalScreen
    fname_message: HiddenCalibration/finalText.txt
 
@@ -92,7 +108,6 @@ elements:
 
  - module: EyeTracker
    className: Tobii_UDP_Client
-
    name: eyeTracker
    printGaze: True
    showGaze: False
@@ -131,7 +146,7 @@ elements:
      tuple_args: ('endGame')
 
  - className: SelectNumbers
-   name: selectNumbers
+   name: game1
    gridWidth: 3
    gridHeight: 3
    scale: 0.4
@@ -142,7 +157,7 @@ elements:
      tuple_args: ('endGame1')
 
  - className: SelectColours
-   name: selectColours
+   name: game2
    gridWidth: 3
    gridHeight: 3
    scale: 0.4
@@ -153,6 +168,9 @@ elements:
 
 
 transitions:
+# - trans: 'start @ game1: auto'
+# - trans: 'game1 @ end: auto'
+
  - trans: 'start @ eyeTracker:auto'
 
  - trans: 'start @ introText:auto'
@@ -167,16 +185,17 @@ transitions:
 
  - trans: 'colourBlindText @ colourBlindCheck:auto'
  - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
+ - trans: 'colourBlindCheck @ whackIntroText:imageQueryOk'
 
- - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryOk'
-
-
-#- trans: 'UserInfo @ colourBlindText:nextPressed'
- - trans: 'colourBlindText @
- - trans:
  - trans: 'whackIntroText @ whackAMole:auto'
 
- - trans: 'whackAMole @ end: auto'
+ - trans: 'whackAMole @ game1Intro: auto'
+ - trans: 'game1Intro @ game1: auto'
+ - trans: 'game1 @ game2Intro: auto'
+ - trans: 'game2Intro @ game2: auto'
+ - trans: 'game2 @ FinalScreen: auto'
+
+ - trans: 'FinalScreen @ end: auto'
  - trans: 'colourBlindProblem @ end:auto'
  - trans: 'eyeTracker @ end:imageQueryBad'
 
