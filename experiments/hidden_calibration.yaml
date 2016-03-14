@@ -178,12 +178,10 @@ elements:
 
 
 transitions:
- - trans: 'start @ game1: auto'
+ - trans: 'start @ game2: auto'
  - trans: 'start @ mouseLog: auto'
- - trans: 'start @ eyeTracker: auto'
- - trans: 'game1 @ end: auto'
+ - trans: 'game2 @ end: auto'
  - trans: 'mouseLog @ end: auto'
- - trans: 'eyeTracker @ end: auto'
 
  #- trans: 'start @ eyeTracker:auto'
 

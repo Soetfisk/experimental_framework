@@ -10,6 +10,7 @@ from direct.interval.IntervalGlobal import *
 import random
 
 from Element import *
+from Logger import Logger
 
 #sys utils
 import sys
@@ -45,6 +46,8 @@ class SelectColours(Element):
 
         # start a new grid
         self.makeGrid()
+
+        self.logFile = Logger("run/selectColours_%s.txt" % self.config.world.participantId, 'w')
 
         # add UI elements to enlarge/shrink grid
         self.addButtonsBigSmall()
@@ -190,23 +193,28 @@ class SelectColours(Element):
         """
 
         correct = False
-        mouseX = base.mouseWatcherNode.getMouseX()
-        mouseY = base.mouseWatcherNode.getMouseZ()
-        print mouseX, mouseY
-
         if self.currentTile < len(self.correctTiles) and tileId == self.correctTiles[self.currentTile].getName():
+
             correct = True
-            #tile= [x for x in self.tiles if int(x.getName()) == tileId]
-            self.correctTiles[self.currentTile]['frameColor'] = (0,0,0,0.1)
-            self.currentTile+=1
+
+            mouseX,mouseY = base.mouseWatcherNode.getMouse()
+
+            cam = self.config.world.getCamera()
+            width,height = map(float,(cam.screenWidth,cam.screenHeight))
+            tile = self.correctTiles[self.currentTile]
 
             self.logFile.logEvent("correct tile clicked: %s" % tileId)
-            self.logFile.logEvent("tileCenter: %.4f %.4f" % (tile[0].getPos().getX(),tile[0].getPos().getZ()))
-            self.logFile.logEvent("mouseClicked: %.4f %.4f" % (mouseX,mouseY))
+            #self.logFile.logEvent("tileCenter: %.4f %.4f" % (tile.getPos().getX(),tile.getPos().getZ()))
+            self.logFile.logEvent("tileCenter: %.4f" % (tile.getPos().getX()))
+            #self.logFile.logEvent("mouseClicked: %.4f %.4f" % ((width / height)*float(mouseX), mouseY))
+
             try:
                 self.logFile.logEvent("EyeGaze reported: %.4f %.4f" % self.eyeTracker.getLastSample())
             except:
                 pass
+
+            self.correctTiles[self.currentTile]['frameColor'] = (0,0,0,0.1)
+            self.currentTile+=1
 
     def printPuzzle(self):
         print self.checkResult()
@@ -250,7 +258,9 @@ class SelectColours(Element):
     def enterState(self):
         # super class enterState
         Element.enterState(self)
+        self.logFile.startLog()
 
     def exitState(self):
         # super class leaveState
+        self.logFile.stopLog()
         Element.exitState(self)

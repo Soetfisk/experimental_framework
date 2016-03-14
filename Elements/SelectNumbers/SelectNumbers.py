@@ -179,19 +179,24 @@ class SelectNumbers(Element):
         :return: None
         """
         correct = False
+
         if len(self.correctSequence) > 0 and tileId == self.correctSequence[0]:
+
+            correct = True
+
+            mouseX,mouseY = base.mouseWatcherNode.getMouse()
+
             cam = self.config.world.getCamera()
             width,height = map(float,(cam.screenWidth,cam.screenHeight))
-            correct = True
+
             tile = [x for x in self.tiles if int(x.getName()) == tileId]
             tile[0].setColor(0.2,0.0,0.0,0.5)
             tile[0]['frameColor'] = (.5,.5,.5,0.5)
-            mouseX,mouseY = base.mouseWatcherNode.getMouse()
             self.correctSequence.pop(0)
             self.logFile.logEvent("correct tile clicked: %s" % tileId)
             self.logFile.logEvent("tileCenter: %.4f %.4f" % (tile[0].getPos().getX(),tile[0].getPos().getZ()))
-            self.logFile.logEvent("mouseClicked Normalized x in 0-1: %.4f %.4f" % (mouseX,mouseY))
-            self.logFile.logEvent("mouseClicked Normalized x in 0-ratio: %.4f %.4f" % ((width / height)*mouseX, mouseY))
+            #self.logFile.logEvent("mouseClicked Normalized x in 0-1: %.4f %.4f" % (mouseX,mouseY))
+            self.logFile.logEvent("mouseClicked: %.4f %.4f" % ((width / height)*float(mouseX), mouseY))
             try:
                 self.logFile.logEvent("EyeGaze reported: %.4f %.4f" % self.eyeTracker.getLastSample())
             except:
