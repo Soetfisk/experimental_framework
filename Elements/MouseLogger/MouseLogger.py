@@ -17,7 +17,7 @@ class MouseLogger(Element):
         from scratch
         """
         super(MouseLogger, self).__init__(**kwargs)
-        self.mouseLog = Logger("mouseLog_%s.txt" % self.config.world.participantId)
+        self.mouseLog = Logger("run/mouseLog_%s.txt" % self.config.world.participantId)
         self.left = MouseButton.one()
         self.leftDown = False
         self.right = MouseButton.two()

@@ -6,8 +6,7 @@ from Utils.Debug import printOut
 from Utils.Utils import *
 from collections import OrderedDict
 
-#import external.yaml as yaml
-import yaml
+import external.yaml as yaml
 
 class Element(object):
     """

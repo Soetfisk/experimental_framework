@@ -38,5 +38,5 @@ if __name__=='__main__':
     # create one object with an experiment
     w = World(experiment)
     # enter main loop from Panda3D (see tasks in World)
-    run()
+    base.run()
 

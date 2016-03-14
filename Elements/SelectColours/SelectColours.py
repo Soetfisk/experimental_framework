@@ -191,7 +191,7 @@ class SelectColours(Element):
 
         correct = False
         mouseX = base.mouseWatcherNode.getMouseX()
-        mouseY = base.mouseWatcherNode.getMouseY()
+        mouseY = base.mouseWatcherNode.getMouseZ()
         print mouseX, mouseY
 
         if self.currentTile < len(self.correctTiles) and tileId == self.correctTiles[self.currentTile].getName():
@@ -199,14 +199,14 @@ class SelectColours(Element):
             #tile= [x for x in self.tiles if int(x.getName()) == tileId]
             self.correctTiles[self.currentTile]['frameColor'] = (0,0,0,0.1)
             self.currentTile+=1
-        print "click, {0:b},{1:s},{2:f},{3:f},{4:f}".format(correct,
-                                                             tileId,
-                                                             self.config.scale,
-                                                             mouseX, mouseY)
 
-
-
-
+            self.logFile.logEvent("correct tile clicked: %s" % tileId)
+            self.logFile.logEvent("tileCenter: %.4f %.4f" % (tile[0].getPos().getX(),tile[0].getPos().getZ()))
+            self.logFile.logEvent("mouseClicked: %.4f %.4f" % (mouseX,mouseY))
+            try:
+                self.logFile.logEvent("EyeGaze reported: %.4f %.4f" % self.eyeTracker.getLastSample())
+            except:
+                pass
 
     def printPuzzle(self):
         print self.checkResult()
