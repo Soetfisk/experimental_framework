@@ -13,6 +13,9 @@ elements:
  - className: EmptyState
    name: bubble
 
+ - className: MouseLogger
+   name: mouseLog
+
 ####################################
 # Text display elements.
 ####################################
@@ -135,7 +138,7 @@ elements:
    fname_mole: Elements/WhackAMole/textures/mole_1.png
    fname_plainGrass: Elements/WhackAMole/textures/no_hole.jpg
    int_gridSize: 8
-   int_moleCalibPoints: 10
+   int_moleCalibPoints: 6
    int_waitForDown: 4
    refsto: [eyeTracker]
    keys:
@@ -149,7 +152,11 @@ elements:
    name: game1
    gridWidth: 3
    gridHeight: 3
-   scale: 0.4
+   # size of tile is in the range [0,2]
+   tileSizes: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
+   margin: 1.1
+   # smaller than 1 to make it smaller!
+   textSize: 0.04
    color_tile: (18/255.0,152/255.0,196/255.0,1.0)
    keys:
    - key: 0
@@ -160,7 +167,8 @@ elements:
    name: game2
    gridWidth: 3
    gridHeight: 3
-   scale: 0.4
+   margin: 1.1
+   tileSizes: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
    keys:
    - key: 0
      callback: sendMessage
@@ -168,12 +176,15 @@ elements:
 
 
 transitions:
-# - trans: 'start @ game1: auto'
-# - trans: 'game1 @ end: auto'
+ - trans: 'start @ game1: auto'
+ - trans: 'start @ mouseLog: auto'
+ - trans: 'game1 @ game2: auto'
+ - trans: 'game2 @ end: auto'
+ - trans: 'mouseLog @ end: auto'
 
- - trans: 'start @ eyeTracker:auto'
+ #- trans: 'start @ eyeTracker:auto'
 
- - trans: 'start @ introText:auto'
+ #- trans: 'start @ introText:auto'
  - trans: 'introText @ consentForm:auto'
 
  - trans: 'consentForm @ userInfo:yesPressed'

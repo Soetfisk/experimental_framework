@@ -1,4 +1,5 @@
 from panda3d.core import *
+from direct.showbase import DirectObject
 
 import sys
 from Utils.Debug import printOut
@@ -41,6 +42,8 @@ class Element(object):
 
         # some colours constants to share among all elements
         self.colours = getColors()
+
+        self.mouseListener = DirectObject.DirectObject()
 
         dictionary = {}
         # configuration can be in the experiment file or in a special file

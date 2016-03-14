@@ -10,6 +10,7 @@ from direct.interval.IntervalGlobal import *
 import random
 
 from Element import *
+from Logger import Logger
 
 #sys utils
 import sys
@@ -27,6 +28,15 @@ class SelectNumbers(Element):
         # this defines:
         # self.sceneNP and self.hudNP
         # self.config.world
+
+        if not getattr(self.config, 'textSize', None):
+            setattr(self.config,'textSize',1.0)
+
+        self.logFile = Logger("run/selectNumbers_%s.txt" % self.config.world.participantId, 'w')
+
+        self.sizesToTry = self.config.tileSizes
+        random.shuffle(self.sizesToTry)
+        self.config.scale = self.sizesToTry.pop(0)
 
         self.locked=False
         # start a new grid
@@ -69,9 +79,29 @@ class SelectNumbers(Element):
                                       command=self.changeSize,
                                       #state=0, # disabled
                                       extraArgs=[1.0])
-        #self.shuffleButton.setTransparency(TransparencyAttrib.MAlpha)
+
+        self.nextSizeButton = DirectButton(parent = self.hudNP,
+                                      text="Next", #pad=pad0,
+                                      pad=(.1,.2),
+                                      scale=0.082,
+                                      pos=(-0.5, 0, -0.906),
+                                      command=self.nextSizeFunc)
+         #self.shuffleButton.setTransparency(TransparencyAttrib.MAlpha)
         #self.shuffleButton.setAlphaScale(0.3)
 
+
+    def _recreateGrid(self, newSize):
+        self.config.scale = newSize
+        for t in self.tiles:
+            t.destroy()
+        self.sequenceNP.removeNode()
+        self.makeGrid()
+
+    def nextSizeFunc(self):
+        if (len(self.sizesToTry)):
+            self._recreateGrid(self.sizesToTry.pop(0))
+        else:
+            printOut("sizes completed!")
 
     def changeSize(self, scale):
         """
@@ -79,17 +109,10 @@ class SelectNumbers(Element):
         :param scale: scale factor to increase
         :return: nothing.
         """
-        self.config.scale *= scale
-        for t in self.tiles:
-            t.destroy()
-        self.sequenceNP.removeNode()
-
-        self.makeGrid()
-        #self.shuffle()
-        #self.resetGame()
+        self._recreateGrid(self.config.scale*scale)
 
     # center of tile for any size and pos
-    def makePos(self,t, w, h, x ,y):
+    def makePos(self,t, w, h, x ,y, margin = 1.0):
         """
         Compute the center of a tile in the grid
         :param t: Tile size
@@ -97,9 +120,10 @@ class SelectNumbers(Element):
         :param h: Grid height
         :param x: tile pos, from 1..N
         :param y: tile pos, from 1..N
+        :param margin: and additional distance away from the center
         :return: Tuple containing x,y center position of the tile
         """
-        return (-w*t/2-t/2 + x*t,h*t/2+t/2 - y*t)
+        return ((-w*t/2-t/2 + x*t)*margin,(h*t/2+t/2 - y*t)*margin)
 
     def makeGrid(self):
         """
@@ -111,20 +135,21 @@ class SelectNumbers(Element):
         gridHeight = self.config.gridHeight
         tileSize = self.config.scale
 
-        tilesNames = range(0,gridWidth*gridHeight)
+        tilesNames = range(1,gridWidth*gridHeight + 1)
         random.shuffle(tilesNames)
         self.tiles = []
 
+        margin = getattr(self.config, 'margin', 1.0)
         # background
         for y in range(0,gridHeight):
             for x in range(0,gridWidth):
-                sx,sy = self.makePos(tileSize,gridWidth,gridHeight,x+1,y+1)
+                sx,sy = self.makePos(tileSize,gridWidth,gridHeight,x+1,y+1, margin)
                 # column order
                 self.tiles.append(self.makeTile(sx,sy, tileSize/2, tilesNames[x+y*gridWidth]))
                 # listen to mouse
                 self.tiles[-1].bind(DGG.B1PRESS, self.clicked, extraArgs=[tilesNames[x+y*gridWidth]])
 
-        self.correctSequence = range(0,gridWidth*gridHeight)
+        self.correctSequence = range(1,gridWidth*gridHeight + 1)
         random.shuffle(self.correctSequence)
 
         textVersion = str(self.correctSequence).replace('[','').replace(']','')
@@ -153,12 +178,15 @@ class SelectNumbers(Element):
         :param who: who has called this method (just a string with semantics...)
         :return: None
         """
+        correct = False
         if len(self.correctSequence) > 0 and tileId == self.correctSequence[0]:
+            correct = True
             tile = [x for x in self.tiles if int(x.getName()) == tileId]
-            tile[0].setColor(1.0,0.0,0.0,0.3)
+            tile[0].setColor(0.2,0.0,0.0,0.5)
+            tile[0]['frameColor'] = (.5,.5,.5,0.5)
             self.correctSequence.pop(0)
 
-
+        print "click %s" % tileId
 
     def printPuzzle(self):
         print self.checkResult()
@@ -187,8 +215,9 @@ class SelectNumbers(Element):
         textN.setAlign(TextNode.ACenter)
         textN.setText(str(tileId))
         textNP = NodePath(textN)
-        textNP.setScale(1.5)
-        textNP.setPos(-0.1,0,-0.2)
+        textNP.setScale(self.config.textSize/size)
+
+        textNP.setPos(-textNP.getScale()/10)
         textNP.reparentTo(myFrame)
         return myFrame
 
@@ -198,7 +227,9 @@ class SelectNumbers(Element):
     def enterState(self):
         # super class enterState
         Element.enterState(self)
+        self.logFile.startLog()
 
     def exitState(self):
         # super class leaveState
+        self.logFile.stopLog()
         Element.exitState(self)

@@ -34,10 +34,14 @@ class SelectColours(Element):
             (200,0,0,255), (254,155,14,255), (243,254,30,255),
             (0,240,0,255), (0,254,229,255), (17,41,254,255),
             (197,16,253,255), (120,10,255,255), (0,0,0,255) ]
-        self.colours_names = [ str(c) for c in colours ]
-
         m = 255.0
         self.colours = [(r/m,g/m,b/m,a/m) for (r,g,b,a) in colours]
+
+        self.colours_names = [ str(c) for c in colours ]
+
+        self.sizesToTry = self.config.tileSizes
+        random.shuffle(self.sizesToTry)
+        self.config.scale = self.sizesToTry.pop(0)
 
         # start a new grid
         self.makeGrid()
@@ -47,6 +51,11 @@ class SelectColours(Element):
         # shuffle the grid from its original correct order.
         #self.shuffle()
         self.hideElement()
+
+    def mouseClicked(self):
+        mouseX = base.mouseWatcherNode.getMouseX()
+        mouseY = base.mouseWatcherNode.getMouseY()
+        print mouseX, mouseY
 
     def showElement(self):
         Element.showElement(self)
@@ -80,8 +89,30 @@ class SelectColours(Element):
                                       command=self.changeSize,
                                       #state=0, # disabled
                                       extraArgs=[1.0])
-        #self.shuffleButton.setTransparency(TransparencyAttrib.MAlpha)
+
+        self.nextSizeButton = DirectButton(parent = self.hudNP,
+                                      text="Next", #pad=pad0,
+                                      pad=(.1,.2),
+                                      scale=0.082,
+                                      pos=(-0.5, 0, -0.906),
+                                      command=self.nextSizeFunc)
+
+ #self.shuffleButton.setTransparency(TransparencyAttrib.MAlpha)
         #self.shuffleButton.setAlphaScale(0.3)
+
+    def _recreateGrid(self, newSize):
+        self.config.scale = newSize
+        for t in self.tiles:
+            t.destroy()
+        for t in self.correctTiles:
+            t.destroy()
+        self.makeGrid()
+
+    def nextSizeFunc(self):
+        if (len(self.sizesToTry)):
+            self._recreateGrid(self.sizesToTry.pop(0))
+        else:
+            printOut("sizes completed!")
 
     def changeSize(self, scale):
         """
@@ -89,18 +120,10 @@ class SelectColours(Element):
         :param scale: scale factor to increase
         :return: nothing.
         """
-        self.config.scale *= scale
-        for t in self.tiles:
-            t.destroy()
-        for t in self.correctTiles:
-            t.destroy()
-
-        self.makeGrid()
-        #self.shuffle()
-        #self.resetGame()
+        self._recreateGrid(self.config.scale*scale)
 
     # center of tile for any size and pos
-    def makePos(self,t, w, h, x ,y):
+    def makePos(self,t, w, h, x ,y, margin = 1.0):
         """
         Compute the center of a tile in the grid
         :param t: Tile size
@@ -110,7 +133,7 @@ class SelectColours(Element):
         :param y: tile pos, from 1..N
         :return: Tuple containing x,y center position of the tile
         """
-        return (-w*t/2-t/2 + x*t,h*t/2+t/2 - y*t)
+        return ((-w*t/2-t/2 + x*t)*margin,(h*t/2+t/2 - y*t)*margin)
 
     def makeGrid(self):
         """
@@ -128,10 +151,12 @@ class SelectColours(Element):
         self.correctTiles = []
         self.currentTile = 0
 
+        margin = getattr(self.config, 'margin', 1.0)
+
         # tile grid
         for y in range(0,gridHeight):
             for x in range(0,gridWidth):
-                sx,sy = self.makePos(tileSize,gridWidth,gridHeight,x+1,y+1)
+                sx,sy = self.makePos(tileSize,gridWidth,gridHeight,x+1,y+1, margin)
                 # column order
                 self.tiles.append(self.makeTile(sx,sy, tileSize/2, temp[x+y*gridWidth]))
                 # listen to mouse
@@ -164,10 +189,22 @@ class SelectColours(Element):
         :return: None
         """
 
+        correct = False
+        mouseX = base.mouseWatcherNode.getMouseX()
+        mouseY = base.mouseWatcherNode.getMouseY()
+        print mouseX, mouseY
+
         if self.currentTile < len(self.correctTiles) and tileId == self.correctTiles[self.currentTile].getName():
+            correct = True
             #tile= [x for x in self.tiles if int(x.getName()) == tileId]
             self.correctTiles[self.currentTile]['frameColor'] = (0,0,0,0.1)
             self.currentTile+=1
+        print "click, {0:b},{1:s},{2:f},{3:f},{4:f}".format(correct,
+                                                             tileId,
+                                                             self.config.scale,
+                                                             mouseX, mouseY)
+
+
 
 
 
@@ -188,7 +225,6 @@ class SelectColours(Element):
 
 
         frameColor = self.colours[self.colours_names.index(tileId)]
-        print frameColor
         order = 10
         relief=DGG.GROOVE #DGG.SUNKEN
 

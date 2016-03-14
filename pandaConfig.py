@@ -10,7 +10,7 @@
 
 options = [
 "win-origin t",
-"win-size 1920 1200",
+"win-size 1920 1080",
 "win-fixed-size t",
 "fullscreen f",
 "cursor-hidden f",

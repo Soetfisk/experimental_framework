@@ -111,10 +111,13 @@ class DataForm(Element):
                         command=self.setText, extraArgs=[],
                         pos=(0,1,widgetYpos), numLines = 1, focus=0)
             elif ( str(i.type) == 'Option' ):
-                widget = DirectOptionMenu( text="options", scale=1.10*scale, items=i.tuple_values,
+                widget = DirectOptionMenu( text="options", scale=1.05*scale, items=i.tuple_values,
                         popupMarkerBorder=(1,0),
                         initialitem=0, command=self.optionMenu, extraArgs=[],
-                        pos=(0,1,widgetYpos))
+                        pos=(0,1,widgetYpos),
+                        text_scale=(0.7,0.7),
+                        text_pos=(0.3,0.1))
+
             elif ( str(i.type) == 'TickBox' ):
                 widget = DirectCheckButton( text="", scale=scale,
                          command=self.tickBoxClicked, extraArgs=[],
