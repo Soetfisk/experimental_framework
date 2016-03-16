@@ -1,22 +1,24 @@
+#sys utils
+import sys
+import time
+import random
+from collections import OrderedDict
+
 # panda imports
-from direct.gui import OnscreenImage
-from direct.showbase.DirectObject import DirectObject
+#from direct.gui import OnscreenImage
+#from direct.showbase.DirectObject import DirectObject
+from direct.gui.OnscreenImage import OnscreenImage
 from direct.gui.DirectGui import *
 from direct.task.Task import *
 from panda3d.core import *
 from direct.interval.MetaInterval import *
 from direct.interval.FunctionInterval import *
 from direct.interval.IntervalGlobal import *
-import time
 
+# framework imports
 from Element import *
-from direct.gui.OnscreenImage import OnscreenImage
-from collections import OrderedDict
-import random
 
 
-#sys utils
-import sys
 
 class GrassTile(object):
     def __init__(self, textures, parent, pos, size):
@@ -27,7 +29,7 @@ class GrassTile(object):
         self.grassNP.setTransparency(TransparencyAttrib.MAlpha)
         self.grassNP.reparentTo(parent)
 
-class MoleHole(DirectObject):
+class MoleHole(DirectObject.DirectObject):
     def __init__(self, textures, moleNP, parent,pos, size):
 
         self.textures = textures
