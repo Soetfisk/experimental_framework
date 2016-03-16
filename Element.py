@@ -18,7 +18,7 @@ class Element(object):
     for example, one image, a text message, a timer, a game!, a pilot...
     It is a very flat hierarchy, and simplistic design.
     """
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         '''
         Element constructor. When the element is constructed is passed the YAML
         configuration that is defined in the experiment file. Those kwargs will be
@@ -250,8 +250,8 @@ class Element(object):
             try:
                 t = float(t)
                 if t:
-                    taskMgr.doMethodLater(t, self.config.world.advanceFSM,
-                    'timeout_'+self.config.name, extraArgs=['auto'])
+                    taskMgr.doMethodLater(t, self.sendMessage,
+                    'timeout_'+self.config.name, extraArgs=['timeout_'+self.config.name])
             except:
                 printOut("error converting timeout value %s in %s " % (str(t), self.config.name), 0)
                 self.config.world.quit()
