@@ -5,13 +5,11 @@ elements:
 ####################################
  - className: EmptyState
    name: start
+   # send message timeout_start after 0.1
    timeout: 0.1
 
  - className: EmptyState
    name: end
-
- - className: EmptyState
-   name: bubble
 
  - className: MouseLogger
    name: mouseLog
@@ -56,7 +54,13 @@ elements:
 
  - className: ScreenText
    name: FinalScreen
+   # send message FinalScreen_timeout after 1 second
+   timeout: 1.0
    fname_message: HiddenCalibration/finalText.txt
+   keys:
+    - key: q
+      callback: sendMessage
+      tuple_args: ('endSimulation')
 
  - className: ScreenText
    name: colourBlindText
@@ -129,7 +133,8 @@ elements:
    name: eventLogger
 
 # no template yet
- - className: WhackAMole
+ - module: WhackAMole
+   className: WhackAMole
    name: whackAMole
    fname_moleModel: Elements/WhackAMole/textures/mole.egg
    fname_holeTop: Elements/WhackAMole/textures/tophole.png
@@ -174,25 +179,18 @@ elements:
    keys:
    - key: 0
      callback: sendMessage
-     tuple_args: ('endGame1')
+     tuple_args: ('endGame2')
 
 
 transitions:
- - trans: 'start @ game2: auto'
- - trans: 'start @ mouseLog: auto'
- - trans: 'game2 @ end: auto'
- - trans: 'mouseLog @ end: auto'
+ - trans: 'start @ introText:timeout_start'
+ # background elements
+ - trans: 'start @ eyeTracker: timeout_start'
+ - trans: 'start @ mouseLog: timeout_start'
 
- #- trans: 'start @ eyeTracker:auto'
-
- #- trans: 'start @ introText:auto'
  - trans: 'introText @ consentForm:auto'
-
  - trans: 'consentForm @ userInfo:yesPressed'
-
  - trans: 'consentForm @ end:noPressed'
- - trans: 'eyeTracker @ end:noPressed'
-
  - trans: 'userInfo @ colourBlindText:nextPressed'
 
  - trans: 'colourBlindText @ colourBlindCheck:auto'
@@ -207,65 +205,8 @@ transitions:
  - trans: 'game2Intro @ game2: auto'
  - trans: 'game2 @ FinalScreen: auto'
 
- - trans: 'FinalScreen @ end: auto'
+ - trans: 'FinalScreen @ end: timeout_FinalScreen'
+ - trans: 'mouseLog @ end: timeout_FinalScreen'
+ - trans: 'eyeTracker @ end:timeout_FinalScreen,noPressed,imageQueryBad'
  - trans: 'colourBlindProblem @ end:auto'
- - trans: 'eyeTracker @ end:imageQueryBad'
 
-
-# - trans: 'start @ mole1:auto'
-# - trans: 'mole1 @ end:auto'
-# - trans: 'start @ eyeTracker:auto'
-#- trans: 'IntroScreen @ countDown: auto'
-#- trans: 'thegame @ end: endOfGame'
-#- trans: 'countDown @ end: endOfGame'
-#- trans: 'IntroScreen @ consentForm:auto'
-#- trans: 'consentForm @ UserInfo:yesPressed'
-#- trans: 'consentForm @ end:noPressed'
-#- trans: 'UserInfo @ colourBlindText:nextPressed'
-#- trans: 'colourBlindText @ colourBlindCheck:auto'
-#- trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
-#- trans: 'colourBlindProblem @ end:auto'
-
-# TWO STATES ACTIVATED HERE
-#- trans: 'colourBlindCheck @ MessageAdjustScale:imageQueryOk'
-#- trans: 'colourBlindCheck @ rescaleScreen:imageQueryOk'
-
-# TWO STATES DEACTIVATE INTO ONE
-#- trans: 'rescaleScreen @ gameIntroText:nextPressed'
-#- trans: 'MessageAdjustScale @ gameIntroText:nextPressed'
-
-#- trans: 'start @ gameIntroText:xxx'
-#- trans: 'gameIntroText @ thegame:auto'
-#- trans: 'gameIntroText @ countDown:auto'
-
-#- trans: 'countDown @ end: endOfGame'
-#- trans: 'thegame @ end: endOfGame'
-
-#- trans: 'countDown @ gameQuestions:endOfGame'
-#- trans: 'thegame @ gameQuestions:endOfGame'
-
-#- trans: 'gameQuestions @ PrePilotScreen:auto'
-#- trans: 'PrePilotScreen @ end:auto'
-
-#- trans: 'PrePilotScreen @ Pilot:auto'
-#- trans: 'Pilot @ PilotQuestionnaire: auto'
-
-# SERVER UPLOAD INFORMATION
-# - trans: 'PilotQuestionnaire @ studyServer: auto'
-# STUDY SERVER UPLOAD TO FINAL SCREEN
-# - trans: 'studyServer @ FinalScreen: dataSaved'
-# END
-# - trans: 'FinalScreen@end:auto'
-#- trans: 'start@eyeTracker:auto'
-#- trans: 'start@selectColours:auto'
-#- trans: 'selectColours@end:endGame1'
-
-#- trans: 'bubble@end:auto'
-#- trans: 'eyeTracker@end:auto'
-#- trans: 'introText@consentForm:auto'
-#- trans: 'consentForm@userInfo:yesPressed'
-#- trans: 'consentForm@end:noPressed'
-#- trans: 'userInfo@whackIntroText:nextPressed'
-#- trans: 'whackIntroText@whackAMole:auto'
-#- trans: 'start@whackAMole:auto'
-#- trans: 'whackAMole@end:calibrationFinished'
