@@ -164,9 +164,10 @@ class World(DirectObject):
                 if (fromState == fromNode):
                     # add child to stack
                     transitionsStack.append(toState)
-                    fsmTransitions[fromState][evt] = fsmTransitions[fromState].get(evt, []) + [toState]
-                    # notify the FSM when the event happens
-                    self.accept(evt, self.FsmEventHandler, [evt])
+                    for event in evt.split(','):
+                        fsmTransitions[fromState][event] = fsmTransitions[fromState].get(event, []) + [toState]
+                        # notify the FSM when the event happens
+                        self.accept(event, self.FsmEventHandler, [event])
 
         for el in exp['elements']:
             try:
@@ -175,12 +176,8 @@ class World(DirectObject):
                     continue
 
                 className = el['className']
+                # get module name, or default to className
                 module = el.get('module', className)
-                if 'module' in el.keys():
-                    module = el['module']
-                else:
-                    module = className
-
                 # reload or import the Python Module for this element
                 try:
                     reload(sys.modules['Elements.'+module])
