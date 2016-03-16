@@ -1,2 +1,5 @@
+
 In the following screen, you will play a simple game.
 You must click the grid boxes following the order of the sequence showing above the grid, from left to right.
+
+Press Escape to continue

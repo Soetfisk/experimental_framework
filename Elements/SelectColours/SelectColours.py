@@ -163,7 +163,9 @@ class SelectColours(Element):
                 # column order
                 self.tiles.append(self.makeTile(sx,sy, tileSize/2, temp[x+y*gridWidth]))
                 # listen to mouse
-                self.tiles[-1].bind(DGG.B1PRESS, self.clicked, extraArgs=[temp[x+y*gridWidth]])
+                idx = x+y*gridWidth
+                # send idx as an INT and the colour associated.
+                self.tiles[-1].bind(DGG.B1PRESS, self.clicked, extraArgs=[idx, temp[idx]])
 
         # sequence at the top, re-shuffle!
         random.shuffle(temp)
@@ -180,7 +182,7 @@ class SelectColours(Element):
     def unlockFunc(self):
         self.locked=False
 
-    def clicked(self, tileId, who='mouse'):
+    def clicked(self, idx, tileId, who='mouse'):
         """
         Method called when the user presses the mouse
         When each tile is created, a method is bound to the NodePath, so I do not
@@ -201,12 +203,11 @@ class SelectColours(Element):
 
             cam = self.config.world.getCamera()
             width,height = map(float,(cam.screenWidth,cam.screenHeight))
-            tile = self.correctTiles[self.currentTile]
+            tile = self.tiles[idx]
 
             self.logFile.logEvent("correct tile clicked: %s" % tileId)
-            #self.logFile.logEvent("tileCenter: %.4f %.4f" % (tile.getPos().getX(),tile.getPos().getZ()))
-            self.logFile.logEvent("tileCenter: %.4f" % (tile.getPos().getX()))
-            #self.logFile.logEvent("mouseClicked: %.4f %.4f" % ((width / height)*float(mouseX), mouseY))
+            self.logFile.logEvent("tileCenter: %.4f %.4f" % (tile.getPos().getX(),tile.getPos().getZ()))
+            self.logFile.logEvent("mouseClicked: %.4f %.4f" % ((width / height)*float(mouseX), mouseY))
 
             try:
                 self.logFile.logEvent("EyeGaze reported: %.4f %.4f" % self.eyeTracker.getLastSample())
