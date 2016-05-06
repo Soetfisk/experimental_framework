@@ -1,7 +1,7 @@
 elements:
  - className: ScreenText
    name: IntroScreen
-   plain_text: PilotData/introPilot.txt
+   fname_message: PilotData/introPilot.txt
 
  - className: EmptyState
    name: start
@@ -22,7 +22,7 @@ elements:
  - module: ScreenText
    className: ScreenText
    name: PrePilotScreen
-   plain_text: PilotData/prePilot.txt
+   fname_message: PilotData/prePilot.txt
 
  - className: Pilot
    name: Pilot
@@ -42,7 +42,7 @@ elements:
  - module: ScreenText
    className: ScreenText
    name: FinalScreen
-   plain_text: PilotData/finalText.txt
+   fname_message: PilotData/finalText.txt
 
 transitions:
  - trans: 'start @ IntroScreen'

@@ -50,8 +50,8 @@ class HUDTimer(HUDText):
         HUDText.exitState(self)
 
     def updateTimer(self, task):
-        self.timeElapsed = task.time
         if (not self.config.hide):
-            self.textNode.setText("%.0f" % self.timeElapsed)
+            self.textNode.setText("%.0f" % task.time)
+        self.timeElapsed = task.time
         return task.cont
 

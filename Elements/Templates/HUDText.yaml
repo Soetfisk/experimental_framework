@@ -1,0 +1,8 @@
+className: HUDText
+name: MessageAdjustScale
+text_text: "Please use the keys 'w' (increase), 's' (decrease) to adjust the size of the \nmodel (parachute+robot) so it occupies exactly 5 cm on your screen. \nFor finner adjustments use 'e' and 'd' accordingly.\n\nPress the key 'n' when you have finished the adjustment"
+tuple_topLeft: (0.1, 0.2)
+keys:
+ - key: n
+   callback: sendMessage
+   tuple_args: ('nextPressed')

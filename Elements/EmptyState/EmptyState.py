@@ -19,7 +19,6 @@ class EmptyState(Element):
         super(EmptyState, self).__init__(**kwargs)
         self.hideElement()
 
-
     def enterState(self):
         # super class enterState
         Element.enterState(self)
@@ -28,3 +27,7 @@ class EmptyState(Element):
         # super class exitState
         Element.exitState(self)
 
+    def getConfigTemplate(self):
+        elementDict = Element.getConfigTemplate()
+        return elementDict
+        

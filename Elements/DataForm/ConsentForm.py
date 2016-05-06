@@ -33,7 +33,7 @@ class ConsentForm(Element):
         # centered
         pos = (0, 1.0, 0)
         # guiLabels colour
-        labelColour = self.config.settings.labelcolour
+        labelColour = getattr(self.config.settings, 'color_label', (1.0,1.0,1.0,1.0))
         # global scale of the frame
         scale = self.config.settings.scale
         # canvas with scrolling capabilities
@@ -83,10 +83,12 @@ class ConsentForm(Element):
 
     def yesPressed(self):
         self.answer = 'yes'
+        self.log('Consent accepted')
         self.sendMessage('yesPressed')
 
     def noPressed(self):
         self.answer = 'no'
+        self.log('Consent not accepted')
         self.sendMessage('noPressed')
 
     def enterState(self):

@@ -16,6 +16,7 @@ for o in pandaConfig.options:
     loadPrcFileData('', o)
 
 from Utils.FiniteStateMachine import *
+from Utils.YamlTools import fixTuples
 
 # basic Panda3D imports
 from direct.showbase.DirectObject import DirectObject
@@ -23,10 +24,6 @@ from direct.gui.OnscreenText import OnscreenText
 from panda3d.core import TextNode
 from panda3d.core import WindowProperties
 import direct.directbase.DirectStart
-
-
-# python threading for Eye-tracker
-from Tracker import Tracker
 
 # logger class
 from Logger import Logger
@@ -84,11 +81,13 @@ class World(DirectObject):
         else:
             experiment = yaml.load(open(self.experiment))
 
+        experiment = fixTuples(experiment)
+
         # first timestamp since the whole application started
         self.baseTime = time.time()
 
         # Dictionary to store the elements (nodes) that will be part of
-        # an experimentation, will construct a Finite State Machine 
+        # an experimentation, will construct a Finite State Machine
         # with them
         self.elements = {}
 
@@ -97,6 +96,7 @@ class World(DirectObject):
 
         # get global keys configuration, always available application wide
         self.keyConfig = yaml.load(open("config/globalKeys.yaml"))
+        # tuples are not supported by YAML
 
         # This class inherits from DirectObject, and Keyboard
         # will get a reference to the messenger from us
@@ -110,9 +110,6 @@ class World(DirectObject):
 
         # do some basic setup common to the whole framework
         self.generalSetup()
-
-        # for the Eye-tracker
-        self.tracker = Tracker()
 
         # build FSM of the experiment
         self.fsm = self.setupFSM(experiment)
@@ -167,9 +164,10 @@ class World(DirectObject):
                 if (fromState == fromNode):
                     # add child to stack
                     transitionsStack.append(toState)
-                    fsmTransitions[fromState][evt] = fsmTransitions[fromState].get(evt, []) + [toState]
-                    # notify the FSM when the event happens
-                    self.accept(evt, self.FsmEventHandler, [evt])
+                    for event in evt.split(','):
+                        fsmTransitions[fromState][event] = fsmTransitions[fromState].get(event, []) + [toState]
+                        # notify the FSM when the event happens
+                        self.accept(event, self.FsmEventHandler, [event])
 
         for el in exp['elements']:
             try:
@@ -178,12 +176,8 @@ class World(DirectObject):
                     continue
 
                 className = el['className']
+                # get module name, or default to className
                 module = el.get('module', className)
-                if 'module' in el.keys():
-                    module = el['module']
-                else:
-                    module = className
-
                 # reload or import the Python Module for this element
                 try:
                     reload(sys.modules['Elements.'+module])
@@ -220,7 +214,7 @@ class World(DirectObject):
                 # if the name cannot be split in two pieces by the dot
                 #printOut("Missing or extra dots in the name of :" + s,0)
                 print v
-                sys.quit()
+                self.quit()
             except AttributeError, e:
                 printOut("Attribute error when building " + el['name'], 0)
                 printOut("Most likely there is a mismatch between the code and the config file", 0)
@@ -355,13 +349,33 @@ class World(DirectObject):
 
         #render.explore()
 
+    def toggleFullScreen(self):
+        #const WindowProperties oldp = window->get_graphics_window()->get_properties();
+        #WindowProperties newp;
+        #if (oldp.get_fullscreen())
+        #    newp.set_fullscreen(false);
+        #else
+        #    newp.set_fullscreen(true);
+        #window->get_graphics_window()->request_properties(newp);
+        new_wp = WindowProperties()
+        old_wp = base.win.getProperties()
+        if old_wp.getFullscreen():
+            new_wp.setFullscreen(False)
+        else:
+            new_wp.setFullscreen(True)
+        base.win.requestProperties(new_wp)
+
+
+    def getCamera(self):
+        return self.camera
+
     def setupCamera(self):
         """
         Attributes:
         screenWidth, screenHeight
         pos, lookAt, fov, ratio
         """
-        # setup the camera based purely on the JSON configuration
+        # setup the camera based purely on the YAML configuration
 
         self.camera = self.config.cameraConfig
 
@@ -373,11 +387,11 @@ class World(DirectObject):
                 # "win-size 1280 800"
                 w, h = o.split(' ')[1:]
                 printOut("Saving window config: %s %s" % (w, h), 4)
-                self.config.cameraConfig.screenWidth = int(w)
-                self.config.cameraConfig.screenHeight = int(h)
+                self.camera.screenWidth = int(w)
+                self.camera.screenHeight = int(h)
         # ===========================================================
-
         setattr(self.camera, 'ratio', self.camera.screenWidth / float(self.camera.screenHeight))
+
         # fovRads = (self.camera.fov * pi / 180.0)
 
         # make a triangle rectangle, from camera pos to the plane
@@ -415,10 +429,8 @@ class World(DirectObject):
         :param npath: nodepath to attach
         :param place: place where to attach, can be 3d or HUD
         """
-        parent = render
-        if place == 'HUD':
-            parent = aspect2d
-        npath.reparentTo(parent)
+        mapNode={'3d':render,'3D':render,'HUD':aspect2d}
+        npath.reparentTo(mapNode[place])
 
     #=========================================================================================
     #========== KEYBOARD - KEYS HANDLING =====================================================
@@ -444,8 +456,8 @@ class World(DirectObject):
                 method = getattr(self, key_record['callback'])
                 args = []
                 comment = ""
-                if key_record.has_key('args'):
-                    args = key_record['args']
+                if key_record.has_key('tuple_args'):
+                    args = key_record['tuple_args']
                 if key_record.has_key('comment'):
                     comment = key_record['comment']
                 if not k.registerKey(key_record['key'], 'World', method, comment, False, args):
@@ -503,17 +515,19 @@ class World(DirectObject):
         messenger.toggleVerbose()
 
     def quit(self):
-        self.log.logEvent("Simulation finished\n", time.time())
-        self.log.stopLog()
-        self.tracker.stopTrack()
-        sys.exit()
+        try:
+            self.log.logEvent("quiting simulation")
+            self.log.logEvent("calling ExitState on any active element")
+            for e in self.elements.values():
+                if e.isActive():
+                    e.exitState()
 
-    #    def _quit(self):
-    # this will implicitly quit, but each state will have
-    # the opportunity to clear out the logs
-    #self.fsm.request("Off")
-    #        self.quit()
-    #while(True):
-    #    self.advanceFSM()
-
-
+            self.log.logEvent("Simulation finished\n", time.time())
+            self.log.stopLog()
+        except Exception,e:
+            printOut("Error whilst closing!")
+            print e
+        finally:
+            # sleep 1 second of grace
+            time.sleep(1)
+            sys.exit()

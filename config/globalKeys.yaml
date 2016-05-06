@@ -10,16 +10,16 @@ global_keys:
   - key: escape
     callback: advanceFSM
     comment: Advance State Machine
-    args: ["auto"]
+    tuple_args: ['auto']
   - key: control-m
     callback: toggleMouseCursor
     comment: Show/Hide mouse cursor
   - key: control-r
     callback: restartSimulation
     comment: restartSimulation
-  - key: '1'
-    callback: testOne
-    comment: testOne
+  - key: f
+    callback: toggleFullScreen
+    comment: Toggles fullscreen without closing the game
 #  - key: control-g
 #    callback: advanceFSM
 #    comment: Advance State Machine

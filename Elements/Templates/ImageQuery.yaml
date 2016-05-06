@@ -1,0 +1,13 @@
+module: FullScreenImage
+className: ImageQuery
+name: imageQuery1
+# images in a printf format
+fname_imageNameStr: PilotData/colorblind/plate%d.png
+tuple_imageNameStrArgs: (1,2,3)
+tuple_imageAnswers: (12,8,6)
+
+tuple_scale: (0.5,0.5)
+keys:
+- key: n
+  callback: nextImage
+  once: false

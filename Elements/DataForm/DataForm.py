@@ -61,7 +61,7 @@ class DataForm(Element):
         # background colour
         colour = self.colours['dark_grey']
         # guiLabels colour
-        labelColour = self.config.settings.labelcolour
+        labelColour = getattr(self.config.settings, 'color_label', (1.0,1.0,1.0,1.0))
         # global scale of the frame
         scale    = self.config.settings.scale
         # canvas with scrolling capabilities
@@ -111,10 +111,13 @@ class DataForm(Element):
                         command=self.setText, extraArgs=[],
                         pos=(0,1,widgetYpos), numLines = 1, focus=0)
             elif ( str(i.type) == 'Option' ):
-                widget = DirectOptionMenu( text="options", scale=1.10*scale, items=i.values,
+                widget = DirectOptionMenu( text="options", scale=1.05*scale, items=i.tuple_values,
                         popupMarkerBorder=(1,0),
                         initialitem=0, command=self.optionMenu, extraArgs=[],
-                        pos=(0,1,widgetYpos))
+                        pos=(0,1,widgetYpos),
+                        text_scale=(0.7,0.7),
+                        text_pos=(0.3,0.1))
+
             elif ( str(i.type) == 'TickBox' ):
                 widget = DirectCheckButton( text="", scale=scale,
                          command=self.tickBoxClicked, extraArgs=[],
@@ -213,10 +216,18 @@ class DataForm(Element):
         s = self.config.settings
         filename = "%s/%s_%s.txt" % (s.outfiledir, s.outfileprefix, self.config.world.participantId)
         try:
+            # write comma separated values
             out = open(filename, 'w')
-            out.write("participant id: %s\n" % self.config.world.participantId)
+            # header
+            out.write("# participant id, ")
             for (k,v) in self.userInput.items():
-                out.write("%s: %s\n" %(k,v))
+                out.write("%s," %k)
+            out.write("\n")
+            # values
+            out.write("%s," % self.config.world.participantId)
+            for (k,v) in self.userInput.items():
+                out.write("%s," %v)
+
             out.close()
         except Exception, e:
             printOut(str(e), 0)

@@ -3,7 +3,7 @@
       {
         "className":"ScreenText",
         "name":"IntroScreen",
-        "plain_text":"PilotData/introPilot.txt"
+        "fname_message":"PilotData/introPilot.txt"
       },
       {
         "className":"DataForm",
@@ -14,7 +14,7 @@
         "module":"ScreenText",
         "className":"ScreenText",
         "name":"PrePilotScreen",
-        "plain_text":"PilotData/prePilot.txt"
+        "fname_message":"PilotData/prePilot.txt"
       },
       {
         "className":"Pilot",
@@ -33,7 +33,7 @@
         "module":"ScreenText",
         "className":"ScreenText",
         "name":"FinalScreen",
-        "plain_text":"PilotData/finalText.txt"
+        "fname_message":"PilotData/finalText.txt"
       }
       ],
   "transitions": [

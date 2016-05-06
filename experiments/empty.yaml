@@ -1,0 +1,12 @@
+elements:
+
+ - className: EmptyState
+   name: start
+   timeout: 0.1
+
+ - className: EmptyState
+   name: end
+   color_col: (10,10,10,255)
+
+transitions:
+- trans: 'start @ end:auto'

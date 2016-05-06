@@ -1,0 +1,212 @@
+elements:
+
+####################################
+# Initial and final states in the FSM.
+####################################
+ - className: EmptyState
+   name: start
+   # send message timeout_start after 0.1
+   timeout: 0.1
+
+ - className: EmptyState
+   name: end
+
+ - className: MouseLogger
+   name: mouseLog
+
+####################################
+# Text display elements.
+####################################
+
+ # introduction to the experiment
+ - className: ScreenText
+   fname_message: HiddenCalibration/introExperiment.txt
+   name: introText
+
+ - module: DataForm
+   className: ConsentForm
+   name: consentForm
+   fname_config: HiddenCalibration/consentForm.yaml
+
+ - className: ScreenText
+   name: game1Intro
+   fname_message: HiddenCalibration/game1Intro.txt
+   keys:
+    - key: n
+      callback: sendMessage
+      tuple_args: ('auto')
+
+ - className: ScreenText
+   name: game2Intro
+   fname_message: HiddenCalibration/game2Intro.txt
+   keys:
+    - key: n
+      callback: sendMessage
+      tuple_args: ('auto')
+
+ - className: ScreenText
+   name: whackIntroText
+   fname_message: HiddenCalibration/whackIntroText.txt
+   keys:
+    - key: n
+      callback: sendMessage
+      tuple_args: ('auto')
+
+ - className: ScreenText
+   name: FinalScreen
+   # send message FinalScreen_timeout after 1 second
+   timeout: 1.0
+   fname_message: HiddenCalibration/finalText.txt
+   keys:
+    - key: q
+      callback: sendMessage
+      tuple_args: ('endSimulation')
+
+ - className: ScreenText
+   name: colourBlindText
+   fname_message: PilotData/colourBlindText.txt
+   # example defining the keybindings directly here
+
+ - className: ScreenText
+   name: colourBlindProblem
+   # the LAST element is the option selected now, which has to be in the list
+   #option_level: ('easy','hard','easy')
+   fname_message: PilotData/colourBlindProblem.txt
+
+# Very specific Element, for testing for Colour Blindness
+ - module: FullScreenImage
+   className: ImageQuery
+   name: colourBlindCheck
+   fname_imageNameStr: PilotData/colorblind/plate%d.png
+#   imageStrArgs: (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17)
+   tuple_imageStrArgs: (1,2,3)
+#   imageAnswers: (12,8,6,29,57,5,3,15,74,2,6,97,45,5,7,16,73)
+   tuple_imageAnswers: (12,8,6)
+   tuple_scale: (0.5,0.5)
+#   keys:
+#    - key: n
+#      callback: nextImage
+#      once: false
+
+ - className: DataForm
+   name: userInfo
+   settings:
+    outfiledir: run
+    outfileprefix: userdata
+    formId: userdata
+    scale: 0.06
+    maxlabel: 10
+    color_label: (1.0,0.5,0.5,1.0)
+    title: 'Please provide us with some information about you:'
+   # form description
+   input:
+    - label: Gender
+      type: Option
+      tuple_values: ("Male","Female")
+    - label: Do you have vision problems
+      type: Option
+      tuple_values: ("Yes","No")
+    - label: Do you have experience playing games
+      type: Option
+      tuple_values: ("Yes","No")
+    - label: Age
+      type: TextEntry
+      default: 0
+
+ - module: EyeTracker
+   className: Tobii_UDP_Client
+   name: eyeTracker
+   printGaze: True
+   showGaze: False
+   smoothWindow: 10
+   keys:
+   - key: t
+     callback: startTracking
+   - key: y
+     callback: stopTracking
+   - key: k
+     callback: toggleGaze
+
+# not template yet...
+ - module: EventLogger
+   className: EventLogger
+   name: eventLogger
+
+# no template yet
+ - module: WhackAMole
+   className: WhackAMole
+   name: whackAMole
+   fname_moleModel: Elements/WhackAMole/textures/mole.egg
+   fname_holeTop: Elements/WhackAMole/textures/tophole.png
+   fname_holeBottom: Elements/WhackAMole/textures/botomhole.png
+   fname_back: Elements/WhackAMole/textures/back.png
+   fname_mole: Elements/WhackAMole/textures/mole_1.png
+   fname_plainGrass: Elements/WhackAMole/textures/no_hole.jpg
+   int_gridSize: 8
+   int_moleCalibPoints: 6
+   int_waitForDown: 4
+   refsto: [eyeTracker]
+   keys:
+   - key: mouse1
+     callback: hammerDown
+   - key: q
+     callback: sendMessage
+     tuple_args: ('endGame')
+
+ - className: SelectNumbers
+   name: game1
+   gridWidth: 3
+   gridHeight: 3
+   # size of tile is in the range [0,2]
+   tileSizes: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
+   margin: 1.1
+   # smaller than 1 to make it smaller!
+   textSize: 0.04
+   color_tile: (18/255.0,152/255.0,196/255.0,1.0)
+   refsto: [eyeTracker]
+   keys:
+   - key: 0
+     callback: sendMessage
+     tuple_args: ('endGame1')
+
+ - className: SelectColours
+   name: game2
+   gridWidth: 3
+   gridHeight: 3
+   margin: 1.1
+   tileSizes: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
+   refsto: [eyeTracker]
+   keys:
+   - key: 0
+     callback: sendMessage
+     tuple_args: ('endGame2')
+
+
+transitions:
+ - trans: 'start @ introText:timeout_start'
+ # background elements
+ - trans: 'start @ eyeTracker: timeout_start'
+ - trans: 'start @ mouseLog: timeout_start'
+
+ - trans: 'introText @ consentForm:auto'
+ - trans: 'consentForm @ userInfo:yesPressed'
+ - trans: 'consentForm @ end:noPressed'
+ - trans: 'userInfo @ colourBlindText:nextPressed'
+
+ - trans: 'colourBlindText @ colourBlindCheck:auto'
+ - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
+ - trans: 'colourBlindCheck @ whackIntroText:imageQueryOk'
+
+ - trans: 'whackIntroText @ whackAMole:auto'
+
+ - trans: 'whackAMole @ game1Intro: auto'
+ - trans: 'game1Intro @ game1: auto'
+ - trans: 'game1 @ game2Intro: auto'
+ - trans: 'game2Intro @ game2: auto'
+ - trans: 'game2 @ FinalScreen: auto'
+
+ - trans: 'FinalScreen @ end: timeout_FinalScreen'
+ - trans: 'mouseLog @ end: timeout_FinalScreen'
+ - trans: 'eyeTracker @ end:timeout_FinalScreen,noPressed,imageQueryBad'
+ - trans: 'colourBlindProblem @ end:auto'
+

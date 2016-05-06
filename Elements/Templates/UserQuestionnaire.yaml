@@ -1,0 +1,22 @@
+module: DataForm
+className: UserQuestionnaire
+name: basicQuestionnaire
+settings:
+  formId: formId
+  scale: 0.06
+  maxlabel: 10
+  color_label: (255,128,255,255)
+  title: 'Please answer the following questions:'
+  color_background: (100,100,100,255)
+questions:
+  - text_text: Question 1?
+    order: 0
+    answerType: Option
+    tuple_answerOptions: ('yes','no')
+    graphics:
+     - fname_image: PilotData/textures/red64.png
+       tuple_pos: (-0.3,0,-0.5)
+       scale: 0.3
+     - fname_image: PilotData/textures/red128.png
+       tuple_pos: (0.3,0,-0.5)
+       scale: 0.3

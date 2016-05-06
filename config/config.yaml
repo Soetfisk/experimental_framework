@@ -6,8 +6,8 @@ cameraConfig:
   lookAt: [0.0,1.0,0.0]
   fov: 60.0
   # dimensions of the screen
-  screenWidth: 1280
-  screenHeight: 800
+  # screenWidth: 1920
+  # screenHeight: 1080
   # distance of the plane of parachutes from the camera
   # parDistCam: 250.0,
   # delta: 0

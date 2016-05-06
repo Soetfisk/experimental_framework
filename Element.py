@@ -1,28 +1,38 @@
 from panda3d.core import *
+from direct.showbase import DirectObject
 
 import sys
 from Utils.Debug import printOut
 from Utils.Utils import *
-#try:
-#    import json
-#except ImportError:
-#    import simplejson as json
+from collections import OrderedDict
 
-#import external.yaml as yaml
-import yaml
+import external.yaml as yaml
 
 class Element(object):
     """
-    Base class for the Elements in the experiment.
-    Each element represents ONE stage in the experiment,
-    for example, one image, a text message, a timer,
-    a game!, a pilot...
+    The simulation is based on a Finite State Machine of
+    States/Elements, but with the exception that MORE than one
+    element can be active at a particular time...I know, sounds
+    horrible.
+    Each element represents some stimuli/functionality in the experiment,
+    for example, one image, a text message, a timer, a game!, a pilot...
+    It is a very flat hierarchy, and simplistic design.
     """
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         '''
-        Element constructor. Adds all kwargs as attributes. Creates some
-        useful attributes to give access to the World, and also to the
-        different scene parts (2d, 3d)
+        Element constructor. When the element is constructed is passed the YAML
+        configuration that is defined in the experiment file. Those kwargs will be
+        added as attributes. It also saves some useful attributes to give access
+        to the World, and also to the different scene parts (2d, 3d)
+        To allow for basic 2D transformations, each element can be manipulated in
+        run-time if the attribute "locked_xform" is defined as false.
+
+        If "locked_xform" is false, the user will be able to interact with the mouse and
+        keys <ctrl-1> for translation, <ctrl-2> for rotation, <ctrl-3> for scale
+        After the interaction, the tweaks will be saved in a file named after the experiment
+        name and the element name as: 'expXY_elName_xform.yaml'.
+        If the file exists, it will be overwritten.
+
         :param kwargs: dict
         :return: None
         '''
@@ -32,17 +42,22 @@ class Element(object):
         # some colours constants to share among all elements
         self.colours = getColors()
 
+        self.mouseListener = DirectObject.DirectObject()
+
         dictionary = {}
-        if 'config' in kwargs:
+        # configuration can be in the experiment file or in a special file
+        # just for this element.
+        if 'fname_config' in kwargs:
             try:
-                dictionary = yaml.load(open(kwargs['config']))
+                dictionary = yaml.load(open(kwargs['fname_config']))
             except Exception, e:
                 print e
-                printOut("Fatal error loading config file " + kwargs['config'], 0)
+                printOut("Fatal error loading config file " + kwargs['fname_config'], 0)
                 kwargs['world'].quit()
 
+        # ALL atributes are under "self.config"
         for k, v in kwargs.items():
-            # make every argument from the config file an attribute, including a reference
+            # make every argument from the fname_config file an attribute, including a reference
             # to world through self.config.world
             if k in dictionary:
                 printOut("Warning, same key found in config file and in experiment file",0)
@@ -57,12 +72,27 @@ class Element(object):
             else:
                 dictionary[k] = v
 
-        # keep a reference to the original YAML config
-        self.yaml_config = dictionary
-
         # make everything in the config file a simple object.
         self.config = objFromDict(dictionary)
         printOut("CONFIG LOADED FOR %s" % self.config.name, 4)
+
+        # all configuration options have been loaded.
+        # check if this Element can be moved around in run-time, and
+        # check if there is a xform file already in the filesystem.
+        xform_file = None
+        try:
+            xform_file = open('exp_' + self.config.name + '_xform_yaml')
+            xform_dict = yaml.load(xform_file)
+        except:
+            xform_dict = None
+        finally:
+            if xform_file:
+                xform_file.close()
+        setattr(self.config,'xform_dict',xform_dict)
+
+        # keep a reference to the original YAML config
+        self.yaml_config = dictionary
+
 
         # try to set some default values, each Element subclass can define
         # a set of default values that if not present in the config file are
@@ -93,6 +123,22 @@ class Element(object):
         #if (c is None):
 
         self.registeredKeys = []
+
+    def getConfigTempate(self):
+        return OrderedDict({
+            'className': 'className',
+            'module': 'moduleName',
+            'name': 'uniqueName',
+            'timeout': 0.0,
+            'keys': [
+                {
+                 'key': '',
+                 'callback': '',
+                 'tuple_args': ()
+                }
+            ]
+        })
+
 
     def setKeyboard(self, keyboard):
         self.kbd = keyboard
@@ -129,12 +175,20 @@ class Element(object):
         printOut("Registering keys for the current element", 4)
         for k in keys:
             comment = getattr(k, 'comment', '')
-            cb = getattr(self, k.callback, None)
+            # support for references using dot notation only!
+            # for example:
+            # callback: anotherObject.attribute.method
+            tokens = k.callback.split('.')
+            prevToken = self
+            for t in tokens:
+                cb = getattr(prevToken, t, None)
+                prevToken = cb
+
             key = getattr(k, 'key', None)
             # in case is the letter 1,2,3..., or even a number 123
             key = str(key)
             once = getattr(k, 'once', False)
-            args = getattr(k, 'args', [])
+            args = getattr(k, 'tuple_args', [])
             # force args to be a list...
             if not isinstance(args, list):
                 args = [args]
@@ -189,7 +243,6 @@ class Element(object):
         printOut("Entering state %s" % self.config.name, 1)
         #self.config.world.resetKeys()
         self.showElement()
-        self.registerKeys()
 
         # is there a timeout set for this state ?
         t = getattr(self.config, 'timeout', None)
@@ -197,8 +250,8 @@ class Element(object):
             try:
                 t = float(t)
                 if t:
-                    taskMgr.doMethodLater(t, self.config.world.advanceFSM,
-                    'timeout_'+self.config.name, extraArgs=['auto'])
+                    taskMgr.doMethodLater(t, self.sendMessage,
+                    'timeout_'+self.config.name, extraArgs=['timeout_'+self.config.name])
             except:
                 printOut("error converting timeout value %s in %s " % (str(t), self.config.name), 0)
                 self.config.world.quit()
@@ -227,10 +280,13 @@ class Element(object):
         for ref in refs:
             if ref in self.config.world.elements:
                 el = self.config.world.elements[ref]
-                setattr(self.config,ref, el)
+                setattr(self,ref, el)
             else:
                 printOut("ERROR: Element %s trying to set a reference to non-existent element %s!" %
                          (self.config.name, ref ),0)
+
+        # lastly, register keys.
+        self.registerKeys()
 
     def removeElement(self):
         self.sceneNP.detachNode()
@@ -272,4 +328,3 @@ class Element(object):
 #       service.setServiceImp( self.getUserData )
 #       # register service
 #       self.config.world.serviceMgr.registerService ( service )
-
