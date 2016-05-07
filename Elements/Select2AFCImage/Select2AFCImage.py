@@ -11,7 +11,7 @@ import random
 from Utils.Debug import printOut
 from Logger import Logger
 
-class ColourPreference(Element):
+class Select2AFCImage(Element):
     """
     Class to display two images and allow the user to select one or the other
     """
@@ -21,7 +21,7 @@ class ColourPreference(Element):
         Class constructor
         """
         # call parent constructor
-        super(ColourPreference,self).__init__(**kwargs)
+        super(Select2AFCImage,self).__init__(**kwargs)
 
         # scale is used to change the size of the images
         sx, sz = getattr(self.config,'tuple_scale',[1.0,1.0])
@@ -79,7 +79,8 @@ class ColourPreference(Element):
         # place holder to write
 
         # file output to store the results
-        self.logResults = Logger("run/userAnswers_"+self.config.world.participantId+".log",mode='w')
+        outputDir = getattr(self.config,'logOutputDir','run')
+        self.logResults = Logger(outputDir+"/userAnswers_"+self.config.world.participantId+".log",mode='w')
         #self.currentPair = None
 
     def hidePair(self, pair):
@@ -139,5 +140,6 @@ class ColourPreference(Element):
     def exitState(self):
         # we could unload the images here...
         Element.exitState(self)
+        self.logResults.stopLog()
 
 
