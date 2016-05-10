@@ -49,8 +49,17 @@ elements:
    name: pathChoice
    # scaling for the images across X and Y
    tuple_scale: (0.5,0.5)
+   # path were the images reside (NON-RECURSIVE)
    imagePath: JuliaExperiment/images/
-   imagePairs: [(image1,image2),(image2,image3),(image1,image3)]
+   # if this attribute is present, only these pairs will be presented, and not ALL image files in the folder.
+   # NOTE THE USE OF LIST OF LISTS, THERE IS A BUG HERE SO LISTS HAVE TO BE USED INSTEAD OF TUPLES.
+   imagePairs: [[image1,image2],[image2,image3],[image1,image3]]
+   # what extension are the images ?
+   imageExtension: .png
+   # generate mirror pairs [false by default]: if True, will also generate (image2,image1) when (image1,image2) is present.
+   genMirrorPair: True
+   # randomize all pairs [true by default]
+   randomizePairs: True
    keys:
    - key: arrow_left
      callback: imageSelected

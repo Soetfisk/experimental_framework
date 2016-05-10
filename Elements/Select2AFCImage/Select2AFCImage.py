@@ -25,28 +25,42 @@ class Select2AFCImage(Element):
 
         # scale is used to change the size of the images
         sx, sz = getattr(self.config,'tuple_scale',[1.0,1.0])
-        # in this dictionary we will hold the images
+
+        # in this DICTIONARY we will hold the images
         self.imageNodes={}
 
-        # read all filenames from directory
-        # only put IMAGES in this directory
-        try:
-            files = os.listdir(self.config.imagePath)
-        except WindowsError,e:
-            printOut("Directory %s does not exist!" % self.config.imagePath)
-            self.config.world.quit()
-        # compute all pairs as a result of a combination of filenames
-        tempImagePairs = list(itertools.combinations(files,2))
+        # check if explicit list of pairs has been provided.
+        tempImagePairs = getattr(self.config,'imagePairs',None)
 
-        # shuffle the image pairs before start
-        random.shuffle(tempImagePairs)
-        # convert to list of lists instead of list of tuples
-        tempImagePairs = [list(x) for x in tempImagePairs]
-        # for each image pair, randomize the actual pair so it is
-        # not always (a,b) but (b,a) sometimes as well.
-        map(random.shuffle, tempImagePairs)
+        # if tempImagePairs does not exist, read file names from directory
+        if not tempImagePairs:
+            try:
+                files = os.listdir(self.config.imagePath)
+                # remove extension from filename
+                files = [ x.rsplit('.',1)[0] for x in files]
+                # compute all pairs as a result of a combination of filenames
+                tempImagePairs = list(itertools.combinations(files,2))
+            except AttributeError,e:
+                printOut("Attribute imagePath in config file does not exist!")
+                self.config.world.quit()
+            except WindowsError,e:
+                printOut("Directory %s with images does not exist!" % self.config.imagePath)
+                self.config.world.quit()
+
+        # check if mirrors are desired, and append them.
+        if getattr(self.config,'genMirrorPair',None):
+            for i in range(len(tempImagePairs)):
+                a,b = tempImagePairs[i]
+                tempImagePairs.append((b,a))
+
+        if getattr(self.config,'randomizePairs',False):
+            # shuffle the image pairs before start
+            random.shuffle(tempImagePairs)
 
         self.imagePairs = tempImagePairs
+
+        # if extension has been set use it, otherwise assume PNG
+        imageExtension = getattr(self.config,'imageExtension','.png')
 
         try:
             # load every image into a Panda node and attach it to the
@@ -54,7 +68,7 @@ class Select2AFCImage(Element):
             for pair in self.imagePairs:
                 for p in pair:
                     if p not in self.imageNodes.keys():
-                        finalname = self.config.imagePath + p
+                        finalname = self.config.imagePath + p + imageExtension
                         printOut("loading %s" % finalname)
                         self.imageNodes[p] = OnscreenImage(
                             image=finalname,
