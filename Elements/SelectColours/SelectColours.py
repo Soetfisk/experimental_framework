@@ -31,34 +31,39 @@ class SelectColours(Element):
 
         self.locked=False
 
+
         colours = [
-            (200,0,0,255), (254,155,14,255), (243,254,30,255),
-            (0,240,0,255), (0,254,229,255), (17,41,254,255),
-            (197,16,253,255), (120,10,255,255), (0,0,0,255) ]
+            (250,0,0,255),      # red
+            (254,254,254,255),  # white
+            (255,255,0,255),    # yellow
+            (0,0,150,255),      # dark blue
+            (0,150,0,255),      # dark green
+            (197,16,253,255),   # magenta
+            (102,51,0,255),     # brown
+            (0,255,255,255),    # cyan
+            (0,0,0,255) ]       # black
+        names = [ 'red', 'white', 'yellow', 'darkblue', 'darkgreen', 'magenta', 'brown', 'cyan', 'black' ]
         m = 255.0
         self.colours = [(r/m,g/m,b/m,a/m) for (r,g,b,a) in colours]
+        self.colours_names = names # [ str(c) for c in colours ]
 
-        self.colours_names = [ str(c) for c in colours ]
+        try:
+            self.sizesToTry = self.config.tileSizes
+        except:
+            printOut("missing property 'tileSizes' in config file")
+            self.config.world.quit()
 
-        self.sizesToTry = self.config.tileSizes
         random.shuffle(self.sizesToTry)
-        self.config.scale = self.sizesToTry.pop(0)
 
-        # start a new grid
+        self.config.scale = self.sizesToTry.pop(0)
+        # start a new grid, using self.config.scale
         self.makeGrid()
 
-        self.logFile = Logger("run/selectColours_%s.txt" % self.config.world.participantId, 'w')
-
         # add UI elements to enlarge/shrink grid
-        self.addButtonsBigSmall()
+        #self.addButtonsBigSmall()
         # shuffle the grid from its original correct order.
         #self.shuffle()
         self.hideElement()
-
-    def mouseClicked(self):
-        mouseX = base.mouseWatcherNode.getMouseX()
-        mouseY = base.mouseWatcherNode.getMouseY()
-        print mouseX, mouseY
 
     def showElement(self):
         Element.showElement(self)
@@ -67,38 +72,38 @@ class SelectColours(Element):
     def resetGame(self):
         pass
 
-    def addButtonsBigSmall(self):
-        self.bigger = DirectButton(parent = self.hudNP,
-                                      text="Bigger", #pad=pad0,
-                                      scale=0.08,
-                                      pad=(.1,.1),
-                                      pos=(0.6, 0, -0.9),
-                                      command=self.changeSize,
-                                      extraArgs=[1.1])
-
-        self.smaller = DirectButton(parent = self.hudNP,
-                                      text="Smaller", #pad=pad0,
-                                      pad=(.1,.2),
-                                      scale=0.082,
-                                      pos=(1.0, 0, -0.906),
-                                      command=self.changeSize,
-                                      extraArgs=[0.9])
-
-        self.shuffleButton = DirectButton(parent = self.hudNP,
-                                      text="Shuffle", #pad=pad0,
-                                      pad=(.1,.2),
-                                      scale=0.082,
-                                      pos=(0.1, 0, -0.906),
-                                      command=self.changeSize,
-                                      #state=0, # disabled
-                                      extraArgs=[1.0])
-
-        self.nextSizeButton = DirectButton(parent = self.hudNP,
-                                      text="Next", #pad=pad0,
-                                      pad=(.1,.2),
-                                      scale=0.082,
-                                      pos=(-0.5, 0, -0.906),
-                                      command=self.nextSizeFunc)
+#    def addButtonsBigSmall(self):
+#        self.bigger = DirectButton(parent = self.hudNP,
+#                                      text="Bigger", #pad=pad0,
+#                                      scale=0.08,
+#                                      pad=(.1,.1),
+#                                      pos=(0.6, 0, -0.9),
+#                                      command=self.changeSize,
+#                                      extraArgs=[1.1])
+#
+#        self.smaller = DirectButton(parent = self.hudNP,
+#                                      text="Smaller", #pad=pad0,
+#                                      pad=(.1,.2),
+#                                      scale=0.082,
+#                                      pos=(1.0, 0, -0.906),
+#                                      command=self.changeSize,
+#                                      extraArgs=[0.9])
+#
+#        self.shuffleButton = DirectButton(parent = self.hudNP,
+#                                      text="Shuffle", #pad=pad0,
+#                                      pad=(.1,.2),
+#                                      scale=0.082,
+#                                      pos=(0.1, 0, -0.906),
+#                                      command=self.changeSize,
+#                                      #state=0, # disabled
+#                                      extraArgs=[1.0])
+#
+#        self.nextSizeButton = DirectButton(parent = self.hudNP,
+#                                      text="Next", #pad=pad0,
+#                                      pad=(.1,.2),
+#                                      scale=0.082,
+#                                      pos=(-0.5, 0, -0.906),
+#                                      command=self.nextSizeFunc)
 
  #self.shuffleButton.setTransparency(TransparencyAttrib.MAlpha)
         #self.shuffleButton.setAlphaScale(0.3)
@@ -111,19 +116,20 @@ class SelectColours(Element):
             t.destroy()
         self.makeGrid()
 
-    def nextSizeFunc(self):
+    def nextSizeFunc(self, args):
         if (len(self.sizesToTry)):
             self._recreateGrid(self.sizesToTry.pop(0))
         else:
             printOut("sizes completed!")
+            self.sendMessage('end_colours')
 
-    def changeSize(self, scale):
-        """
-        Create a new grid, bigger or smaller, and re-shuffled.
-        :param scale: scale factor to increase
-        :return: nothing.
-        """
-        self._recreateGrid(self.config.scale*scale)
+#    def changeSize(self, scale):
+#        """
+#        Create a new grid, bigger or smaller, and re-shuffled.
+#        :param scale: scale factor to increase
+#        :return: nothing.
+#        """
+#        self._recreateGrid(self.config.scale*scale)
 
     # center of tile for any size and pos
     def makePos(self,t, w, h, x ,y, margin = 1.0):
@@ -196,26 +202,35 @@ class SelectColours(Element):
 
         correct = False
         if self.currentTile < len(self.correctTiles) and tileId == self.correctTiles[self.currentTile].getName():
-
             correct = True
-
             mouseX,mouseY = base.mouseWatcherNode.getMouse()
 
             cam = self.config.world.getCamera()
             width,height = map(float,(cam.screenWidth,cam.screenHeight))
             tile = self.tiles[idx]
 
-            self.logFile.logEvent("correct tile clicked: %s" % tileId)
-            self.logFile.logEvent("tileCenter: %.4f %.4f" % (tile.getPos().getX(),tile.getPos().getZ()))
-            self.logFile.logEvent("mouseClicked: %.4f %.4f" % ((width / height)*float(mouseX), mouseY))
-
+            eyeX,eyeY = (0,0)
             try:
-                self.logFile.logEvent("EyeGaze reported: %.4f %.4f" % self.eyeTracker.getLastSample())
+                eyeX,eyeY = self.eyeTracker.getLastSample()
             except:
                 pass
 
+            # result, tile centre, mouse clicked, eye-gaze pos
+            outString = "correct, %.4f, %s,%.4f %.4f, %.4f %.4f, %.4f %.4f" %\
+                        (
+                            self.config.scale,                          # size %
+                            tileId,                                     # colour
+                            tile.getPos().getX(),tile.getPos().getZ(),  # tile center
+                            (width / height)*mouseX, float(mouseY),     # mouse pos
+                            eyeX,eyeY                                   # gaze pos
+                        )
+            self.logFile.logEvent(outString)
+
             self.correctTiles[self.currentTile]['frameColor'] = (0,0,0,0.1)
             self.currentTile+=1
+            # are we done with this size of tile
+            if self.currentTile == len(self.correctTiles):
+                taskMgr.doMethodLater(1.0,self.nextSizeFunc,'nextSizeFun')
 
     def printPuzzle(self):
         print self.checkResult()
@@ -259,9 +274,7 @@ class SelectColours(Element):
     def enterState(self):
         # super class enterState
         Element.enterState(self)
-        self.logFile.startLog()
 
     def exitState(self):
         # super class leaveState
-        self.logFile.stopLog()
         Element.exitState(self)

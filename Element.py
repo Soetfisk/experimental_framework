@@ -4,6 +4,7 @@ from direct.showbase import DirectObject
 import sys
 from Utils.Debug import printOut
 from Utils.Utils import *
+from Logger import Logger
 from collections import OrderedDict
 
 import external.yaml as yaml
@@ -124,6 +125,14 @@ class Element(object):
 
         self.registeredKeys = []
 
+        # create a logfile using the name of the Element, and the logFilePath if defined,
+        # otherwise create the logfile in the default 'run' directory
+        if getattr(self.config,'log',False):
+            logFilePath = getattr(self.config, "logFilePath", 'run')
+            self.logFile = Logger('%s/%s_%s.txt' % (logFilePath,self.config.name,self.config.world.participantId), 'w')
+        else:
+            self.logFile = None
+
     def getConfigTempate(self):
         return OrderedDict({
             'className': 'className',
@@ -240,6 +249,8 @@ class Element(object):
         This method will be executed when the Finite State Machine
         enters into this state
         """
+        if self.logFile:
+            self.logFile.startLog()
         printOut("Entering state %s" % self.config.name, 1)
         #self.config.world.resetKeys()
         self.showElement()
@@ -316,6 +327,8 @@ class Element(object):
                 # read value or assign default from config!
                 newValue = getattr (self, g, globals[g])
                 self.config.world.globals[g] = newValue
+        if self.logFile:
+            self.logFile.stopLog()
 
     def isActive(self):
         return self.active

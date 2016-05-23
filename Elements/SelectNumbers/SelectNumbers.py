@@ -30,9 +30,7 @@ class SelectNumbers(Element):
         # self.config.world
 
         if not getattr(self.config, 'textSize', None):
-            setattr(self.config,'textSize',1.0)
-
-        self.logFile = Logger("run/selectNumbers_%s.txt" % self.config.world.participantId, 'w')
+            setattr(self.config,'textSize',0.05)
 
         self.sizesToTry = self.config.tileSizes
         random.shuffle(self.sizesToTry)
@@ -42,7 +40,7 @@ class SelectNumbers(Element):
         # start a new grid
         self.makeGrid()
         # add UI elements to enlarge/shrink grid
-        self.addButtonsBigSmall()
+        # self.addButtonsBigSmall()
         # shuffle the grid from its original correct order.
         #self.shuffle()
         self.hideElement()
@@ -54,38 +52,38 @@ class SelectNumbers(Element):
     def resetGame(self):
         pass
 
-    def addButtonsBigSmall(self):
-        self.bigger = DirectButton(parent = self.hudNP,
-                                      text="Bigger", #pad=pad0,
-                                      scale=0.08,
-                                      pad=(.1,.1),
-                                      pos=(0.6, 0, -0.9),
-                                      command=self.changeSize,
-                                      extraArgs=[1.5])
-
-        self.smaller = DirectButton(parent = self.hudNP,
-                                      text="Smaller", #pad=pad0,
-                                      pad=(.1,.2),
-                                      scale=0.082,
-                                      pos=(1.0, 0, -0.906),
-                                      command=self.changeSize,
-                                      extraArgs=[0.5])
-
-        self.shuffleButton = DirectButton(parent = self.hudNP,
-                                      text="Shuffle", #pad=pad0,
-                                      pad=(.1,.2),
-                                      scale=0.082,
-                                      pos=(0.1, 0, -0.906),
-                                      command=self.changeSize,
-                                      #state=0, # disabled
-                                      extraArgs=[1.0])
-
-        self.nextSizeButton = DirectButton(parent = self.hudNP,
-                                      text="Next", #pad=pad0,
-                                      pad=(.1,.2),
-                                      scale=0.082,
-                                      pos=(-0.5, 0, -0.906),
-                                      command=self.nextSizeFunc)
+#    def addButtonsBigSmall(self):
+#        self.bigger = DirectButton(parent = self.hudNP,
+#                                      text="Bigger", #pad=pad0,
+#                                      scale=0.08,
+#                                      pad=(.1,.1),
+#                                      pos=(0.6, 0, -0.9),
+#                                      command=self.changeSize,
+#                                      extraArgs=[1.5])
+#
+#        self.smaller = DirectButton(parent = self.hudNP,
+#                                      text="Smaller", #pad=pad0,
+#                                      pad=(.1,.2),
+#                                      scale=0.082,
+#                                      pos=(1.0, 0, -0.906),
+#                                      command=self.changeSize,
+#                                      extraArgs=[0.5])
+#
+#        self.shuffleButton = DirectButton(parent = self.hudNP,
+#                                      text="Shuffle", #pad=pad0,
+#                                      pad=(.1,.2),
+#                                      scale=0.082,
+#                                      pos=(0.1, 0, -0.906),
+#                                      command=self.changeSize,
+#                                      #state=0, # disabled
+#                                      extraArgs=[1.0])
+#
+#        self.nextSizeButton = DirectButton(parent = self.hudNP,
+#                                      text="Next", #pad=pad0,
+#                                      pad=(.1,.2),
+#                                      scale=0.082,
+#                                      pos=(-0.5, 0, -0.906),
+#                                      command=self.nextSizeFunc)
          #self.shuffleButton.setTransparency(TransparencyAttrib.MAlpha)
         #self.shuffleButton.setAlphaScale(0.3)
 
@@ -97,11 +95,12 @@ class SelectNumbers(Element):
         self.sequenceNP.removeNode()
         self.makeGrid()
 
-    def nextSizeFunc(self):
+    def nextSizeFunc(self, args):
         if (len(self.sizesToTry)):
             self._recreateGrid(self.sizesToTry.pop(0))
         else:
             printOut("sizes completed!")
+            self.sendMessage('end_numbers')
 
     def changeSize(self, scale):
         """
@@ -189,18 +188,34 @@ class SelectNumbers(Element):
             cam = self.config.world.getCamera()
             width,height = map(float,(cam.screenWidth,cam.screenHeight))
 
-            tile = [x for x in self.tiles if int(x.getName()) == tileId]
-            tile[0].setColor(0.2,0.0,0.0,0.5)
-            tile[0]['frameColor'] = (.5,.5,.5,0.5)
-            self.correctSequence.pop(0)
-            self.logFile.logEvent("correct tile clicked: %s" % tileId)
-            self.logFile.logEvent("tileCenter: %.4f %.4f" % (tile[0].getPos().getX(),tile[0].getPos().getZ()))
-            #self.logFile.logEvent("mouseClicked Normalized x in 0-1: %.4f %.4f" % (mouseX,mouseY))
-            self.logFile.logEvent("mouseClicked: %.4f %.4f" % ((width / height)*float(mouseX), mouseY))
+            eyeX,eyeY = (0,0)
             try:
-                self.logFile.logEvent("EyeGaze reported: %.4f %.4f" % self.eyeTracker.getLastSample())
+                eyeX,eyeY = self.eyeTracker.getLastSample()
             except:
                 pass
+
+            # find the tile using the tileId (slow way)
+            tile = [x for x in self.tiles if int(x.getName()) == tileId][0]
+            tile.setColor(0.2,0.0,0.0,0.5)
+            tile['frameColor'] = (.5,.5,.5,0.5)
+
+            # result, tile centre, mouse clicked, eye-gaze pos
+            outString = "correct, %.4f, %s,%.4f %.4f, %.4f %.4f, %.4f %.4f" %\
+                        (
+                            self.config.scale,                          # size %
+                            tileId,                                     # colour
+                            tile.getPos().getX(),tile.getPos().getZ(),  # tile center
+                            (width / height)*mouseX, float(mouseY),     # mouse pos
+                            eyeX,eyeY                                   # gaze pos
+                        )
+            self.logFile.logEvent(outString)
+
+            self.correctSequence.pop(0)
+
+            # are we done with this size of tile
+            if len(self.correctSequence) == 0:
+                taskMgr.doMethodLater(1.0,self.nextSizeFunc,'nextSizeFun')
+
 
     def printPuzzle(self):
         print self.checkResult()
@@ -241,9 +256,7 @@ class SelectNumbers(Element):
     def enterState(self):
         # super class enterState
         Element.enterState(self)
-        self.logFile.startLog()
 
     def exitState(self):
         # super class leaveState
-        self.logFile.stopLog()
         Element.exitState(self)

@@ -20,17 +20,17 @@ elements:
 
  # introduction to the experiment
  - className: ScreenText
-   fname_message: HiddenCalibration/introExperiment.txt
+   fname_message: experiments/HiddenCalibration/data/introExperiment.txt
    name: introText
 
  - module: DataForm
    className: ConsentForm
    name: consentForm
-   fname_config: HiddenCalibration/consentForm.yaml
+   fname_config: experiments/HiddenCalibration/data/consentForm.yaml
 
  - className: ScreenText
    name: game1Intro
-   fname_message: HiddenCalibration/game1Intro.txt
+   fname_message: experiments/HiddenCalibration/data/game1Intro.txt
    keys:
     - key: n
       callback: sendMessage
@@ -38,7 +38,7 @@ elements:
 
  - className: ScreenText
    name: game2Intro
-   fname_message: HiddenCalibration/game2Intro.txt
+   fname_message: experiments/HiddenCalibration/data/game2Intro.txt
    keys:
     - key: n
       callback: sendMessage
@@ -46,7 +46,7 @@ elements:
 
  - className: ScreenText
    name: whackIntroText
-   fname_message: HiddenCalibration/whackIntroText.txt
+   fname_message: experiments/HiddenCalibration/data/whackIntroText.txt
    keys:
     - key: n
       callback: sendMessage
@@ -56,7 +56,7 @@ elements:
    name: FinalScreen
    # send message FinalScreen_timeout after 1 second
    timeout: 1.0
-   fname_message: HiddenCalibration/finalText.txt
+   fname_message: experiments/HiddenCalibration/data/finalText.txt
    keys:
     - key: q
       callback: sendMessage
@@ -64,24 +64,24 @@ elements:
 
  - className: ScreenText
    name: colourBlindText
-   fname_message: PilotData/colourBlindText.txt
+   fname_message: experiments/HiddenCalibration/data/colourBlindText.txt
    # example defining the keybindings directly here
 
  - className: ScreenText
    name: colourBlindProblem
    # the LAST element is the option selected now, which has to be in the list
    #option_level: ('easy','hard','easy')
-   fname_message: PilotData/colourBlindProblem.txt
+   fname_message: experiments/HiddenCalibration/data/colourBlindProblem.txt
 
-# Very specific Element, for testing for Colour Blindness
+# Display ishihara test, expects an exact number as an answer.
  - module: FullScreenImage
    className: ImageQuery
    name: colourBlindCheck
-   fname_imageNameStr: PilotData/colorblind/plate%d.png
-#   imageStrArgs: (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17)
-   tuple_imageStrArgs: (1,2,3)
-#   imageAnswers: (12,8,6,29,57,5,3,15,74,2,6,97,45,5,7,16,73)
-   tuple_imageAnswers: (12,8,6)
+   fname_imageNameStr: experiments/HiddenCalibration/data/colourblind/%d.png
+   #tuple_imageStrArgs: (2,3,6,42,45,74,97)
+   tuple_imageStrArgs: (2)
+   #tuple_imageAnswers: (2,3,6,42,45,74,97)
+   tuple_imageAnswers: (2)
    tuple_scale: (0.5,0.5)
 #   keys:
 #    - key: n
@@ -158,55 +158,55 @@ elements:
    gridWidth: 3
    gridHeight: 3
    # size of tile is in the range [0,2]
-   tileSizes: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
+   #tileSizes: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
+   tileSizes: [ 0.3]
    margin: 1.1
    # smaller than 1 to make it smaller!
    textSize: 0.04
    color_tile: (18/255.0,152/255.0,196/255.0,1.0)
    refsto: [eyeTracker]
-   keys:
-   - key: 0
-     callback: sendMessage
-     tuple_args: ('endGame1')
+   log: True
+   logFilePath: 'experiments/HiddenCalibration/run'
 
  - className: SelectColours
    name: game2
    gridWidth: 3
    gridHeight: 3
    margin: 1.1
-   tileSizes: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
+   #tileSizes: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
+   tileSizes: [ 0.3]
    refsto: [eyeTracker]
-   keys:
-   - key: 0
-     callback: sendMessage
-     tuple_args: ('endGame2')
-
+   log: True
+   logFilePath: 'experiments/HiddenCalibration/run'
 
 transitions:
- - trans: 'start @ introText:timeout_start'
- # background elements
- - trans: 'start @ eyeTracker: timeout_start'
- - trans: 'start @ mouseLog: timeout_start'
+ - trans: 'start @ game1:auto'
+ - trans: 'game1 @ end: end_numbers'
 
- - trans: 'introText @ consentForm:auto'
- - trans: 'consentForm @ userInfo:yesPressed'
- - trans: 'consentForm @ end:noPressed'
- - trans: 'userInfo @ colourBlindText:nextPressed'
+# - trans: 'start @ introText:timeout_start'
+# # background elements
+# - trans: 'start @ eyeTracker: timeout_start'
+# - trans: 'start @ mouseLog: timeout_start'
+#
+# - trans: 'introText @ consentForm:auto'
+# - trans: 'consentForm @ userInfo:yesPressed'
+# - trans: 'consentForm @ end:noPressed'
+# - trans: 'userInfo @ colourBlindText:nextPressed'
+#
+# - trans: 'colourBlindText @ colourBlindCheck:auto'
+# - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
+# - trans: 'colourBlindCheck @ whackIntroText:imageQueryOk'
+#
+# - trans: 'whackIntroText @ whackAMole:auto'
+#
+# - trans: 'whackAMole @ game1Intro: auto'
+# - trans: 'game1Intro @ game1: auto'
+# - trans: 'game1 @ game2Intro: auto'
+# - trans: 'game2Intro @ game2: auto'
+# - trans: 'game2 @ FinalScreen: auto'
 
- - trans: 'colourBlindText @ colourBlindCheck:auto'
- - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
- - trans: 'colourBlindCheck @ whackIntroText:imageQueryOk'
-
- - trans: 'whackIntroText @ whackAMole:auto'
-
- - trans: 'whackAMole @ game1Intro: auto'
- - trans: 'game1Intro @ game1: auto'
- - trans: 'game1 @ game2Intro: auto'
- - trans: 'game2Intro @ game2: auto'
- - trans: 'game2 @ FinalScreen: auto'
-
- - trans: 'FinalScreen @ end: timeout_FinalScreen'
- - trans: 'mouseLog @ end: timeout_FinalScreen'
- - trans: 'eyeTracker @ end:timeout_FinalScreen,noPressed,imageQueryBad'
- - trans: 'colourBlindProblem @ end:auto'
+# - trans: 'FinalScreen @ end: timeout_FinalScreen'
+# - trans: 'mouseLog @ end: timeout_FinalScreen'
+# - trans: 'eyeTracker @ end:timeout_FinalScreen,noPressed,imageQueryBad'
+# - trans: 'colourBlindProblem @ end:auto'
 
