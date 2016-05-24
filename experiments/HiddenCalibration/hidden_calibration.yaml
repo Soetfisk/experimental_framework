@@ -135,9 +135,11 @@ elements:
    color_background: (0.0,0.1,0.1,1)
    fname_image: 'common/images/gaze_circle.png'
    tuple_imageScale: (0.1,0.1)
-   tuple_points: [(0,0),(0,1)]
+   tuple_points: [[0,0,0],[0,0,1],[1,0,0],[0.5,0.0,0.5]]
+   pointsDelay: 0
    randomPoints: True
    animate: True
+   secondsBetweenPoints: 2
 
 # not template yet...
  - module: EventLogger
