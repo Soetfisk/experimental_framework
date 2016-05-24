@@ -133,6 +133,8 @@ class Element(object):
         else:
             self.logFile = None
 
+
+
     def getConfigTempate(self):
         return OrderedDict({
             'className': 'className',
@@ -295,6 +297,11 @@ class Element(object):
             else:
                 printOut("ERROR: Element %s trying to set a reference to non-existent element %s!" %
                          (self.config.name, ref ),0)
+
+        # set clear color if it has been explicitly stated in the config
+        c = getattr(self.config,'color_background',None)
+        if c:
+            base.win.setClearColor(Vec4(*c))
 
         # lastly, register keys.
         self.registerKeys()

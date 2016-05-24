@@ -33,8 +33,6 @@ class Tobii_UDP_Client(EyeTrackerClient):
         # fill in some empty samples in case I am asked for samples right away
         self.clientStatus = CLIENT_STATUS.NONE
 
-
-
     def connectSockets(self):
 
         """
@@ -69,6 +67,31 @@ class Tobii_UDP_Client(EyeTrackerClient):
         if self.clientStatus == CLIENT_STATUS.NONE:
             self.startTracking()
 
+    def saveCalibration(self, filename):
+        notValidStates = [CLIENT_STATUS.CALIBRATING,CLIENT_STATUS.NONE]
+        if self.clientStatus in notValidStates:
+            printOut("You cannot save the calibration if the tracker is in any of ")
+            printOut(str(notValidStates))
+            return
+        else:
+            msg = '' + pack('b',CLIENT_MSG_ID.SAVE_CALIB)
+            # filename to save the calibration
+            msg += filename
+            self.udpServerSocket.send(msg)
+            printOut("Saving calibration %s" % filename)
+
+    def loadAndSetCalibration(self, filename):
+        notValidStates = [CLIENT_STATUS.CALIBRATING,CLIENT_STATUS.NONE]
+        if self.clientStatus in notValidStates:
+            printOut("You cannot save the calibration if the tracker is in any of ")
+            printOut(str(notValidStates))
+            return
+        else:
+            msg = '' + pack('b',CLIENT_MSG_ID.LOAD_CALIB)
+            # filename to load the calibration from
+            msg += filename
+            self.udpServerSocket.send(msg)
+            printOut("Loading and setting calibration %s" % filename)
 
     def startTracking(self):
         if self.clientStatus != CLIENT_STATUS.NONE:

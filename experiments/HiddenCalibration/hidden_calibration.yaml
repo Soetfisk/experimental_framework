@@ -5,6 +5,8 @@ elements:
 ####################################
  - className: EmptyState
    name: start
+   # color is set until is changed again!
+   color_background: (0,0,0,1)
    # send message timeout_start after 0.1
    timeout: 0.1
 
@@ -127,6 +129,16 @@ elements:
    - key: k
      callback: toggleGaze
 
+ - module: EyeTracker
+   className: VisualTarget
+   name: visualTarget
+   color_background: (0.0,0.1,0.1,1)
+   fname_image: 'common/images/gaze_circle.png'
+   tuple_imageScale: (0.1,0.1)
+   tuple_points: [(0,0),(0,1)]
+   randomPoints: True
+   animate: True
+
 # not template yet...
  - module: EventLogger
    className: EventLogger
@@ -180,8 +192,8 @@ elements:
    logFilePath: 'experiments/HiddenCalibration/run'
 
 transitions:
- - trans: 'start @ game1:auto'
- - trans: 'game1 @ end: end_numbers'
+ - trans: 'start @ visualTarget:auto'
+ - trans: 'visualTarget @ end: auto'
 
 # - trans: 'start @ introText:timeout_start'
 # # background elements

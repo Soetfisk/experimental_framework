@@ -17,6 +17,8 @@ CLIENT_MSG_ID = enum(
 	STOP_TRACKING   = 6,
     GET_STATUS      = 7,
     REM_LAST_CALIB_POINT = 8,
+    LOAD_CALIB = 9,
+    SAVE_CALIB = 10,
 )
 # message from Eyetracker Server to Client
 SERVER_MSG_ID = enum(
