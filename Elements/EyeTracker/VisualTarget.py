@@ -59,7 +59,6 @@ class VisualTarget(Element):
         # create animations at constant speed
         # take pairs of points using zip and shifting the list by one
         for p0,p1 in zip(self.points[:-1],self.points[1:]):
-            print p0,p1
             v0 = Point3(p0[0],0,p0[2])
             v1 = Point3(p1[0],0,p1[2])
             dist = (v0-v1).length()
