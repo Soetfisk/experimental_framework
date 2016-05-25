@@ -3,3 +3,4 @@ nolog
 pandasrc
 run/*
 .idea/*
+experiments/*/run/*.txt
