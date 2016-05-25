@@ -69,20 +69,57 @@ class VisualTarget(Element):
             self.moveSequence.append( self.imgNode.posInterval( delay, v0 , blendType=blend))
             self.moveSequence.append( self.imgNode.posInterval( speed, v1 , blendType=blend))
             self.moveSequence.append( self.imgNode.posInterval( delay, v1, blendType=blend))
+
+
+        cam = self.config.world.getCamera()
+        self.width, self.height = map(float,(cam.screenWidth,cam.screenHeight))
         self.hideElement()
 
+
+    def getCenterPos(self):
+        return self.imgNode.getPos()
 
     def enterState(self):
         # super class enterState
         Element.enterState(self)
+        taskMgr.add( self.logData, 'logData' )
         self.moveSequence.start()
         #self.showElement()
 
     def exitState(self):
         # super class exitState
         Element.exitState(self)
+        taskMgr.remove('logData')
 
     def getConfigTemplate(self):
         elementDict = Element.getConfigTemplate()
         return elementDict
-        
+
+    def logData(self, t):
+        """
+        :param t: Panda3d task
+        :return: task.cont or task.done
+        """
+        mouseX,mouseY = (0.0,0.0)
+        eyeX,eyeY = (0,0)
+        pos = self.imgNode.getPos()
+        if self.config.trackMouse:
+            mouseX,mouseY = map(float,base.mouseWatcherNode.getMouse())
+        if self.config.trackEye:
+            try:
+                eyeX,eyeY = self.eyeTracker.getLastSample()
+            except:
+                pass
+        # targetPos, mousePos, eyePos
+        outString = "%.4f %.4f, %.4f %.4f, %.4f %.4f" %\
+        (
+         pos.getX(),pos.getZ(),  # tile center
+         (self.width / self.height)*mouseX, mouseY,     # mouse pos
+         eyeX,eyeY                                   # gaze pos
+        )
+        self.logFile.logEvent(outString)
+        return t.cont
+
+
+
+

@@ -204,7 +204,6 @@ class SelectColours(Element):
         if self.currentTile < len(self.correctTiles) and tileId == self.correctTiles[self.currentTile].getName():
             correct = True
             mouseX,mouseY = base.mouseWatcherNode.getMouse()
-
             cam = self.config.world.getCamera()
             width,height = map(float,(cam.screenWidth,cam.screenHeight))
             tile = self.tiles[idx]

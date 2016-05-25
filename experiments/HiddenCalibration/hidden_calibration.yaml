@@ -140,6 +140,10 @@ elements:
    randomPoints: True
    animate: True
    secondsBetweenPoints: 2
+   trackMouse: True
+   trackEye: True
+   refsto: [eyeTracker]
+   log: True
 
 # not template yet...
  - module: EventLogger
