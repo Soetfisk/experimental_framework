@@ -19,16 +19,15 @@ class Pilot(Element):
         super(Pilot,self).__init__(**kwargs)
 
         # create BASIC LOG
-        ts = time.time()
         l = getattr(self, 'pilotLog', 'nolog,w').split(',')
         if l is 'nolog,w':
             printOut("-- Warning -- logging for the Pilot disabled",0)
-        self.pilotLog = Logger(l[0],l[1]) 
-        self.pilotLog.startLog(ts)
+        self.pilotLog = Logger(self.baseTime,l[0],l[1])
+        self.pilotLog.startLog()
         
-        self.pilotLog.logEvent("==== new pilot participant ====\n",ts)
-        self.pilotLog.logEvent("date: " +  ctime() + "\n",ts)
-        self.pilotLog.logEvent("pilot start\n",ts)
+        self.pilotLog.logEvent("==== new pilot participant ====\n")
+        self.pilotLog.logEvent("date: " +  ctime() + "\n")
+        self.pilotLog.logEvent("pilot start\n")
         
         # sets some GUI elements on top of the main game scene, to select
         # which parachute has lower quality
@@ -376,10 +375,9 @@ class Pilot(Element):
                 l = self.Qi.currentQ
                 r = self.QM.currentQ
 
-            ts = time.time()
-            self.pilotLog.logEvent("left  : " + str(l)+"\n",ts)
-            self.pilotLog.logEvent("right : " + str(r)+"\n",ts)
-            self.pilotLog.logEvent("choice: " + self.qualitySelected + "\n",ts)
+            self.pilotLog.logEvent("left  : " + str(l)+"\n")
+            self.pilotLog.logEvent("right : " + str(r)+"\n")
+            self.pilotLog.logEvent("choice: " + self.qualitySelected + "\n")
 
             # do we still have more qualities to test ?
             if (len(self.listOfQualities) >= 1):

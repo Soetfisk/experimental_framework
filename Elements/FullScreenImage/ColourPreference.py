@@ -79,7 +79,7 @@ class ColourPreference(Element):
         # place holder to write
 
         # file output to store the results
-        self.logResults = Logger("run/userAnswers_"+self.config.world.participantId+".log",mode='w')
+        self.logResults = Logger(self.baseTime, "run/userAnswers_"+self.config.world.participantId+".log",mode='w')
         #self.currentPair = None
 
     def hidePair(self, pair):

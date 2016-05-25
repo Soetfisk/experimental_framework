@@ -167,7 +167,7 @@ class Parachute(DirectObject):
         self.lowerResolution = False
         self.model.setTexture(self.textures[toQ], 1)
         self.currentQ = toQ
-        self.game.replayLog.logEvent("Q:[\'"+self.name+"\',"+str(toQ)+"]\n", time.time())
+        self.game.replayLog.logEvent("Q:[\'"+self.name+"\',"+str(toQ)+"]\n")
 
     def forceTexture(self,quality):
         if (quality < 0 or quality >= len(self.textures)):

@@ -265,14 +265,13 @@ class World(DirectObject):
 
         # create general log file
         genLog = self.config.simulationLog
-        self.log = Logger(genLog.outfile, genLog.mode)
-        self.log.startLog(self.baseTime)
-        t = time.time()
+        self.log = Logger(self.baseTime, genLog.outfile, genLog.mode)
+        self.log.startLog()
         printOut("==== Application started ====\n", 2)
-        self.log.logEvent("==== Application started ====\n", t)
-        self.log.logEvent("date: " + ctime() + "\n", t)
-        self.log.logEvent("participant id: %s\n" % self.participantId, t)
-        self.log.logEvent("loading Elements\n", t)
+        self.log.logEvent("==== Application started ====\n")
+        self.log.logEvent("date: " + ctime() + "\n")
+        self.log.logEvent("participant id: %s\n" % self.participantId)
+        self.log.logEvent("loading Elements\n")
 
         self.setupCamera()
         self.setupPandaCamera()
@@ -287,8 +286,7 @@ class World(DirectObject):
         return
 
     def logEvent(self, message):
-        t = time.time()
-        self.log.logEvent(message, t)
+        self.log.logEvent(message)
 
     #=========================================================================================
     #========== INPUT HANDLING ===============================================================
@@ -522,7 +520,7 @@ class World(DirectObject):
                 if e.isActive():
                     e.exitState()
 
-            self.log.logEvent("Simulation finished\n", time.time())
+            self.log.logEvent("Simulation finished\n")
             self.log.stopLog()
         except Exception,e:
             printOut("Error whilst closing!")

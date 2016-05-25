@@ -18,7 +18,7 @@ class EventLogger(Element):
         self.listener.accept('crossHair',self.logEvent)
 
         uniqueFileName = self.config.logfile +"_"+ self.config.world.participantId + ".log"
-        self.eventLog = Logger(uniqueFileName, 'w')
+        self.eventLog = Logger(self.baseTime, uniqueFileName, 'w')
         self.eventLog.startLog()
         self.eventLog.logEvent('Event logger started\n')
         taskMgr.add( self.updateHooks, 'updateHooks' )

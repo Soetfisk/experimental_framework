@@ -40,6 +40,8 @@ class Element(object):
         # this changes when the state is activated.
         self.active = False
 
+        # baseTime for the experiment, from the World object.
+        self.baseTime = kwargs['world'].baseTime
         # some colours constants to share among all elements
         self.colours = getColors()
 
@@ -129,7 +131,7 @@ class Element(object):
         # otherwise create the logfile in the default 'run' directory
         if getattr(self.config,'log',False):
             logFilePath = getattr(self.config, "logFilePath", 'run')
-            self.logFile = Logger('%s/%s_%s.txt' % (logFilePath,self.config.name,self.config.world.participantId), 'w')
+            self.logFile = Logger(self.baseTime, '%s/%s_%s.txt' % (logFilePath,self.config.name,self.config.world.participantId), 'w')
         else:
             self.logFile = None
 

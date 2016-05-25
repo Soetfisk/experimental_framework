@@ -144,6 +144,8 @@ elements:
    trackEye: True
    refsto: [eyeTracker]
    log: True
+   logFilePath: 'experiments/HiddenCalibration/run'
+
 
 # not template yet...
  - module: EventLogger

@@ -44,11 +44,11 @@ class Game(Element):
         # the string will look like "filename,mode"
         # if no value is found, 'nolog,w' is returned.
         rl = getattr(self.config, 'saveReplay', 'nolog,w')
-        self.replayLog = Logger(rl[0], 'w')
+        self.replayLog = Logger(self.baseTime, rl[0], 'w')
         # creating logger for the game
         # the string will look like "filename,mode"
         gl = getattr(self.config, 'logFile', 'nolog,a')
-        self.gameLog = Logger(gl[0], 'a')
+        self.gameLog = Logger(self.baseTime, gl[0], 'a')
 
     def readUserData(self):
         pass
@@ -68,17 +68,16 @@ class Game(Element):
 
     #=============================================
     def startLogging(self):
-        t = time.time()
-        self.gameLog.startLog(t)
-        self.gameLog.logEvent("==== new game participant ====\n", t)
+        self.gameLog.startLog()
+        self.gameLog.logEvent("==== new game participant ====\n")
 
         # process user data if present (from a previous form)
         #if self.userData:
         #    for k, v in self.userData.items():
         #        self.gameLog.logEvent("== UI ==  %s: %s\n" % (k, v), t)
 
-        self.gameLog.logEvent("date: " + ctime() + "\n", t)
-        self.gameLog.logEvent("game start\n", t)
+        self.gameLog.logEvent("date: " + ctime() + "\n")
+        self.gameLog.logEvent("game start\n")
 
     #=============================================
     def stopLogging(self):
@@ -282,29 +281,28 @@ class Game(Element):
     def logFrameTask(self, t):
         """logs all the positions of parachutes, cannon and ball so the game
         can be reproduced or played back at any speed forward and backward."""
-        curr_t = time.time()
 
         if self.lastEyeSample:
             eyesample = "[%.3f,%.3f]\n" % (self.lastEyeSample[0], self.lastEyeSample[1])
-            self.replayLog.logEvent("E:" + eyesample, curr_t)
+            self.replayLog.logEvent("E:" + eyesample)
 
         # grab all parachutes (name,value) and save their position
         for p_name, par in self.parachutes.items():
             np = par.modelNP
             if (np.getX() != -1000 and par.hitted == False ):
                 position = "[\'%s\',%.3f,%.3f,%.3f]\n" % (p_name, np.getX(), np.getY(), np.getZ())
-                self.replayLog.logEvent("P:" + position, curr_t)
+                self.replayLog.logEvent("P:" + position)
         # grab heading and pitch of the cannon
         hpr = self.cannon.getHpr()
         if (self.lastHpr != hpr):
             hpr_str = "[%.3f,%.3f]\n" % (hpr[0], hpr[1])
-            self.replayLog.logEvent("C:" + hpr_str, curr_t)
+            self.replayLog.logEvent("C:" + hpr_str)
             self.lastHpr = hpr
 
         crossPos = self.crosshairNP.getPos()
         if (self.lastCrossHairPos != crossPos):
             crossPos_str = "[%.3f,%.3f,%.3f]\n" % (crossPos[0], crossPos[1], crossPos[2])
-            self.replayLog.logEvent("T:" + crossPos_str, curr_t)
+            self.replayLog.logEvent("T:" + crossPos_str)
             self.lastCrossHairPos = crossPos
 
 
@@ -839,8 +837,7 @@ class Game(Element):
             # log for replay
 
         if self.replayLog:
-            ts = time.time()
-            self.replayLog.logEvent("H:[\'" + par_name + "\']\n", ts)
+            self.replayLog.logEvent("H:[\'" + par_name + "\']\n")
             # good hit, advance arrow
             # self.targetGuideHUD.advanceArrow()
             #self.replayLog.logEvent("A: %d\n" % self.targetGuideHUD.currentTarget, ts)
@@ -1031,8 +1028,7 @@ class Game(Element):
 
     def shoot(self):
         # get timestamp
-        ts = time.time()
-        self.replayLog.logEvent("S\n", ts)
+        self.replayLog.logEvent("S\n")
 
         # switch from where the bullet starts, tip0 or tip1
         if (self.tip0):
@@ -1119,9 +1115,8 @@ class Game(Element):
 
         if (self.replayLog.logging):
             # get time stamp
-            ts = time.time()
             state = "K:" + str(self.mapkeys) + "\n"
-            self.replayLog.logEvent(state, ts)
+            self.replayLog.logEvent(state)
 
         return
 

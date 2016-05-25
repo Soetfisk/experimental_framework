@@ -73,9 +73,9 @@ class EyeTrackerClient(Element):
 
         if self.config.logGaze:
             # one gaze log per participant
-            self.gazeLogger = Logger("run/gazeData_"+self.config.world.participantId+".log",mode='w')
+            self.gazeLogger = Logger(self.baseTime, "run/gazeData_"+self.config.world.participantId+".log",mode='w')
         else:
-            self.gazeLogger = Logger("noLog")
+            self.gazeLogger = Logger(self.baseTime, "noLog")
         self.gazeLogger.startLog()
 
         # create a mutex for accessing the gazeData list

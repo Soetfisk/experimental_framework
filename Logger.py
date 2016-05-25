@@ -5,11 +5,11 @@ from Utils.Debug import printOut
 class Logger(object):
     """simple class to dump timestamps and
     events from the game"""
-    def __init__(self,fileName, mode = 'a'):
+    def __init__(self,basetime, fileName, mode = 'a'):
         "Creates a log, throws exception of error opening file"
 
         # set this to -1 until we start logging
-        self.baseTime = 0.0
+        self.baseTime = basetime
 
         if fileName is not 'nolog':
             try:
@@ -30,12 +30,9 @@ class Logger(object):
     def isLogging(self):
         return self.logging
 
-    def startLog(self,t=-1):
+    def startLog(self):
         if not self.logging:
             return
-        if t==-1:
-            t = time.time()
-        self.baseTime = t
         # instead of writing into a file, dump all in memory, and write at the end
         self.logStarted=True
 
@@ -48,7 +45,7 @@ class Logger(object):
         self.logList.append(text+'\n')
         return
 
-    def logEvent(self,event, ts=-1):
+    def logEvent(self,event):
         """Logs a single event, with a timestamp with
         5 fractional digits of precision
         An event is a timestamp, a colon (:), an event
@@ -58,12 +55,12 @@ class Logger(object):
         if not self.logging:
             return
 
-        if (ts==-1):
-            ts = time.time()
+        ts = time.time()
 
         if event[-1]!='\n':
             event = event + '\n'
-        self.logList.append("%7.4f:%s" % (ts - self.baseTime, event))
+        #self.logList.append("%07.5f:%s" % (ts - self.baseTime, event))
+        self.logList.append("%07.5f:%s" % (ts - self.baseTime, event))
 
     def stopLog(self):
         """
@@ -72,29 +69,20 @@ class Logger(object):
         """
         if not self.logging:
             return
-        self._closeLog(time.time())
+        self._closeLog()
 
-    def _closeLog(self, ts=-1):
+    def _closeLog(self):
         """
         Private function, used by stopLog, to close the log file if necessary
         :param ts: timestamp
         :return: None
         """
-        if (ts == -1):
-            ts = time.time()
-
-        if (self.baseTime==-1):
-            printOut("Warning: closing log before starting the timers",1)
-            printOut("Warning: timestamps will not make sense",1)
-            self.baseTime=0
-
-        ts2 = ts - self.baseTime
+        ts = time.time() - self.baseTime
         # write backlog
         for l in self.logList:
             self.outfile.write(l)
         # close file
-        finalTime="%7.3f:" % ts2
+        finalTime="%7.3f:EOL\n" % ts
         self.outfile.write(finalTime)
-        self.outfile.write(":EOL\n")
         self.outfile.close()
     

@@ -14,7 +14,7 @@ options = [
 "win-fixed-size t",
 "fullscreen f",
 "cursor-hidden f",
-"show-frame-rate-meter f",
+"show-frame-rate-meter t",
 "framebuffer-multisample 1",
 "multisamples 4"
 ]

@@ -94,7 +94,7 @@ class Select2AFCImage(Element):
 
         # file output to store the results
         outputDir = getattr(self.config,'logOutputDir','run')
-        self.logResults = Logger(outputDir+"/userAnswers_"+self.config.world.participantId+".log",mode='w')
+        self.logResults = Logger(self.baseTime, outputDir+"/userAnswers_"+self.config.world.participantId+".log",mode='w')
         #self.currentPair = None
 
     def hidePair(self, pair):
