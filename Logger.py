@@ -82,7 +82,7 @@ class Logger(object):
         for l in self.logList:
             self.outfile.write(l)
         # close file
-        finalTime="%7.3f:EOL\n" % ts
+        finalTime="%07.5f:EOL\n" % ts
         self.outfile.write(finalTime)
         self.outfile.close()
     
