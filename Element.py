@@ -6,6 +6,7 @@ from Utils.Debug import printOut
 from Utils.Utils import *
 from Logger import Logger
 from collections import OrderedDict
+import os.path
 
 import external.yaml as yaml
 
@@ -127,16 +128,6 @@ class Element(object):
 
         self.registeredKeys = []
 
-        # create a logfile using the name of the Element, and the logFilePath if defined,
-        # otherwise create the logfile in the default 'run' directory
-        if getattr(self.config,'log',False):
-            logFilePath = getattr(self.config, "logFilePath", 'run')
-            self.logFile = Logger(self.baseTime, '%s/%s_%s.txt' % (logFilePath,self.config.name,self.config.world.participantId), 'w')
-        else:
-            self.logFile = None
-
-
-
     def getConfigTempate(self):
         return OrderedDict({
             'className': 'className',
@@ -253,6 +244,28 @@ class Element(object):
         This method will be executed when the Finite State Machine
         enters into this state
         """
+        # WE CREATE THE logFile HERE BECAUSE AN ELEMENT CAN BE EXECUTED MORE THAN ONCE.
+        # THIS IMPLIES THAT THIS AUTOMATIC LOGFILE CANNOT BE USED IN THE CONSTRUCTOR OF THE
+        # ELEMENT.
+        # create a logfile using the name of the Element, and the logFilePath if defined,
+        # otherwise create the logfile in the default 'run' directory
+        # If the logFile with the exact same name exists, it means that the same
+        # element has been already executed, and it is being repeated.
+        # Add a counter to the last part of the name to account for this.
+
+        if getattr(self.config,'log',False):
+            logFilePath = getattr(self.config, "logFilePath", 'run')
+            fileCounter = 1
+            fname = '%s/%s_%s_0.txt' % (logFilePath,self.config.name,self.config.world.participantId)
+            # repeat until a filename is found
+            while os.path.isfile(fname):
+                fname = fname[:fname.rfind('_')+1]+str(fileCounter)+'.txt'
+                fileCounter+=1
+
+            self.logFile = Logger(self.baseTime, fname, 'w')
+        else:
+            self.logFile = None
+
         if self.logFile:
             self.logFile.startLog()
         printOut("Entering state %s" % self.config.name, 1)
@@ -273,21 +286,26 @@ class Element(object):
         #self.config.world.createTextKeys()
         self.active = True
 
-        # check if we need to load values from globals! or set them
-        # to the defaults specified in the configuration of the Element
-        # check the experiment!
-        try:
-            globals = self.yaml_config['readFromGlobals']
-        except KeyError, e:
-            #print e
-            globals = None
 
-        if globals:
-            for g in globals.keys():
-                if g in self.config.world.globals:
-                    setattr(self, g, self.config.world.globals[g])
-                else:
-                    setattr(self, g, globals[g])
+        # THIS IS OVER COMPLICATED, FOR NOW ANY ELEMENT CAN READ AND WRITE FROM
+        # GLOBALS BY HAND...
+        ## globals are variables that are accessible experiment wise.
+        ## check if we need to load values from globals! or set them
+        ## to the defaults specified in the configuration of the Element
+        ## check the experiment!
+        #try:
+        #    globals = self.yaml_config['readFromGlobals']
+        #except KeyError, e:
+        #    #print e
+        #    globals = None
+
+        #if globals:
+        #    for g in globals.keys():
+        #        if g in self.config.world.globals:
+        #            setattr(self, g, self.config.world.globals[g])
+        #        else:
+        #            setattr(self, g, globals[g])
+
         # finally, there is a refsto attribute in the config file, which allows to provide a reference from
         # one Element to another, provided that the target reference exists.
         refs = getattr(self.config, "refsto", [])
@@ -324,18 +342,19 @@ class Element(object):
 #        self.config.world.createTextKeys()
         self.active = False
 
+        # DO NOT USE readFromGlobals or writeFromGlobals in config file.
         # save globals if we have them.
-        try:
-            globals = self.yaml_config['writeToGlobals']
-        except KeyError, e:
-            #print e
-            globals = None
+        #try:
+        #    globals = self.yaml_config['writeToGlobals']
+        #except KeyError, e:
+        #    #print e
+        #    globals = None
+        #if globals:
+        #    for g in globals.keys():
+        #        # read value or assign default from config!
+        #        newValue = getattr (self, g, globals[g])
+        #        self.config.world.globals[g] = newValue
 
-        if globals:
-            for g in globals.keys():
-                # read value or assign default from config!
-                newValue = getattr (self, g, globals[g])
-                self.config.world.globals[g] = newValue
         if self.logFile:
             self.logFile.stopLog()
 
