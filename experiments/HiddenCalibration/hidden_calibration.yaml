@@ -5,10 +5,19 @@ elements:
 ####################################
  - className: EmptyState
    name: start
-   # color is set until is changed again!
-   color_background: (0,0,0,1)
+   color_background: (0.3,0.3,0.3,1)
    # send message timeout_start after 0.1
    timeout: 0.1
+
+ - className: RepeatSequence
+   # for each value, send message
+   # 'repeat' and assign the value to variable,
+   # and then when there are no more values
+   # send the message 'end'
+   name: repeatRandom
+   random: true
+   variable: useCalibration
+   values: ['useTobii','useCustom']
 
  - className: EmptyState
    name: end
@@ -24,6 +33,14 @@ elements:
  - className: ScreenText
    fname_message: experiments/HiddenCalibration/data/introExperiment.txt
    name: introText
+
+ - className: ScreenText
+   fname_message: experiments/HiddenCalibration/data/visualTargetIntro.txt
+   name: visualTargetIntro
+
+ - className: ScreenText
+   fname_message: experiments/HiddenCalibration/data/calibrateTobii.txt
+   name: calibrateTobii
 
  - module: DataForm
    className: ConsentForm
@@ -179,7 +196,7 @@ elements:
    gridHeight: 3
    # size of tile is in the range [0,2]
    #tileSizes: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
-   tileSizes: [ 0.3]
+   tileSizes: [ 0.3, 0.05]
    margin: 1.1
    # smaller than 1 to make it smaller!
    textSize: 0.04
@@ -194,39 +211,43 @@ elements:
    gridHeight: 3
    margin: 1.1
    #tileSizes: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
-   tileSizes: [ 0.3]
+   tileSizes: [ 0.3, 0.05]
    refsto: [eyeTracker]
    log: True
    logFilePath: 'experiments/HiddenCalibration/run'
 
 transitions:
- - trans: 'start @ visualTarget:auto'
- - trans: 'visualTarget @ end: auto'
 
-# - trans: 'start @ introText:timeout_start'
-# # background elements
-# - trans: 'start @ eyeTracker: timeout_start'
-# - trans: 'start @ mouseLog: timeout_start'
-#
-# - trans: 'introText @ consentForm:auto'
-# - trans: 'consentForm @ userInfo:yesPressed'
-# - trans: 'consentForm @ end:noPressed'
-# - trans: 'userInfo @ colourBlindText:nextPressed'
-#
-# - trans: 'colourBlindText @ colourBlindCheck:auto'
-# - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
-# - trans: 'colourBlindCheck @ whackIntroText:imageQueryOk'
-#
-# - trans: 'whackIntroText @ whackAMole:auto'
-#
-# - trans: 'whackAMole @ game1Intro: auto'
-# - trans: 'game1Intro @ game1: auto'
-# - trans: 'game1 @ game2Intro: auto'
-# - trans: 'game2Intro @ game2: auto'
-# - trans: 'game2 @ FinalScreen: auto'
+ - trans: 'start @ introText:timeout_start'
+# background elements
+ - trans: 'introText @ consentForm:auto'
+ - trans: 'consentForm @ userInfo:yesPressed'
+ - trans: 'consentForm @ end:noPressed'
+ - trans: 'userInfo @ colourBlindText:nextPressed'
+ - trans: 'colourBlindText @ colourBlindCheck:auto'
+ - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
+ - trans: 'colourBlindCheck @ calibrateTobii:imageQueryOk'
+ - trans: 'calibrateTobii @ eyeTracker:auto'
+ - trans: 'calibrateTobii @ whackIntroText: auto'
+ - trans: 'calibrateTobii @ mouseLog: auto'
+ # whackAMole saves current calibration to file
+ # whackAMole calibrates again, and saves as well the
+ # new calibration.
+ - trans: 'whackIntroText @ whackAMole:auto'
 
-# - trans: 'FinalScreen @ end: timeout_FinalScreen'
-# - trans: 'mouseLog @ end: timeout_FinalScreen'
-# - trans: 'eyeTracker @ end:timeout_FinalScreen,noPressed,imageQueryBad'
-# - trans: 'colourBlindProblem @ end:auto'
+ # loop part, through calibration methods
+ - trans: 'whackAMole @ repeatRandom: auto'
+ - trans: 'repeatRandom @ game1Intro : repeat'
+ - trans: 'repeatRandom @ FinalScreen : end'
+ - trans: ' game1Intro @ game1: auto'
+ - trans: 'game1 @ game2Intro: end_game1'
+ - trans: 'game2Intro @ game2: auto'
+ - trans: 'game2 @ visualTargetIntro: end_game2'
+ - trans: 'visualTargetIntro @ visualTarget: auto'
+ # loop back to repeatRandom
+ - trans: 'visualTarget @ repeatRandom : auto'
+ - trans: 'FinalScreen @ end: timeout_FinalScreen'
+ - trans: 'mouseLog @ end: timeout_FinalScreen'
+ - trans: 'eyeTracker @ end:timeout_FinalScreen,noPressed,imageQueryBad'
+ - trans: 'colourBlindProblem @ end:auto'
 
