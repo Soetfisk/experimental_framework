@@ -82,6 +82,7 @@ class VisualTarget(Element):
     def enterState(self):
         # super class enterState
         Element.enterState(self)
+        self.logFile.writeln("# time, targetPos, mousePos, eyePos")
         taskMgr.add( self.logData, 'logData' )
         self.moveSequence.start()
         #self.showElement()
