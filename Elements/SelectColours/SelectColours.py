@@ -25,13 +25,8 @@ class SelectColours(Element):
     def __init__(self, **kwargs):
         # build parent object class
         super(SelectColours, self).__init__(**kwargs)
-        # this defines:
-        # self.sceneNP and self.hudNP
-        # self.config.world
 
-        self.locked=False
-
-
+        self.colours_names = [ 'red', 'white', 'yellow', 'darkblue', 'darkgreen', 'magenta', 'brown', 'cyan', 'black' ]
         colours = [
             (250,0,0,255),      # red
             (254,254,254,255),  # white
@@ -42,22 +37,9 @@ class SelectColours(Element):
             (102,51,0,255),     # brown
             (0,255,255,255),    # cyan
             (0,0,0,255) ]       # black
-        names = [ 'red', 'white', 'yellow', 'darkblue', 'darkgreen', 'magenta', 'brown', 'cyan', 'black' ]
-        m = 255.0
-        self.colours = [(r/m,g/m,b/m,a/m) for (r,g,b,a) in colours]
-        self.colours_names = names # [ str(c) for c in colours ]
 
-        try:
-            self.sizesToTry = self.config.tileSizes
-        except:
-            printOut("missing property 'tileSizes' in config file")
-            self.config.world.quit()
+        self.colours = [(r/255.0,g/255.0,b/255.0,a/255.0) for (r,g,b,a) in colours]
 
-        random.shuffle(self.sizesToTry)
-
-        self.config.scale = self.sizesToTry.pop(0)
-        # start a new grid, using self.config.scale
-        self.makeGrid()
 
         # add UI elements to enlarge/shrink grid
         #self.addButtonsBigSmall()
@@ -121,7 +103,7 @@ class SelectColours(Element):
             self._recreateGrid(self.sizesToTry.pop(0))
         else:
             printOut("sizes completed!")
-            self.sendMessage('end_colours')
+            self.sendMessage('end_' + self.config.name)
 
 #    def changeSize(self, scale):
 #        """
@@ -273,6 +255,23 @@ class SelectColours(Element):
     def enterState(self):
         # super class enterState
         Element.enterState(self)
+
+        self.locked=False
+        try:
+            # force a copy!
+            self.sizesToTry = list(self.config.tileSizes)
+        except:
+            printOut("missing property 'tileSizes' in config file")
+            self.config.world.quit()
+
+        random.shuffle(self.sizesToTry)
+
+        self.config.scale = self.sizesToTry.pop(0)
+        # start a new grid, using self.config.scale, or recreate one if tiles already exist!
+        if getattr(self,'tiles',False):
+            self._recreateGrid(self.config.scale)
+        else:
+            self.makeGrid()
 
     def exitState(self):
         # super class leaveState

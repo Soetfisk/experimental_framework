@@ -25,25 +25,9 @@ class SelectNumbers(Element):
     def __init__(self, **kwargs):
         # build parent object class
         super(SelectNumbers, self).__init__(**kwargs)
-        # this defines:
-        # self.sceneNP and self.hudNP
-        # self.config.world
-
-        if not getattr(self.config, 'textSize', None):
-            setattr(self.config,'textSize',0.05)
-
-        self.sizesToTry = self.config.tileSizes
-        random.shuffle(self.sizesToTry)
-        self.config.scale = self.sizesToTry.pop(0)
-
-        self.locked=False
-        # start a new grid
-        self.makeGrid()
-        # add UI elements to enlarge/shrink grid
-        # self.addButtonsBigSmall()
-        # shuffle the grid from its original correct order.
-        #self.shuffle()
         self.hideElement()
+
+
 
     def showElement(self):
         Element.showElement(self)
@@ -100,7 +84,7 @@ class SelectNumbers(Element):
             self._recreateGrid(self.sizesToTry.pop(0))
         else:
             printOut("sizes completed!")
-            self.sendMessage('end_numbers')
+            self.sendMessage('end_' + self.config.name)
 
     def changeSize(self, scale):
         """
@@ -137,7 +121,6 @@ class SelectNumbers(Element):
         tilesNames = range(1,gridWidth*gridHeight + 1)
         random.shuffle(tilesNames)
         self.tiles = []
-
         margin = getattr(self.config, 'margin', 1.0)
         # background
         for y in range(0,gridHeight):
@@ -256,6 +239,18 @@ class SelectNumbers(Element):
     def enterState(self):
         # super class enterState
         Element.enterState(self)
+        if not getattr(self.config, 'textSize', None):
+            setattr(self.config,'textSize',0.05)
+        # force a copy of the list
+        self.sizesToTry = list(self.config.tileSizes)
+        random.shuffle(self.sizesToTry)
+        self.config.scale = self.sizesToTry.pop(0)
+        self.locked=False
+        # recreate the grid if this is not the first time
+        if getattr(self,'tiles', False):
+            self._recreateGrid(self.config.scale)
+        else:
+            self.makeGrid()
 
     def exitState(self):
         # super class leaveState
