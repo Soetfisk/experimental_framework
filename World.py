@@ -38,15 +38,14 @@ from Utils.Utils import *
 # simple keyboard class that wraps around Panda messenger
 from Keyboard import Keyboard
 
-
 class World(DirectObject):
     def __init__(self, experiment):
         """
         empty constructor
         just calls initialSetup(experiment)
         """
-        self.experiment = experiment
-        self.initialSetup()
+        if experiment:
+            self.setNewExperiment(experiment)
 
     def testOne(self):
         test = {
@@ -59,8 +58,9 @@ class World(DirectObject):
 
     def cleanSimulation(self):
         # clean up everything!
-        for e in self.elements.values():
-            e.removeElement()
+        if getattr(self,'elements',False):
+            for e in self.elements.values():
+                e.removeElement()
         self.ignoreAll()
 
     def restartSimulation(self):
@@ -83,6 +83,10 @@ class World(DirectObject):
 
         experiment = fixTuples(experiment)
 
+        # register global values for use by any other part of the simulation
+        self.globals = experiment['globals']
+
+        print self.globals
         # first timestamp since the whole application started
         self.baseTime = time.time()
 
@@ -282,7 +286,7 @@ class World(DirectObject):
         # between each other.
         # They can save values here and use them, ideally using
         # writeToGlobals and readFromGlobals in the configuration file.
-        self.globals = {}
+        # self.globals = {}
         return
 
     def logEvent(self, message):
@@ -292,11 +296,11 @@ class World(DirectObject):
     #========== INPUT HANDLING ===============================================================
     #=========================================================================================
 
-    def hideMouseCursor(self):
-        """Hides mouse cursor in Panda3D"""
-        props = WindowProperties()
-        props.setCursorHidden(True)
-        base.win.requestProperties(props)
+#    def hideMouseCursor(self):
+#        """Hides mouse cursor in Panda3D"""
+#        props = WindowProperties()
+#        props.setCursorHidden(True)
+#        base.win.requestProperties(props)
 
     def showMouseCursor(self):
         """Hides mouse cursor in Panda3D"""
@@ -410,6 +414,7 @@ class World(DirectObject):
         #const_wp = window.getProperties()
         #w = const_wp.getXSize()
         #h = const_wp.getYSize()
+        pass
 
         #wp = WindowProperties()
         #wp.setSize(w, int(w/h))
@@ -427,15 +432,16 @@ class World(DirectObject):
         :param npath: nodepath to attach
         :param place: place where to attach, can be 3d or HUD
         """
-        mapNode={'3d':render,'3D':render,'HUD':aspect2d}
-        npath.reparentTo(mapNode[place])
+
+        mapNode={'3D':render,'HUD':aspect2d}
+        if place.upper() in mapNode.keys():
+            npath.reparentTo(mapNode[place])
+        else:
+            printOut("ERROR: trying to add a node to an invalid place: %s"%place,0)
 
     #=========================================================================================
     #========== KEYBOARD - KEYS HANDLING =====================================================
     #=========================================================================================
-
-    def stopKeyboard(self):
-        self.keyboard.clearKeys()
 
     def resetKeys(self):
         """clears all key bindings and links the global keys specified in config/globalKeys.yaml"""

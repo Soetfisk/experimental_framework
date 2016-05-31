@@ -261,18 +261,24 @@ class Element(object):
             while os.path.isfile(fname):
                 fname = fname[:fname.rfind('_')+1]+str(fileCounter)+'.txt'
                 fileCounter+=1
-
-            self.logFile = Logger(self.baseTime, fname, 'w')
         else:
-            self.logFile = None
+            # nolog is special name to disable logging
+            fname = 'nolog'
+        self.logFile = Logger(self.baseTime, fname, 'w')
 
-        if self.logFile:
-            self.logFile.startLog()
+        self.logFile.startLog()
         printOut("Entering state %s" % self.config.name, 1)
-        #self.config.world.resetKeys()
+
+        # log all global variables before anything into the log file.
+        self.logFile.logEvent("Global state:")
+        for name,value in self.config.world.globals.items():
+            self.logFile.logEvent("%s: %s" % (name, value))
+
         self.showElement()
 
         # is there a timeout set for this state ?
+        # a timeout automatically sends an event after the time, with the name of the
+        # element prepended with the word "timeout_"
         t = getattr(self.config, 'timeout', None)
         if t is not None:
             try:
@@ -284,8 +290,6 @@ class Element(object):
                 printOut("error converting timeout value %s in %s " % (str(t), self.config.name), 0)
                 self.config.world.quit()
         #self.config.world.createTextKeys()
-        self.active = True
-
 
         # THIS IS OVER COMPLICATED, FOR NOW ANY ELEMENT CAN READ AND WRITE FROM
         # GLOBALS BY HAND...
@@ -325,6 +329,8 @@ class Element(object):
 
         # lastly, register keys.
         self.registerKeys()
+
+        self.active = True
 
     def removeElement(self):
         self.sceneNP.detachNode()

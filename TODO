@@ -1,8 +1,2 @@
 TODO:
 
-2) Pilot experimental design (staircase)
-3) Network uploader for collected data
-4) Read config from data collected, to target game.
-   Game must read from network the configuration to
-   use!
-5) setup server to collect data 24/7

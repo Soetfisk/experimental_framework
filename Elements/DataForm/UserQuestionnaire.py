@@ -264,7 +264,6 @@ class UserQuestionnaire(Element):
     def enterState(self):
         Element.enterState(self)
         self.setQuestion(0)
-       #self.config.world.stopKeyboard()
 
     def exitState(self):
         # exit state

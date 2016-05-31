@@ -1,5 +1,8 @@
-elements:
+globals:
+ # all logFiles created automatically by Element will go into this folder
+ logFilePath: 'experiments/HiddenCalibration/run'
 
+elements:
 ####################################
 # Initial and final states in the FSM.
 ####################################
@@ -201,7 +204,7 @@ elements:
    # smaller than 1 to make it smaller!
    textSize: 0.04
    color_tile: (18/255.0,152/255.0,196/255.0,1.0)
-   refsto: [eyeTracker]
+   refsto: [eyeTracker,repeatRandom]
    log: True
    logFilePath: 'experiments/HiddenCalibration/run'
 
@@ -212,7 +215,7 @@ elements:
    margin: 1.1
    #tileSizes: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
    tileSizes: [ 0.3, 0.05]
-   refsto: [eyeTracker]
+   refsto: [eyeTracker,repeatRandom]
    log: True
    logFilePath: 'experiments/HiddenCalibration/run'
 

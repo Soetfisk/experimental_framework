@@ -276,7 +276,6 @@ class DataForm(Element):
 
     def enterState(self):
         Element.enterState(self)
-       #self.config.world.stopKeyboard()
 
     def exitState(self):
         # exit state
