@@ -2,12 +2,13 @@
 import sys
 import time
 from time import ctime
+from multiprocessing import Process, Pipe
 
 
 # config files are in yaml
 import yaml
 
-# utility to load options from file or strings
+# utility to load options from file (panda3d config files) or strings
 from pandac.PandaModules import loadPrcFileData
 # pandaConfig defines a list of options to setup Panda3D
 
@@ -15,7 +16,11 @@ import pandaConfig
 for o in pandaConfig.options:
     loadPrcFileData('', o)
 
+# basic finite state machine
 from Utils.FiniteStateMachine import *
+# In YamlTools I have a few functions that massage the YAML
+# files so I can use them in the pyqtgraph for the property
+# editor
 from Utils.YamlTools import fixTuples
 
 # basic Panda3D imports
@@ -43,9 +48,23 @@ class World(DirectObject):
         """
         empty constructor
         just calls initialSetup(experiment)
+        or waits for remote commands
         """
-        if experiment:
+        if experiment != 'online':
             self.setNewExperiment(experiment)
+        else:
+            import zmq
+            self.context = zmq.Context()
+            # to receive commands
+            self.commands_receiver = self.context.socket(zmq.REP)
+            self.commands_receiver.bind("tcp://127.0.0.1:7777")
+            # to send answers
+            base.taskMgr.add(self.pollZMQ, "poll messages")
+            self.msgHandlers = {
+                'testSingle':self.testElement,
+                'updateElement':self.updateElement,
+                'loadExperiment':self.loadExperiment,
+            }
 
     def testOne(self):
         test = {
@@ -536,5 +555,36 @@ class World(DirectObject):
             print e
         finally:
             # sleep 1 second of grace
+            if getattr(self, 'context', False):
+                self.commands_receiver.close()
             time.sleep(1)
             sys.exit()
+
+    def pollZMQ(self,t):
+        try:
+            msg = self.commands_receiver.recv(flags=zmq.NOBLOCK)
+            print msg
+            self.commands_receiver.send("OK")
+        except:
+            pass
+        t.delayTime = 0.2
+        printOut('running...' + str(t.time))
+        return t.again
+
+#---------------------------------------------------------------------
+# HANDLERS FOR ZEROMQ MESSAGES
+#---------------------------------------------------------------------
+    def testElement(self, yamlElement):
+        """Take a SINGLE element, and adds elements start end, and transitions
+        start -> elementToTest -> end with the event 'Esc' to move forward"""
+        print yamlElement
+
+    def updateElement(self, yamlElement):
+        """same as testElement, but skips start so it will appear as if the element
+        has simply been updated"""
+        print yamlElement
+
+    def loadExperiment(self, yamlExperiment):
+        print yamlExperiment
+
+
