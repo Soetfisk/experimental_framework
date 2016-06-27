@@ -15,7 +15,7 @@ from Elements.Game.pointsHUD import pointsHUD
 from Elements.Game.PositionGenerator import PositionGenerator
 from Elements.Game.Parachute import *
 from Elements.Game.LodManager import *
-from Element import *
+from Elements.Element.Element import *
 from Elements.Game.targetGuide import *
 
 class Replay(GameClass):

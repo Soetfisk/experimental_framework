@@ -2,7 +2,7 @@ __author__ = 'Francholi'
 __author__ = 'Francholi'
 
 # panda imports
-from Element import *
+from Elements.Element.Element import *
 import random
 
 class RepeatSequence(Element):
@@ -41,7 +41,4 @@ class RepeatSequence(Element):
         # super class exitState
         Element.exitState(self)
 
-    def getConfigTemplate(self):
-        elementDict = Element.getConfigTemplate()
-        return elementDict
-        
+

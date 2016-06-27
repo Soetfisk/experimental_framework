@@ -4,7 +4,7 @@ __author__ = 'Francholi'
 from direct.gui.DirectGui import *
 from direct.task.Task import *
 from panda3d.core import *
-from Element import *
+from Elements.Element.Element import *
 from HUDText import HUDText
 
 #sys utils

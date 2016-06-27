@@ -5,7 +5,7 @@ from panda3d.core import *
 from direct.gui.OnscreenText import OnscreenText
 import random as rnd
 
-from Element import *
+from Elements.Element.Element import *
 
 
 #sys utils

@@ -3,7 +3,7 @@ __author__ = 'Francholi'
 
 # panda imports
 from direct.interval.IntervalGlobal import *
-from Element import *
+from Elements.Element.Element import *
 
 import random
 import math
@@ -91,10 +91,6 @@ class VisualTarget(Element):
         # super class exitState
         Element.exitState(self)
         taskMgr.remove('logData')
-
-    def getConfigTemplate(self):
-        elementDict = Element.getConfigTemplate()
-        return elementDict
 
     def logData(self, t):
         """

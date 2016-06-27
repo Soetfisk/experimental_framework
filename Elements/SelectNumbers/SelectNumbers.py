@@ -9,7 +9,7 @@ from direct.interval.FunctionInterval import *
 from direct.interval.IntervalGlobal import *
 import random
 
-from Element import *
+from Elements.Element.Element import *
 from Logger import Logger
 
 #sys utils

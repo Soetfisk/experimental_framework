@@ -1,0 +1,10 @@
+# parent of all elements
+# all these properties can be specified at any element
+# timeout before a message 'name_timeout' is sent to the messenger.
+timeout: float
+# configuration file which can contain further options to load into
+# the element.
+file config: filename
+# list of keys and callbacks with arguments
+dict keys: [{ value: string, callback: methodFromClass, args: listStrings }]
+

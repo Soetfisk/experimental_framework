@@ -16,7 +16,7 @@ from direct.interval.FunctionInterval import *
 from direct.interval.IntervalGlobal import *
 
 # framework imports
-from Element import *
+from Elements.Element.Element import *
 
 
 

@@ -9,7 +9,7 @@ import sys
 from random import *
 
 #game imports
-from Element import *
+from Elements.Element.Element import *
 from CalPoint import calStimuli
 
 from Debug import printOut

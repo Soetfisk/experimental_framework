@@ -2,7 +2,7 @@
 from direct.gui.DirectGui import *
 from direct.task.Task import *
 from panda3d.core import *
-from Element import *
+from Elements.Element.Element import *
 from direct.gui.OnscreenImage import OnscreenImage
 # os module to list filenames in a directory
 import os,itertools

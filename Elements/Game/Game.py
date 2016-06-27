@@ -7,7 +7,7 @@ from Logger import Logger
 from PositionGenerator import PositionGenerator
 from Parachute import *
 from LodManager import *
-from Element import *
+from Elements.Element.Element import *
 import random
 
 from Utils.Debug import printOut

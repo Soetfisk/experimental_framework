@@ -83,16 +83,16 @@ class Element(object):
         # all configuration options have been loaded.
         # check if this Element can be moved around in run-time, and
         # check if there is a xform file already in the filesystem.
-        xform_file = None
-        try:
-            xform_file = open('exp_' + self.config.name + '_xform_yaml')
-            xform_dict = yaml.load(xform_file)
-        except:
-            xform_dict = None
-        finally:
-            if xform_file:
-                xform_file.close()
-        setattr(self.config,'xform_dict',xform_dict)
+        #xform_file = None
+        #try:
+        #    xform_file = open('exp_' + self.config.name + '_xform_yaml')
+        #    xform_dict = yaml.load(xform_file)
+        #except:
+        #    xform_dict = None
+        #finally:
+        #    if xform_file:
+        #        xform_file.close()
+        #setattr(self.config,'xform_dict',xform_dict)
 
         # keep a reference to the original YAML config
         self.yaml_config = dictionary

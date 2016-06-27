@@ -84,9 +84,8 @@ class World(DirectObject):
         experiment = fixTuples(experiment)
 
         # register global values for use by any other part of the simulation
-        self.globals = experiment['globals']
+        self.globals = experiment.get('globals',{})
 
-        print self.globals
         # first timestamp since the whole application started
         self.baseTime = time.time()
 
@@ -223,6 +222,10 @@ class World(DirectObject):
                 printOut("Attribute error when building " + el['name'], 0)
                 printOut("Most likely there is a mismatch between the code and the config file", 0)
                 printOut("%s" % e, 0)
+                self.quit()
+            except KeyError, e:
+                printOut("Exception building state: " + el['name'], 0)
+                print "Key error:" , e
                 self.quit()
             except Exception, e:
                 printOut("Exception building state: " + el['name'], 0)
@@ -435,7 +438,7 @@ class World(DirectObject):
 
         mapNode={'3D':render,'HUD':aspect2d}
         if place.upper() in mapNode.keys():
-            npath.reparentTo(mapNode[place])
+            npath.reparentTo(mapNode[place.upper()])
         else:
             printOut("ERROR: trying to add a node to an invalid place: %s"%place,0)
 

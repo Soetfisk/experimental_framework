@@ -2,7 +2,7 @@ __author__ = 'Francholi'
 __author__ = 'Francholi'
 
 # panda imports
-from Element import *
+from Elements.Element.Element import *
 from Logger import Logger
 
 class MouseLogger(Element):

@@ -1,0 +1,260 @@
+globals:
+ # all logFiles created automatically by Element will go into this folder
+ logFilePath: 'experiments/HiddenCalibration/run'
+
+elements:
+####################################
+# Initial and final states in the FSM.
+####################################
+ - className: EmptyState
+   name: start
+   color background: [100,0.0,0.0,255]
+   color foreground: (100,0.0,0.0,255)
+   # send message timeout_start after 0.1
+   timeout: 0.1
+   file message: /pepe.txt
+
+ - className: RepeatSequence
+   # for each value, send message
+   # 'repeat' and assign the value to variable,
+   # and then when there are no more values
+   # send the message 'end'
+   name: repeatRandom
+   random: true
+   variable: useCalibration
+   tuple values: ('useTobii','useCustom')
+
+ - className: EmptyState
+   name: end
+
+ - className: MouseLogger
+   name: mouseLog
+
+####################################
+# Text display elements.
+####################################
+
+ # introduction to the experiment
+ - className: ScreenText
+   file message: experiments/HiddenCalibration/data/introExperiment.txt
+   name: introText
+
+ - className: ScreenText
+   file message: experiments/HiddenCalibration/data/visualTargetIntro.txt
+   name: visualTargetIntro
+
+ - className: ScreenText
+   file message: experiments/HiddenCalibration/data/calibrateTobii.txt
+   name: calibrateTobii
+
+ - module: DataForm
+   className: ConsentForm
+   name: consentForm
+   file config: experiments/HiddenCalibration/data/consentForm.yaml
+
+ - className: ScreenText
+   name: game1Intro
+   file message: experiments/HiddenCalibration/data/game1Intro.txt
+   keys:
+    - key: n
+      callback: sendMessage
+      tuple args: ('auto')
+
+ - className: ScreenText
+   name: game2Intro
+   file message: experiments/HiddenCalibration/data/game2Intro.txt
+   keys:
+    - key: n
+      callback: sendMessage
+      tuple args: ('auto')
+
+ - className: ScreenText
+   name: whackIntroText
+   file message: experiments/HiddenCalibration/data/whackIntroText.txt
+   keys:
+    - key: n
+      callback: sendMessage
+      tuple args: ('auto')
+
+ - className: ScreenText
+   name: FinalScreen
+   # send message FinalScreen_timeout after 1 second
+   timeout: 1.0
+   file message: experiments/HiddenCalibration/data/finalText.txt
+   keys:
+    - key: q
+      callback: sendMessage
+      tuple args: ('endSimulation')
+
+ - className: ScreenText
+   name: colourBlindText
+   file message: experiments/HiddenCalibration/data/colourBlindText.txt
+   # example defining the keybindings directly here
+
+ - className: ScreenText
+   name: colourBlindProblem
+   # the LAST element is the option selected now, which has to be in the list
+   #option_level: ('easy','hard','easy')
+   file message: experiments/HiddenCalibration/data/colourBlindProblem.txt
+
+# Display ishihara test, expects an exact number as an answer.
+ - module: FullScreenImage
+   className: ImageQuery
+   name: colourBlindCheck
+   folder imagesLocation: experiments/HiddenCalibration/data/colourblind
+   imagesName: '%d.png'
+   #fname_imageNameStr: experiments/HiddenCalibration/data/colourblind/%d.png
+   #tuple_imageStrArgs: (2,3,6,42,45,74,97)
+   tuple imageStrArgs: (2)
+   #tuple_imageAnswers: (2,3,6,42,45,74,97)
+   tuple imageAnswers: (2)
+   tuple scale: (0.5,0.5)
+#   keys:
+#    - key: n
+#      callback: nextImage
+#      once: false
+
+ - className: DataForm
+   name: userInfo
+   settings:
+    outfiledir: run
+    outfileprefix: userdata
+    formId: userdata
+    scale: 0.06
+    maxlabel: 10
+    color label: (1.0,0.5,0.5,1.0)
+    title: 'Please provide us with some information about you:'
+   # form description
+   input:
+    - label: Gender
+      type: Option
+      tuple values: ("Male","Female")
+    - label: Do you have vision problems
+      type: Option
+      tuple values: ("Yes","No")
+    - label: Do you have experience playing games
+      type: Option
+      tuple values: ("Yes","No")
+    - label: Age
+      type: TextEntry
+      default: 0
+
+ - module: EyeTracker
+   className: Tobii_UDP_Client
+   name: eyeTracker
+   printGaze: True
+   showGaze: False
+   smoothWindow: 10
+   keys:
+   - key: t
+     callback: startTracking
+   - key: y
+     callback: stopTracking
+   - key: k
+     callback: toggleGaze
+
+ - module: EyeTracker
+   className: VisualTarget
+   name: visualTarget
+   color_background: (0.0,0.1,0.1,1)
+   fname_image: 'common/images/gaze_circle.png'
+   tuple_imageScale: (0.1,0.1)
+   tuple_points: [[0,0,0],[0,0,1],[1,0,0],[0.5,0.0,0.5]]
+   pointsDelay: 0
+   randomPoints: True
+   animate: True
+   secondsBetweenPoints: 2
+   trackMouse: True
+   trackEye: True
+   refsto: [eyeTracker]
+   log: True
+   logFilePath: 'experiments/HiddenCalibration/run'
+
+
+# not template yet...
+ - module: EventLogger
+   className: EventLogger
+   name: eventLogger
+
+# no template yet
+ - module: WhackAMole
+   className: WhackAMole
+   name: whackAMole
+   fname_moleModel: Elements/WhackAMole/textures/mole.egg
+   fname_holeTop: Elements/WhackAMole/textures/tophole.png
+   fname_holeBottom: Elements/WhackAMole/textures/botomhole.png
+   fname_back: Elements/WhackAMole/textures/back.png
+   fname_mole: Elements/WhackAMole/textures/mole_1.png
+   fname_plainGrass: Elements/WhackAMole/textures/no_hole.jpg
+   int_gridSize: 8
+   int_moleCalibPoints: 6
+   int_waitForDown: 4
+   refsto: [eyeTracker]
+   keys:
+   - key: mouse1
+     callback: hammerDown
+   - key: q
+     callback: sendMessage
+     tuple_args: ('endGame')
+
+ - className: SelectNumbers
+   name: game1
+   gridWidth: 3
+   gridHeight: 3
+   # size of tile is in the range [0,2]
+   #tileSizes: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
+   tileSizes: [ 0.3, 0.05]
+   margin: 1.1
+   # smaller than 1 to make it smaller!
+   textSize: 0.04
+   color_tile: (18/255.0,152/255.0,196/255.0,1.0)
+   refsto: [eyeTracker,repeatRandom]
+   log: True
+   logFilePath: 'experiments/HiddenCalibration/run'
+
+ - className: SelectColours
+   name: game2
+   gridWidth: 3
+   gridHeight: 3
+   margin: 1.1
+   #tileSizes: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
+   tileSizes: [ 0.3, 0.05]
+   refsto: [eyeTracker,repeatRandom]
+   log: True
+   logFilePath: 'experiments/HiddenCalibration/run'
+
+transitions:
+
+ - trans: 'start @ introText:timeout_start'
+# background elements
+ - trans: 'introText @ consentForm:auto'
+ - trans: 'consentForm @ userInfo:yesPressed'
+ - trans: 'consentForm @ end:noPressed'
+ - trans: 'userInfo @ colourBlindText:nextPressed'
+ - trans: 'colourBlindText @ colourBlindCheck:auto'
+ - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
+ - trans: 'colourBlindCheck @ calibrateTobii:imageQueryOk'
+ - trans: 'calibrateTobii @ eyeTracker:auto'
+ - trans: 'calibrateTobii @ whackIntroText: auto'
+ - trans: 'calibrateTobii @ mouseLog: auto'
+ # whackAMole saves current calibration to file
+ # whackAMole calibrates again, and saves as well the
+ # new calibration.
+ - trans: 'whackIntroText @ whackAMole:auto'
+
+ # loop part, through calibration methods
+ - trans: 'whackAMole @ repeatRandom: auto'
+ - trans: 'repeatRandom @ game1Intro : repeat'
+ - trans: 'repeatRandom @ FinalScreen : end'
+ - trans: ' game1Intro @ game1: auto'
+ - trans: 'game1 @ game2Intro: end_game1'
+ - trans: 'game2Intro @ game2: auto'
+ - trans: 'game2 @ visualTargetIntro: end_game2'
+ - trans: 'visualTargetIntro @ visualTarget: auto'
+ # loop back to repeatRandom
+ - trans: 'visualTarget @ repeatRandom : auto'
+ - trans: 'FinalScreen @ end: timeout_FinalScreen'
+ - trans: 'mouseLog @ end: timeout_FinalScreen'
+ - trans: 'eyeTracker @ end:timeout_FinalScreen,noPressed,imageQueryBad'
+ - trans: 'colourBlindProblem @ end:auto'
+

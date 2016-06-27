@@ -1,6 +1,6 @@
 from panda3d.core import *
  
-from Element import *
+from Elements.Element.Element import *
 
 import sys
 from Debug import printOut

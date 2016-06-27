@@ -2,7 +2,7 @@ from direct.gui.OnscreenText import OnscreenText
 from direct.gui.DirectGui import *
 from panda3d.core import *
 
-from Element import *
+from Elements.Element.Element import *
 
 import sys
 from Utils.Utils import splitString

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import glob, os
+import glob, os,sys
 import platform
 
 import PySide
@@ -46,7 +46,7 @@ class TransitionsGroup(pTypes.GroupParameter):
     # group
     def __init__(self, **opts):
         opts['type']='group'
-        opts['addText']='Add'
+        #opts['addText']='Add'
         opts['addList']=['transition','extract']
         pTypes.GroupParameter.__init__(self, **opts)
 
@@ -71,9 +71,10 @@ class TransitionsGroup(pTypes.GroupParameter):
                 transition['renamable']=True
                 transition['removable']=True
                 self.addChild(transition)#dict(name="transition %d" % (len(self.childs)+1), type='group', children=val, removable=True, renamable=True))
-                break
+                return
             except:
                 id += 1
+                print 'exception!!!'
                 pass
 
 class ElementsGroup(pTypes.GroupParameter):
@@ -105,8 +106,6 @@ class ElementsGroup(pTypes.GroupParameter):
 
     def elementNameChangedInside(self, el):
         el.parent().setName(el.value())
-
-
 
     def elementNameChanged(self, el):
         for j in el.children():
@@ -172,7 +171,7 @@ def extractDictionary(param):
 
 class Application():
 
-    def __init__(self, yamlConfigFile = "experiments/empty.yaml"):
+    def __init__(self, yamlConfigFile = "experiments/HiddenCalibration/hidden_calibration_gui.yaml"):
         # Must construct a QApplication before a QPaintDevice
         self.app = QtGui.QApplication([])
         self.win = QtGui.QWidget()
@@ -249,7 +248,7 @@ class Application():
         return wid
 
     def setupParameterTrees(self, yamlFile):
-        """Build two parameters tree based on Elements and Transitions"""
+        """Build two parameters trees based on Elements and Transitions"""
         self.yConfig = pushUp(yaml.load(open(yamlFile)))
         elements=[]
         for e in self.yConfig['elements']:
@@ -377,5 +376,6 @@ def restore():
 """
 
 if __name__=='__main__':
+    #if len(sys.argv) > 1:
     app = Application()
 

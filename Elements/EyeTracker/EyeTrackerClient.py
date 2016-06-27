@@ -2,7 +2,7 @@ from panda3d.core import *
 
 from Utils.Debug import printOut
 from Utils.Utils import enum
-from Element import *
+from Elements.Element.Element import *
 from Logger import Logger
 
 # Basic protocol to communicate with the Eye Tracker
