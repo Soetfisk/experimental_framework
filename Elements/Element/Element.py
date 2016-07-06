@@ -51,17 +51,17 @@ class Element(object):
         dictionary = {}
         # configuration can be in the experiment file or in a special file
         # just for this element.
-        if 'fname_config' in kwargs:
+        if 'file config' in kwargs:
             try:
-                dictionary = yaml.load(open(kwargs['fname_config']))
+                dictionary = yaml.load(open(kwargs['file config']))
             except Exception, e:
                 print e
-                printOut("Fatal error loading config file " + kwargs['fname_config'], 0)
+                printOut("Fatal error loading config file " + kwargs['file config'], 0)
                 kwargs['world'].quit()
 
         # ALL atributes are under "self.config"
         for k, v in kwargs.items():
-            # make every argument from the fname_config file an attribute, including a reference
+            # make every argument from the 'file config' file an attribute, including a reference
             # to world through self.config.world
             if k in dictionary:
                 printOut("Warning, same key found in config file and in experiment file",0)
@@ -284,8 +284,7 @@ class Element(object):
             try:
                 t = float(t)
                 if t:
-                    taskMgr.doMethodLater(t, self.sendMessage,
-                    'timeout_'+self.config.name, extraArgs=['timeout_'+self.config.name])
+                    taskMgr.doMethodLater(t, self.sendMessage, 'timeout_'+self.config.name, extraArgs=['timeout_'+self.config.name])
             except:
                 printOut("error converting timeout value %s in %s " % (str(t), self.config.name), 0)
                 self.config.world.quit()

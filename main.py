@@ -14,7 +14,7 @@ def printUsage():
 
 if __name__=='__main__':
     # extract experiment file from command line
-    experiment='online'
+    experiment = ''
     try:
         for arg in sys.argv:
             if 'exp=' in arg:

@@ -135,7 +135,7 @@ class WhackAMole(Element):
         except Exception,e:
             printOut("Error building mole holes!: %s"%e,0)
 
-        gridSize = self.config.int_gridSize
+        gridSize = int(self.config.gridSize)
 
         # holes in the corners
         fixedHoles = [(0,0), (0,gridSize-1), (gridSize-1,0), (gridSize-1,gridSize-1)]
@@ -170,13 +170,12 @@ class WhackAMole(Element):
         self.camRatio = self.config.world.camera.ratio
 
         # remove some calibration points until reaching the limit from the config file
-        while len(self.calibPoints) > self.config.int_moleCalibPoints:
+        while len(self.calibPoints) > self.config.moleCalibPoints:
             x = random.choice([y for y in self.calibPoints if y not in fixedCalibPoints])
             self.calibPoints.remove(x)
 
         self.lastTime=time.time()
         self.randomWaitForUp = random.randint(1,2)
-        self.waitForDown = self.config.int_waitForDown
         taskMgr.add(self.hammerMouse, "hammerController", sort=2)
         self.hideElement()
 
@@ -289,7 +288,7 @@ class WhackAMole(Element):
         # if None it means there is no mole up
         elapsed = time.time()-self.lastTime
         if self.moleUp != None:
-            if (self.moleUpHitCount > 2 or elapsed > self.waitForDown):
+            if (self.moleUpHitCount > 2 or elapsed > self.config.waitForDown):
                 self.moles[self.moleUp].moleDown()
                 if (self.moleUpHitCount>2):
                     # remove element at index moleUp

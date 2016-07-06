@@ -311,9 +311,9 @@ elements:
    fname_back: Elements/WhackAMole/textures/back.png
    fname_mole: Elements/WhackAMole/textures/mole_1.png
    fname_plainGrass: Elements/WhackAMole/textures/no_hole.jpg
-   int_gridSize: 8
-   int_moleCalibPoints: 8
-   int_waitForDown: 4
+   gridSize: 8
+   moleCalibPoints: 8
+   waitForDown: 4
    keys:
    - key: mouse1
      callback: hammerDown

@@ -57,6 +57,7 @@ class objFromDict(object):
     """
     def __init__(self, d):
         for a, b in d.items():
+            a = a.replace(' ', '_')
             try:
                 if isinstance(b, (list, tuple)):
                     setattr(self, a, [objFromDict(x) if isinstance(x, dict) else x for x in b])

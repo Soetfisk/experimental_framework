@@ -36,7 +36,7 @@ class ImageRating(Element):
         # load images for the test
         try:
             for arg in self.config.tuple_imageStrArgs:
-                finalName = self.config.fname_imageNameStr % arg
+                finalName = getattr(self.config,"file imageNameStr") % arg
                 tempNodes.append(OnscreenImage(image=finalName,
                                                scale=Vec3(sx, 1.0, sz)))
                 tempNodes[-1].setTransparency(TransparencyAttrib.MAlpha)
