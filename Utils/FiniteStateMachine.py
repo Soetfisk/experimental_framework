@@ -1,6 +1,5 @@
 __author__ = 'Francholi'
 
-from Element import Element
 from Debug import printOut
 from Utils import *
 
