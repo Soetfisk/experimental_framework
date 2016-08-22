@@ -127,7 +127,7 @@ elements:
       tuple_values: ("Male","Female")
     - label: Do you have vision problems
       type: Option
-      tuple_values: ("Yes","No")
+      tuple_values: ("No","Yes")
     - label: Do you have experience playing games
       type: Option
       tuple_values: ("Yes","No")
@@ -230,9 +230,9 @@ transitions:
  - trans: 'colourBlindText @ colourBlindCheck:auto'
  - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
  - trans: 'colourBlindCheck @ calibrateTobii:imageQueryOk'
- - trans: 'calibrateTobii @ eyeTracker:auto'
- - trans: 'calibrateTobii @ whackIntroText: auto'
- - trans: 'calibrateTobii @ mouseLog: auto'
+ - trans: 'calibrateTobii @ eyeTracker:q'
+ - trans: 'calibrateTobii @ whackIntroText: q'
+ - trans: 'calibrateTobii @ mouseLog:q'
  # whackAMole saves current calibration to file
  # whackAMole calibrates again, and saves as well the
  # new calibration.
@@ -242,7 +242,7 @@ transitions:
  - trans: 'whackAMole @ repeatRandom: auto'
  - trans: 'repeatRandom @ game1Intro : repeat'
  - trans: 'repeatRandom @ FinalScreen : end'
- - trans: ' game1Intro @ game1: auto'
+ - trans: 'game1Intro @ game1: auto'
  - trans: 'game1 @ game2Intro: end_game1'
  - trans: 'game2Intro @ game2: auto'
  - trans: 'game2 @ visualTargetIntro: end_game2'
@@ -251,6 +251,6 @@ transitions:
  - trans: 'visualTarget @ repeatRandom : auto'
  - trans: 'FinalScreen @ end: timeout_FinalScreen'
  - trans: 'mouseLog @ end: timeout_FinalScreen'
- - trans: 'eyeTracker @ end:timeout_FinalScreen,noPressed,imageQueryBad'
+ - trans: 'eyeTracker @ end:timeout_FinalScreen'
  - trans: 'colourBlindProblem @ end:auto'
 
