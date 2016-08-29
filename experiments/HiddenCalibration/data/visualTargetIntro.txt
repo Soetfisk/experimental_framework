@@ -1,1 +1,3 @@
-In the next screen, you have to follow the red target with your eyes at all times. Do not press any key, the application will continue after a few seconds.
+In the next screen, you have to follow the red circle with your eyes at all times.
+
+Press Esc to continue.

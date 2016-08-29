@@ -322,14 +322,14 @@ class Element(object):
                 printOut("ERROR: Element %s trying to set a reference to non-existent element %s!" %
                          (self.config.name, ref ),0)
 
+        # save last clear color
+        self.lastClearColor = base.getBackgroundColor()
         # set clear color if it has been explicitly stated in the config
         c = getattr(self.config,'color_background',None)
         if c:
-            base.win.setClearColor(Vec4(*c))
-
+            base.setBackgroundColor(Vec4(*c))
         # lastly, register keys.
         self.registerKeys()
-
         self.active = True
 
     def removeElement(self):
@@ -347,6 +347,8 @@ class Element(object):
         printOut("Leaving state %s" % self.config.name,2)
 #        self.config.world.createTextKeys()
         self.active = False
+
+        base.setBackgroundColor(self.lastClearColor)
 
         # DO NOT USE readFromGlobals or writeFromGlobals in config file.
         # save globals if we have them.

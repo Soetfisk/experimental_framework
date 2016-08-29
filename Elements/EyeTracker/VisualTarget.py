@@ -4,6 +4,7 @@ __author__ = 'Francholi'
 # panda imports
 from direct.interval.IntervalGlobal import *
 from Elements.Element.Element import *
+from direct.interval.FunctionInterval import *
 
 import random
 import math
@@ -34,10 +35,11 @@ class VisualTarget(Element):
         texture.setMinfilter(Texture.FTLinearMipmapLinear)
         texture.setAnisotropicDegree(2)
 
-        imgScale = getattr(self.config,'tuple_imageScale', (0.1,0.1))
+        temp = getattr(self.config,'tuple_imageScale', (0.1,0.1))
+        imgScale = Vec3(temp[0],1.0,temp[1])
         imgNode = loader.loadModel("common/models/plane")
         imgNode.reparentTo(self.hudNP)
-        imgNode.setScale(imgScale[0],1.0,imgScale[1])
+        imgNode.setScale(imgScale)
         imgNode.setTransparency(1)
         imgNode.setTexture(texture)
         imgNode.setPos(0,0,0)
@@ -46,8 +48,8 @@ class VisualTarget(Element):
         self.randomize = getattr(self.config, 'randomPoints', False)
         self.animate = getattr(self.config, 'animate', True)
         self.points = getattr(self.config,'tuple_points', [(0,0),(0,1)])
-        delay = getattr(self.config,'pointsDelay', 2.0)
-        speed = getattr(self.config,'secondsBetweenPoints', 2.0)
+        delay = getattr(self.config,'restDelay', 2.0)
+        speed = getattr(self.config,'speed', 2.0)
 
         if self.randomize:
             random.shuffle(self.points)
@@ -55,26 +57,28 @@ class VisualTarget(Element):
         self.points.insert(0,(0,0,0))
 
         # sequence of animations
+        blend = 'easeInOut'
         self.moveSequence = Sequence()
         # create animations at constant speed
         # take pairs of points using zip and shifting the list by one
+
         for p0,p1 in zip(self.points[:-1],self.points[1:]):
             v0 = Point3(p0[0],0,p0[2])
             v1 = Point3(p1[0],0,p1[2])
-            dist = (v0-v1).length()
-            if not self.animate:
-                dist = 0
-
-            blend = 'easeInOut'
+            dist = (v0-v1).length() * int(self.animate) # bool True==1, False==0
             self.moveSequence.append( self.imgNode.posInterval( delay, v0 , blendType=blend))
-            self.moveSequence.append( self.imgNode.posInterval( speed, v1 , blendType=blend))
-            self.moveSequence.append( self.imgNode.posInterval( delay, v1, blendType=blend))
+            self.moveSequence.append( self.imgNode.posInterval( dist / speed, v1 , blendType=blend))
 
+        self.moveSequence.append( self.imgNode.scaleInterval( 2, imgScale ) )
 
         cam = self.config.world.getCamera()
         self.width, self.height = map(float,(cam.screenWidth,cam.screenHeight))
         self.hideElement()
+        self.imgNode.setPos(Vec3(0,0,0))
+        self.moveSequence.setDoneEvent('end_animation')
 
+    def nop(self):
+        pass
 
     def getCenterPos(self):
         return self.imgNode.getPos()
@@ -82,13 +86,26 @@ class VisualTarget(Element):
     def enterState(self):
         # super class enterState
         Element.enterState(self)
+        self.config.world.hideMouseCursor()
+
         self.logFile.writeln("# time, targetPos, mousePos, eyePos")
         taskMgr.add( self.logData, 'logData' )
         self.moveSequence.start()
-        #self.showElement()
+
+        # set calibration in the eye-tracker
+        try:
+            self.eyeTracker.loadAndSetCalibration(self.repeatRandom.variable)
+            self.eyeTracker.startTracking()
+        except:
+            printOut("Warning, no eyetracker found")
 
     def exitState(self):
         # super class exitState
+        try:
+            self.eyeTracker.stopTracking()
+        except:
+            pass
+        self.config.world.showMouseCursor()
         Element.exitState(self)
         taskMgr.remove('logData')
 

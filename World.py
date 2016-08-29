@@ -57,7 +57,7 @@ class World(DirectObject):
         self.initialSetup(test)
 
     def cleanSimulation(self):
-        # clean up everything!
+        # clean up everything
         if getattr(self,'elements',False):
             for e in self.elements.values():
                 e.removeElement()
@@ -299,11 +299,11 @@ class World(DirectObject):
     #========== INPUT HANDLING ===============================================================
     #=========================================================================================
 
-#    def hideMouseCursor(self):
-#        """Hides mouse cursor in Panda3D"""
-#        props = WindowProperties()
-#        props.setCursorHidden(True)
-#        base.win.requestProperties(props)
+    def hideMouseCursor(self):
+        """Hides mouse cursor in Panda3D"""
+        props = WindowProperties()
+        props.setCursorHidden(True)
+        base.win.requestProperties(props)
 
     def showMouseCursor(self):
         """Hides mouse cursor in Panda3D"""
@@ -313,11 +313,11 @@ class World(DirectObject):
 
     def toggleMouseCursor(self):
         """shows or hides mouse cursor"""
-        self.cursorHidden = not self.cursorHidden
-        props = WindowProperties()
-        props.setCursorHidden(self.cursorHidden)
-        base.win.requestProperties(props)
-        return
+        oldProps = base.win.getProperties()
+        hidden = oldProps.getCursorHidden()
+        newProps = WindowProperties()
+        newProps.setCursorHidden(not hidden)
+        base.win.requestProperties(newProps)
 
     #=========================================================================================
     #========== CAMERA HANDLING ==============================================================
@@ -368,8 +368,11 @@ class World(DirectObject):
             new_wp.setFullscreen(False)
         else:
             new_wp.setFullscreen(True)
+        new_wp.setSize(1920,1080)
+        #new_wp.setUndecorated(True)
         base.win.requestProperties(new_wp)
-
+        print "Old properties: " + str(old_wp)
+        print "New properties: " + str(new_wp)
 
     def getCamera(self):
         return self.camera

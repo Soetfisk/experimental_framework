@@ -28,7 +28,6 @@ class SelectNumbers(Element):
         self.hideElement()
 
 
-
     def showElement(self):
         Element.showElement(self)
         self.resetGame()
@@ -145,7 +144,6 @@ class SelectNumbers(Element):
         self.sequenceText = sequenceText
         self.sequenceNP = textNP
 
-
     def unlockFunc(self):
         self.locked=False
 
@@ -199,7 +197,6 @@ class SelectNumbers(Element):
             if len(self.correctSequence) == 0:
                 taskMgr.doMethodLater(1.0,self.nextSizeFunc,'nextSizeFun')
 
-
     def printPuzzle(self):
         print self.checkResult()
 
@@ -251,7 +248,14 @@ class SelectNumbers(Element):
             self._recreateGrid(self.config.scale)
         else:
             self.makeGrid()
+        # set calibration in the eye-tracker (if eye-tracker is present)
+        try:
+            self.eyeTracker.loadAndSetCalibration(self.repeatRandom.variable)
+            self.eyeTracker.startTracking()
+        except:
+            pass
 
     def exitState(self):
         # super class leaveState
+        self.eyeTracker.stopTracking()
         Element.exitState(self)

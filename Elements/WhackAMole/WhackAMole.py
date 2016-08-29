@@ -61,7 +61,7 @@ class MoleHole(DirectObject.DirectObject):
         self.nodePaths['holeBottom'].setScale(1.0,1.0,0.5)
 
         self.nodePaths['back'].setPos(0.0,0.0,0.0)
-        self.nodePaths['mole'].setPos(0.0,0.0,-size)
+        self.nodePaths['mole'].setPos(0.0,0.0,-size - 0.05)
         self.nodePaths['mole'].setScale(0.5,1.0,0.5)
 
         self.moleHole.reparentTo(parent)
@@ -99,7 +99,7 @@ class MoleHole(DirectObject.DirectObject):
             return
         self.moving = True
         mole = self.nodePaths['mole']
-        l = LerpPosInterval(mole, 1, Vec3(0,0,-self.size), blendType='easeOut')
+        l = LerpPosInterval(mole, 1, Vec3(0,0,-self.size - 0.05), blendType='easeOut')
         l.setDoneEvent('moleDown')
         self.acceptOnce('moleDown', self.flipMoving, extraArgs=['down'])
         l.start()
@@ -177,7 +177,6 @@ class WhackAMole(Element):
         self.lastTime=time.time()
         self.randomWaitForUp = random.randint(1,2)
         self.waitForDown = self.config.int_waitForDown
-        taskMgr.add(self.hammerMouse, "hammerController", sort=2)
         self.hideElement()
 
     def hammerMouse(self, task):
@@ -199,6 +198,7 @@ class WhackAMole(Element):
         moleAnim = self.moles[self.moleUp].getMoleAnim()
         moleAnim.play(3,5)
         #self.hideMole()
+
     def moleThirdHit(self):
         if self.moleUp==None:
             return
@@ -237,10 +237,10 @@ class WhackAMole(Element):
                     # height in [ 1, -1 ]
                     # Eye-tracker is top left (0,0), bottom right (1,1)
                     self.lastCalibPointSent = calibPoint
-
-                    self.eyeTracker.addCalibrationPoint(calibPoint[0],
-                                                        calibPoint[1])
-
+                    # ONLY ADD CALIBRATION POINT ON THE FIRST HIT
+                    # TODO: If there was an error adding the calibration point, I do not really
+                    # TODO: know here if that happened!!!!
+                    self.eyeTracker.addCalibrationPoint(calibPoint[0], calibPoint[1])
                     self.moleFirstHit()
                 # this is the second hit
                 elif self.moleUpHitCount == 1:
@@ -265,14 +265,18 @@ class WhackAMole(Element):
     def enterState(self):
         Element.enterState(self)
         self.hudNP.show()
+        self.config.world.hideMouseCursor()
+        taskMgr.add(self.hammerMouse, "hammerController", sort=2)
         taskMgr.add(self.updateGame,'whack-a-mole')
         self.config.world.accept('moleUp', self.moleMoved,['up'])
         self.config.world.accept('moleDown', self.moleMoved,['down'])
         try:
-            pass
-            #self.eyeTracker.startCalibration()
-            #self.eyeTracker.startTracking()
-            pass
+            # save current calibration with participant id as normal calibration
+            # save is SYNCHRONOUS ON THE TOBII
+            self.eyeTracker.saveCalibration( str(self.config.world.participantId) + '_tobii' + '.cal' )
+            time.sleep(0.1)
+            # START IS ASYNC ON THE TOBII SIDE
+            self.eyeTracker.startCalibration()
         except Exception,e:
             print e
 
@@ -284,8 +288,8 @@ class WhackAMole(Element):
 
     def updateGame(self, task):
         if len(self.calibPoints)==0 and self.moleIsDown:
-            #self.sendMessage('calibrationFinished')
-            return task.cont
+            taskMgr.doMethodLater(2.0, self.sendMessage, 'calibration finished', extraArgs=['calibrationFinished'])
+            return task.done
         # if None it means there is no mole up
         elapsed = time.time()-self.lastTime
         if self.moleUp != None:
@@ -313,9 +317,11 @@ class WhackAMole(Element):
     def exitState(self):
         self.unregisterKeys()
         try:
-            #self.eyeTracker.stopCalibration()
+            self.config.world.showMouseCursor()
+            self.eyeTracker.stopCalibration()
+            time.sleep(1.0)
+            self.eyeTracker.saveCalibration( str(self.config.world.participantId) + '_mole' + '.cal' )
             #self.eyeTracker.stopTracking()
-            pass
         except Exception,e:
             print e
         Element.exitState(self)

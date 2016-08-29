@@ -17,8 +17,8 @@ CLIENT_MSG_ID = enum(
 	STOP_TRACKING   = 6,
     GET_STATUS      = 7,
     REM_LAST_CALIB_POINT = 8,
-    LOAD_CALIB = 9,
-    SAVE_CALIB = 10,
+    SAVE_CALIB = 9,
+    LOAD_CALIB = 10,
 )
 # message from Eyetracker Server to Client
 SERVER_MSG_ID = enum(
@@ -41,6 +41,9 @@ CLIENT_STATUS = enum(
     TRACKING = 1,
     NONE = 2
 )
+CLIENT_STATUS_STR = {CLIENT_STATUS.CALIBRATING:'CALIBRATING',
+                     CLIENT_STATUS.TRACKING:'TRACKING',
+                     CLIENT_STATUS.NONE:'NONE'}
 
 class EyeTrackerClient(Element):
     def __init__(self, **kwargs):
@@ -89,6 +92,7 @@ class EyeTrackerClient(Element):
         gazeNode.reparentTo(self.hudNP)
         gazeNode.setScale(0.1,1.0,0.1)
         gazeNode.setTransparency(1)
+        gazeNode.setAlphaScale(0.1)
         gazeNode.setTexture(gazeTex)
         gazeNode.setPos(-1.7,0,0)
         self.gazeNode = gazeNode
@@ -142,8 +146,8 @@ class EyeTrackerClient(Element):
         self.gazeMutex.acquire()
         self.gazeData.append((timestamp,x,y))
         # discard oldest, add new.
-        self.smoothSampleXY[0] +=  (-self.gazeData[-int(s+1)][1]/s) + (x/s)
-        self.smoothSampleXY[1] +=  (-self.gazeData[-int(s+1)][2]/s) + (y/s)
+        self.smoothSampleXY[0] +=(-self.gazeData[-int(s+1)][1]/s) + (x/s)
+        self.smoothSampleXY[1] +=(-self.gazeData[-int(s+1)][2]/s) + (y/s)
         self.gazeMutex.release()
 
     def startTracking(self):

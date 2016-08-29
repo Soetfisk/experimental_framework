@@ -23,16 +23,22 @@ class RepeatSequence(Element):
     def enterState(self):
         # super class enterState
         Element.enterState(self)
-        varName = self.config.variable
-        # FIRST TIME, THE KEY DOES NOT EXIST.
-        if varName not in self.config.world.globals.keys():
-            # take the list of values, save it, randomize if necessary.
-            self.values = self.config.values
+
+        # if the attribute values has not been defined, it means it is the first time we iterate in
+        # the loop
+        if (getattr(self, 'values',None) is None):
+            self.values = [ s.replace('$pid$', self.config.world.participantId) for s in self.config.values ]
             if self.config.random:
                 random.shuffle(self.values)
-        # ALWAYS DO THIS
+
+        #if varName not in self.config.world.globals.keys():
+            # take the list of values, save it, randomize if necessary.
+            # replace string $pid$ with real pid of the participant
+
         if len(self.values):
-            self.config.world.globals[varName] = self.values.pop()
+            # both names can be used "variable" or the value in the config file.
+            self.variable = self.values.pop()
+            setattr(self, self.config.variable, self.variable)
             self.sendMessage('repeat')
         else:
             self.sendMessage('end')

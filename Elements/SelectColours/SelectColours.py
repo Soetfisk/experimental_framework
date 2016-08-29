@@ -272,7 +272,11 @@ class SelectColours(Element):
             self._recreateGrid(self.config.scale)
         else:
             self.makeGrid()
+        # set calibration in the eye-tracker
+        self.eyeTracker.loadAndSetCalibration(self.repeatRandom.variable)
+        self.eyeTracker.startTracking()
 
     def exitState(self):
         # super class leaveState
+        self.eyeTracker.stopTracking()
         Element.exitState(self)

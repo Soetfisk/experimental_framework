@@ -9,12 +9,13 @@
 #"win-size":[1680, 1050], "cannon":-0.95,
 
 options = [
-"win-origin t",
-"win-size 1920 1080",
-"win-fixed-size t",
-"fullscreen f",
-"cursor-hidden f",
-"show-frame-rate-meter t",
+#"win-origin 0 0",
+"win-size 1919 1079",
+"win-fixed-size #f",
+"fullscreen #f",
+#"cursor-hidden #f",
+"show-frame-rate-meter #t",
 "framebuffer-multisample 1",
+"undecorated 1"
 "multisamples 4"
 ]

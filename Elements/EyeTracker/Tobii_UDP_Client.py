@@ -7,10 +7,6 @@ from ast import literal_eval
 from Utils.Debug import *
 from struct import *
 
-
-# @TODO Implement TCP client, protocol over TCP to connect to C Client,
-# @TODO
-# empty class
 class Tobii_UDP_Client(EyeTrackerClient):
     def __init__(self, **kwargs):
         """
@@ -27,11 +23,12 @@ class Tobii_UDP_Client(EyeTrackerClient):
         self.defaults["gazeDataIp"] = "127.0.0.1"
         self.defaults["gazeDataPort"] = 5432
 
-        # call constructor, which in turn calls Element constructor
+        # call EyeTrackerClient constructor, which in turn calls Element constructor
         super(Tobii_UDP_Client, self).__init__(**kwargs)
 
         # fill in some empty samples in case I am asked for samples right away
         self.clientStatus = CLIENT_STATUS.NONE
+        self.currentCalibration = 'unknown'
 
     def connectSockets(self):
 
@@ -53,12 +50,11 @@ class Tobii_UDP_Client(EyeTrackerClient):
         # so it is not really "connecting", just the lazy programmer...
         #self.udpSocket.bind( (self.config.serverIp, self.config.serverPort ) )
 
-        # create a task chain with ONE thread to listen for UDP messages
+        # this is a taskchain, it is not a task on its own. This name is passed when a
+        # task is created.
         taskMgr.setupTaskChain('listen_eyetracker', numThreads = 1, tickClock = None,
                        threadPriority = None , frameBudget = None,
                        frameSync = None, timeslicePriority = None)
-        # This task will listen for protocol messages from the server and also for
-        # gaze data in a single thread.
         self.seqNum = 0
 
     def toggleTracking(self):
@@ -68,36 +64,44 @@ class Tobii_UDP_Client(EyeTrackerClient):
             self.startTracking()
 
     def saveCalibration(self, filename):
-        notValidStates = [CLIENT_STATUS.CALIBRATING,CLIENT_STATUS.NONE]
-        if self.clientStatus in notValidStates:
-            printOut("You cannot save the calibration if the tracker is in any of ")
-            printOut(str(notValidStates))
+        calpath = os.getcwd() + '\\' + self.config.calfiles
+        if self.clientStatus != CLIENT_STATUS.NONE:
+            printOut("You cannot save the calibration if the tracker is not in NONE mode")
+            printOut(CLIENT_STATUS_STR[self.clientStatus])
             return
         else:
             msg = '' + pack('b',CLIENT_MSG_ID.SAVE_CALIB)
             # filename to save the calibration
-            msg += filename
+            msg += calpath + '\\' + filename
             self.udpServerSocket.send(msg)
             printOut("Saving calibration %s" % filename)
 
     def loadAndSetCalibration(self, filename):
-        notValidStates = [CLIENT_STATUS.CALIBRATING,CLIENT_STATUS.NONE]
-        if self.clientStatus in notValidStates:
-            printOut("You cannot save the calibration if the tracker is in any of ")
-            printOut(str(notValidStates))
+        """Load a calibration, unless it has already been loaded"""
+        if self.currentCalibration == filename:
+            printOut("Trying to set calibration already set: %s" %filename)
+            return
+
+        calpath = os.getcwd() + '\\' + self.config.calfiles
+        if self.clientStatus != CLIENT_STATUS.NONE:
+            printOut("You cannot load a new calibration if the tracker is not in NONE mode")
+            printOut(CLIENT_STATUS_STR[self.clientStatus])
             return
         else:
             msg = '' + pack('b',CLIENT_MSG_ID.LOAD_CALIB)
             # filename to load the calibration from
-            msg += filename
+            msg += calpath + '\\' + filename
             self.udpServerSocket.send(msg)
             printOut("Loading and setting calibration %s" % filename)
 
+            self.currentCalibration = filename
+
     def startTracking(self):
         if self.clientStatus != CLIENT_STATUS.NONE:
-            print "Client must be in NONE state to start tracking."
+            print "Client MUST be in NONE state to start tracking."
             return
 
+        self.framesWithNoMessages = 0
         msg = '' + pack('b',CLIENT_MSG_ID.START_TRACKING)
         self.udpServerSocket.send(msg)
         self.clientStatus = CLIENT_STATUS.TRACKING
@@ -109,6 +113,7 @@ class Tobii_UDP_Client(EyeTrackerClient):
             print "Client must be in TRACKING state to stop tracking."
             print "Client is in state: %d" % self.clientStatus
             return
+        self.framesWithNoMessages = 0
         msg = '' + pack('b',CLIENT_MSG_ID.STOP_TRACKING)
         taskMgr.remove( 'listenUdp' )
         self.udpServerSocket.send(msg)
@@ -192,6 +197,7 @@ class Tobii_UDP_Client(EyeTrackerClient):
 
                 data, addr = self.udpGazeSocket.recvfrom(192)
                 if len(data)>0:
+                    self.framesWithNoMessages = 0
                     gaze_data  = unpack('QBB' + 2*(3*'ddd' + 'dd'), data)
                     left2D = (gaze_data[-13],gaze_data[-12])
                     right2D = (gaze_data[-2], gaze_data[-1])
@@ -220,10 +226,13 @@ class Tobii_UDP_Client(EyeTrackerClient):
                     printOut("read something empty from UDP socket with Tobii_UDP_Client?",1)
 
             except socket.timeout,te:
-                # sleep 10 millisecond, this is a 30hz eye-tracker!
-                # print te
-                self.gazeLogger.logEvent("No gaze data available")
-                time.sleep(0.01)
+                # sleep 5 millisecond, this is a 30-60hz eye-tracker at best!
+                self.framesWithNoMessages += 1
+                if self.framesWithNoMessages > 30:
+                    printOut("No connection with the tracker, stop tracking!")
+                    self.stopTracking()
+                    return
+                time.sleep(0.005)
         else:
             printOut('executing listenUdp whilst not tracking ?!?!, this seems like a bug!',1)
         return Task.cont

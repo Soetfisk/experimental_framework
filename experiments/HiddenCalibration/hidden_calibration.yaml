@@ -10,7 +10,7 @@ elements:
    name: start
    color_background: (0.3,0.3,0.3,1)
    # send message timeout_start after 0.1
-   timeout: 0.1
+   timeout: 0.5
 
  - className: RepeatSequence
    # for each value, send message
@@ -20,7 +20,9 @@ elements:
    name: repeatRandom
    random: true
    variable: useCalibration
-   values: ['useTobii','useCustom']
+   # pid is replaced by participant id, 'current' and 'mole' are
+   # constants defined at WhackAMole.py
+   values: ['$pid$_tobii.cal','$pid$_mole.cal']
 
  - className: EmptyState
    name: end
@@ -140,12 +142,9 @@ elements:
    name: eyeTracker
    printGaze: True
    showGaze: False
-   smoothWindow: 10
+   smoothWindow: 1
+   calfiles: 'experiments\HiddenCalibration\calibrations'
    keys:
-   - key: t
-     callback: startTracking
-   - key: y
-     callback: stopTracking
    - key: k
      callback: toggleGaze
 
@@ -155,14 +154,15 @@ elements:
    color_background: (0.0,0.1,0.1,1)
    fname_image: 'common/images/gaze_circle.png'
    tuple_imageScale: (0.1,0.1)
-   tuple_points: [[0,0,0],[0,0,1],[1,0,0],[0.5,0.0,0.5]]
-   pointsDelay: 0
+   # position at (0,0,0) is added first by default so it starts from the center always.
+   tuple_points: [[-1.4,0,-0.9],[0,0,-0.9],[1.4,0,-0.9],[-1.4,0,0],[1.4,0,0],[-1.4,0,0.9],[0,0,0.9],[1.4,0,0.9]]
+   restDelay: 0.5
    randomPoints: True
    animate: True
-   secondsBetweenPoints: 2
+   speed: 1
    trackMouse: True
    trackEye: True
-   refsto: [eyeTracker]
+   refsto: [eyeTracker, repeatRandom]
    log: True
    logFilePath: 'experiments/HiddenCalibration/run'
 
@@ -176,7 +176,7 @@ elements:
  - module: WhackAMole
    className: WhackAMole
    name: whackAMole
-   fname_moleModel: Elements/WhackAMole/textures/mole.egg
+   fname_moleModel: Elements/WhackAMole/textures/mole2.egg
    fname_holeTop: Elements/WhackAMole/textures/tophole.png
    fname_holeBottom: Elements/WhackAMole/textures/botomhole.png
    fname_back: Elements/WhackAMole/textures/back.png
@@ -199,7 +199,7 @@ elements:
    gridHeight: 3
    # size of tile is in the range [0,2]
    #tileSizes: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
-   tileSizes: [ 0.3, 0.05]
+   tileSizes: [0.3, 0.05]
    margin: 1.1
    # smaller than 1 to make it smaller!
    textSize: 0.04
@@ -214,43 +214,46 @@ elements:
    gridHeight: 3
    margin: 1.1
    #tileSizes: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
-   tileSizes: [ 0.3, 0.05]
+   tileSizes: [0.3, 0.05]
    refsto: [eyeTracker,repeatRandom]
    log: True
    logFilePath: 'experiments/HiddenCalibration/run'
 
 transitions:
-
- - trans: 'start @ introText:timeout_start'
-# background elements
- - trans: 'introText @ consentForm:auto'
- - trans: 'consentForm @ userInfo:yesPressed'
- - trans: 'consentForm @ end:noPressed'
- - trans: 'userInfo @ colourBlindText:nextPressed'
- - trans: 'colourBlindText @ colourBlindCheck:auto'
- - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
- - trans: 'colourBlindCheck @ calibrateTobii:imageQueryOk'
- - trans: 'calibrateTobii @ eyeTracker:q'
- - trans: 'calibrateTobii @ whackIntroText: q'
- - trans: 'calibrateTobii @ mouseLog:q'
- # whackAMole saves current calibration to file
- # whackAMole calibrates again, and saves as well the
- # new calibration.
- - trans: 'whackIntroText @ whackAMole:auto'
-
- # loop part, through calibration methods
- - trans: 'whackAMole @ repeatRandom: auto'
- - trans: 'repeatRandom @ game1Intro : repeat'
- - trans: 'repeatRandom @ FinalScreen : end'
- - trans: 'game1Intro @ game1: auto'
- - trans: 'game1 @ game2Intro: end_game1'
- - trans: 'game2Intro @ game2: auto'
- - trans: 'game2 @ visualTargetIntro: end_game2'
- - trans: 'visualTargetIntro @ visualTarget: auto'
- # loop back to repeatRandom
- - trans: 'visualTarget @ repeatRandom : auto'
- - trans: 'FinalScreen @ end: timeout_FinalScreen'
- - trans: 'mouseLog @ end: timeout_FinalScreen'
- - trans: 'eyeTracker @ end:timeout_FinalScreen'
- - trans: 'colourBlindProblem @ end:auto'
+# - trans: 'start @ introText: timeout_start'
+ - trans: 'start @ introText: timeout_start'
+ - trans: 'introText @ visualTarget:auto'
+ - trans: 'visualTarget @ introText: 0'
+ - trans: 'introText @ end: 1'
+## background elements
+# - trans: 'introText @ consentForm:auto'
+# - trans: 'consentForm @ userInfo:yesPressed'
+# - trans: 'consentForm @ end:noPressed'
+# - trans: 'userInfo @ colourBlindText:nextPressed'
+# - trans: 'colourBlindText @ colourBlindCheck:auto'
+# - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
+# - trans: 'colourBlindCheck @ calibrateTobii:imageQueryOk'
+# - trans: 'calibrateTobii @ eyeTracker:q'
+# - trans: 'calibrateTobii @ whackIntroText: q'
+# - trans: 'calibrateTobii @ mouseLog:q'
+# # whackAMole saves current calibration to file
+# # whackAMole calibrates again, and saves as well the
+# # new calibration.
+# - trans: 'whackIntroText @ whackAMole:auto'
+# # loop part, through calibration methods
+# - trans: 'whackAMole @ repeatRandom: calibrationFinished'
+# - trans: 'repeatRandom @ game1Intro : repeat'
+# - trans: 'repeatRandom @ FinalScreen : end'
+# - trans: 'game1Intro @ game1: auto'
+# - trans: 'game1 @ game2Intro: end_game1'
+# - trans: 'game2Intro @ game2: auto'
+# - trans: 'game2 @ visualTargetIntro: end_game2'
+# - trans: 'visualTargetIntro @ visualTarget: auto'
+# # loop back to repeatRandom
+# # end_animation is triggered when the visual target stops moving...
+# - trans: 'visualTarget @ repeatRandom : end_animation'
+# - trans: 'FinalScreen @ end: timeout_FinalScreen'
+# - trans: 'mouseLog @ end: timeout_FinalScreen'
+# - trans: 'eyeTracker @ end:timeout_FinalScreen'
+# - trans: 'colourBlindProblem @ end:auto'
 
