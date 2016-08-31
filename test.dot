@@ -1,0 +1,29 @@
+digraph drawing {
+rankdir=LR;
+node [shape = circle];
+ start  ->  introText [ label = timeout_start ];
+ introText  ->  consentForm [ label = auto ];
+ consentForm  ->  userInfo [ label = yesPressed ];
+ consentForm  ->  end [ label = noPressed ];
+ userInfo  ->  colourBlindText [ label = nextPressed ];
+ colourBlindText  ->  colourBlindCheck [ label = auto ];
+ colourBlindCheck  ->  colourBlindProblem [ label = imageQueryBad ];
+ colourBlindCheck  ->  calibrateTobii [ label = imageQueryOk ];
+ calibrateTobii  ->  eyeTracker [ label = q ];
+ calibrateTobii  ->  whackIntroText [ label =  q ];
+ calibrateTobii  ->  mouseLog [ label = q ];
+ whackIntroText  ->  whackAMole [ label = auto ];
+ whackAMole  ->  repeatRandom [ label =  auto ];
+ repeatRandom  ->  game1Intro  [ label =  repeat ];
+ repeatRandom  ->  FinalScreen  [ label =  end ];
+ game1Intro  ->  game1 [ label =  auto ];
+ game1  ->  game2Intro [ label =  end_game1 ];
+ game2Intro  ->  game2 [ label =  auto ];
+ game2  ->  visualTargetIntro [ label =  end_game2 ];
+ visualTargetIntro  ->  visualTarget [ label =  auto ];
+ visualTarget  ->  repeatRandom  [ label =  auto ];
+ FinalScreen  ->  end [ label =  timeout_FinalScreen ];
+ mouseLog  ->  end [ label =  timeout_FinalScreen ];
+ eyeTracker  ->  end [ label = timeout_FinalScreen ];
+ colourBlindProblem  ->  end [ label = auto ];
+}
