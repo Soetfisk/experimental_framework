@@ -2,6 +2,8 @@ __author__ = 'francholi'
 
 
 def str2tuple(x):
+    """nasty hack to fix something about YAML conversion
+    that I do not remember now, but I will fix and remove this code."""
     if not isinstance(x,str):
         return x
     try:

@@ -27,7 +27,7 @@ class ScreenText(Element):
         # this defines:
         # self.sceneNP and self.hudNP
 
-        text = getattr(self.config, 'fname_message', None)
+        text = getattr(self.config, 'file message', None)
         if text is None:
             printOut("Missing reference to what text to display when building ScreenText!", 0)
             sys.exit()

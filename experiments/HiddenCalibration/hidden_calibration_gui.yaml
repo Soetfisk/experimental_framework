@@ -186,9 +186,9 @@ elements:
    fname_back: Elements/WhackAMole/textures/back.png
    fname_mole: Elements/WhackAMole/textures/mole_1.png
    fname_plainGrass: Elements/WhackAMole/textures/no_hole.jpg
-   int_gridSize: 8
-   int_moleCalibPoints: 6
-   int_waitForDown: 4
+   gridSize: 8
+   moleCalibPoints: 6
+   waitForDown: 4
    refsto: [eyeTracker]
    keys:
    - key: mouse1

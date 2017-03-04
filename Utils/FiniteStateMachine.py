@@ -6,11 +6,12 @@ from Utils import *
 FSM_RES = enum(FSM_KEY_ERROR=0, FSM_INCOMPLETE=1, FSM_OK=2)
 
 """
-This finiteStateMachine allows for concurrent
-states, so it is a bit more complex when transitioning
+This finiteStateMachine allows for CONCURRENT states,
+so it is a bit more complex when transitioning
 from one state to another
-The transitions are encoded as follows:
+The transitions in YAML are defined as follows:
 {'currentState':{'event':['dest1','dest2'] } }
+Meaning, from currentState I can go to dest1 and dest2 if 'event' happens
 """
 
 # splits a transition string into a tuple of strings (fromState,toState,event)

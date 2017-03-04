@@ -2,12 +2,15 @@
 import sys
 import time
 from time import ctime
+from multiprocessing import Process, Pipe
+import zmq
+import copy
 
 
 # config files are in yaml
 import yaml
 
-# utility to load options from file or strings
+# utility to load options from file (panda3d config files) or strings
 from pandac.PandaModules import loadPrcFileData
 # pandaConfig defines a list of options to setup Panda3D
 
@@ -15,7 +18,11 @@ import pandaConfig
 for o in pandaConfig.options:
     loadPrcFileData('', o)
 
+# basic finite state machine
 from Utils.FiniteStateMachine import *
+# In YamlTools I have a few functions that massage the YAML
+# files so I can use them in the pyqtgraph for the property
+# editor
 from Utils.YamlTools import fixTuples
 
 # basic Panda3D imports
@@ -39,22 +46,30 @@ from Utils.Utils import *
 from Keyboard import Keyboard
 
 class World(DirectObject):
-    def __init__(self, experiment):
+    def __init__(self, experiment_file = ''):
         """
-        empty constructor
-        just calls initialSetup(experiment)
+        create socket and a task to wait for remote commands,
+        or start right away an experiment from a file.
         """
-        if experiment:
-            self.setNewExperiment(experiment)
-
-    def testOne(self):
-        test = {
-            'className':'ScreenText',
-            'name':'singleScreenText',
-            'plain_text':'PilotData/finalText.txt'
-        }
-        self.cleanSimulation()
-        self.initialSetup(test)
+        if experiment_file != '':
+            try:
+                self.experiment = yaml.load(open(experiment_file))
+                self.restartSimulation()
+            except IOError, e:
+                printOut("EXPERIMENT FILE NOT FOUND. TERMINATING",0)
+                self.quit()
+        else:
+            self.experiment = ''
+            self.empty_experiment = yaml.load(open("experiments/exp_empty.yaml"))
+            self.context = zmq.Context()
+            self.commands_receiver = self.context.socket(zmq.REP)
+            self.commands_receiver.bind("tcp://127.0.0.1:7778")
+            self.msgHandlers = {
+                'testElement': self.testElement,
+            }
+            # launch a task to listen for messages
+            base.taskMgr.add(self.pollZMQ, "poll messages")
+            return
 
     def cleanSimulation(self):
         # clean up everything
@@ -65,27 +80,27 @@ class World(DirectObject):
 
     def restartSimulation(self):
         self.cleanSimulation()
-        self.initialSetup()
+        self.initialSetup(self.experiment)
 
-    def setNewExperiment(self, fileName):
-        self.experiment = fileName
+    def testElement(self, yamlElementString):
+        """Take a SINGLE element, and adds elements start end, and transitions
+        start -> elementToTest -> end with the event 'Esc' to move forward"""
+        yamlElement = yaml.load(yamlElementString)
+        print yamlElement.keys()
+        experiment = copy.deepcopy(self.empty_experiment)
+        experiment['elements'].append(yamlElement)
+        for t in experiment['transitions']:
+            t['trans'] = t['trans'].replace('dummy',yamlElement['name'])
+        self.experiment = experiment
+        print self.experiment
         self.restartSimulation()
 
-    # singleConfig can be a single module/element description, in dictionary form.
-    def initialSetup(self, singleConfig = ''):
-        if singleConfig:
-            experiment = yaml.load(open("experiments/exp_empty.yaml"))
-            experiment['elements'].append(singleConfig)
-            for t in experiment['transitions']:
-                t['trans'] = t['trans'].replace('dummy',singleConfig['name'])
-        else:
-            experiment = yaml.load(open(self.experiment))
+    def initialSetup(self, experiment):
 
-        experiment = fixTuples(experiment)
+        yaml_experiment = fixTuples(experiment)
 
         # register global values for use by any other part of the simulation
-        self.globals = experiment.get('globals',{})
-
+        self.globals = yaml_experiment.get('globals',{})
         # first timestamp since the whole application started
         self.baseTime = time.time()
 
@@ -115,7 +130,7 @@ class World(DirectObject):
         self.generalSetup()
 
         # build FSM of the experiment
-        self.fsm = self.setupFSM(experiment)
+        self.fsm = self.setupFSM(yaml_experiment)
         if (not self.fsm.isValid()):
             printOut("Invalid FSM")
             self.quit()
@@ -539,5 +554,26 @@ class World(DirectObject):
             print e
         finally:
             # sleep 1 second of grace
+            if getattr(self, 'context', False):
+                self.commands_receiver.close()
             time.sleep(1)
             sys.exit()
+
+    def pollZMQ(self,t):
+        try:
+            msg = self.commands_receiver.recv_string(flags=zmq.NOBLOCK)
+            if len(msg) > 0:
+                # answer back
+                self.commands_receiver.send_string('OK')
+                i = msg.find(' ')
+                # find command, use dictionary to call appropriate function with the rest as a string.
+                self.msgHandlers[msg[:i]](msg[i+1:])
+        except Exception, e:
+            pass
+            # print e
+        t.delayTime = 0.1
+        # printOut('running...' + str(t.time))
+        return t.again
+
+
+
