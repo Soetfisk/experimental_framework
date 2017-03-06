@@ -51,12 +51,12 @@ class Element(object):
         dictionary = {}
         # configuration can be in the experiment file or in a special file
         # just for this element.
-        if 'file config' in kwargs:
+        if 'file_config' in kwargs:
             try:
-                dictionary = yaml.load(open(kwargs['file config']))
+                dictionary = yaml.load(open(kwargs['file_config']))
             except Exception, e:
                 print e
-                printOut("Fatal error loading config file " + kwargs['file config'], 0)
+                printOut("Fatal error loading config file " + kwargs['file_config'], 0)
                 kwargs['world'].quit()
 
         # ALL atributes are under "self.config"

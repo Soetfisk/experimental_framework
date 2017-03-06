@@ -1,0 +1,19 @@
+settings:
+    formId: consentForm
+    scale: 0.06
+    labelcolour: [1.0,0.5,0.5,1.0]
+    title: 'Consent Form'
+    consentText: 'This experiment is part of a research conducted by
+     XXXXX. The information you
+     may supply and that which may be collected from the study will only
+     be accessible by authorised personnel involved in the research.
+
+
+     No personal data will be collected.
+
+
+     You can withdraw from the experiment at any time, and you do not have
+     to give any explanation of why.
+
+
+     Do you agree and accept to participate in the experiment ?'

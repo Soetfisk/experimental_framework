@@ -4,7 +4,7 @@
 timeout: float
 # configuration file which can contain further options to load into
 # the element.
-file config: filename
+file_config: filename
 # list of keys and callbacks with arguments
 dict keys: [{ value: string, callback: methodFromClass, args: listStrings }]
 

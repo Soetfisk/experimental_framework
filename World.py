@@ -2,13 +2,14 @@
 import sys
 import time
 from time import ctime
-from multiprocessing import Process, Pipe
-import zmq
+# from multiprocessing import Process, Pipe
+# import zmq
 import copy
-
 
 # config files are in yaml
 import yaml
+
+import tkFileDialog
 
 # utility to load options from file (panda3d config files) or strings
 from pandac.PandaModules import loadPrcFileData
@@ -45,13 +46,15 @@ from Utils.Utils import *
 # simple keyboard class that wraps around Panda messenger
 from Keyboard import Keyboard
 
+# from threading import Thread
+
 class World(DirectObject):
     def __init__(self, experiment_file = ''):
         """
         create socket and a task to wait for remote commands,
         or start right away an experiment from a file.
         """
-        if experiment_file != '':
+        if experiment_file not in ['', 'online']:
             try:
                 self.experiment = yaml.load(open(experiment_file))
                 self.restartSimulation()
@@ -61,15 +64,19 @@ class World(DirectObject):
         else:
             self.experiment = ''
             self.empty_experiment = yaml.load(open("experiments/exp_empty.yaml"))
-            self.context = zmq.Context()
-            self.commands_receiver = self.context.socket(zmq.REP)
-            self.commands_receiver.bind("tcp://127.0.0.1:7778")
-            self.msgHandlers = {
-                'testElement': self.testElement,
-            }
+            #self.context = zmq.Context()
+            #self.commands_receiver = self.context.socket(zmq.REP)
+            #self.commands_receiver.bind("tcp://127.0.0.1:7778")
+            #self.msgHandlers = {
+            #    'testElement': self.testElement,
+            #}
             # launch a task to listen for messages
-            base.taskMgr.add(self.pollZMQ, "poll messages")
+            #base.taskMgr.add(self.pollZMQ, "poll messages")
+            self.setupGUI()
             return
+
+    def setupGUI(self):
+        pass
 
     def cleanSimulation(self):
         # clean up everything

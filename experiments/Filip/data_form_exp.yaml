@@ -1,0 +1,65 @@
+globals:
+ # all logFiles created automatically by Element will go into this folder
+ logFilePath: 'experiments/Filip/run'
+
+elements:
+####################################
+# Initial and final states in the FSM.
+####################################
+ - className: EmptyState
+   name: start
+   color_background: (0.3,0.3,0.3,1)
+   # send message timeout_start after 0.1
+   # message is defined in the FSM at the bottom
+   timeout: 1.0
+
+ - className: EmptyState
+   name: end
+
+ # introduction to the experiment
+ - className: ScreenText
+   file_message: experiments/Filip/data/introText.txt
+   name: introText
+
+ - module: DataForm
+   className: ConsentForm
+   name: consentForm
+   file_config: experiments/Filip/data/consentForm.yaml
+
+ - className: DataForm
+   name: userInfo
+   settings:
+    outfiledir: experiments/Filip/run
+    outfileprefix: userdata
+    formId: userdata
+    scale: 0.06
+    maxlabel: 10
+    color_label: (1.0,0.5,0.5,1.0)
+    title: 'Please provide us with some information about you:'
+   # form description
+   input:
+    - label: Gender
+      type: Option
+      tuple_values: ("Male","Female")
+    - label: Do you have vision problems
+      type: Option
+      tuple_values: ("No","Yes")
+    - label: Do you have experience playing games
+      type: Option
+      tuple_values: ("Yes","No")
+    - label: Age
+      type: TextEntry
+      default: 0
+
+# not template yet...
+# - module: EventLogger
+#   className: EventLogger
+#   name: eventLogger
+
+transitions:
+ - trans: 'start @ introText: timeout_start'
+ - trans: 'introText @ consentForm: auto'
+ - trans: 'consentForm @ userInfo:yesPressed'
+ - trans: 'consentForm @ end:noPressed'
+ - trans: 'userInfo @ end: nextPressed'
+
