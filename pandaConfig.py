@@ -10,12 +10,12 @@
 
 options = [
 #"win-origin 0 0",
-"win-size 1919 1079",
+"win-size 1024 768",
 "win-fixed-size #f",
 "fullscreen #f",
-#"cursor-hidden #f",
+"sync-video 1",
+# "cursor-hidden #f",
 "show-frame-rate-meter #t",
-"framebuffer-multisample 1",
-"undecorated 1"
-"multisamples 4"
+# "undecorated 1"
+"multisamples 4",
 ]

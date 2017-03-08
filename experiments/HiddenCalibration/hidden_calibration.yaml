@@ -222,6 +222,7 @@ elements:
 transitions:
 # - trans: 'start @ introText: timeout_start'
  - trans: 'start @ introText: timeout_start'
+# - trans: 'introText @ end: auto'
  - trans: 'introText @ visualTarget:auto'
  - trans: 'visualTarget @ introText: 0'
  - trans: 'introText @ end: 1'

@@ -9,8 +9,6 @@ import copy
 # config files are in yaml
 import yaml
 
-import tkFileDialog
-
 # utility to load options from file (panda3d config files) or strings
 from pandac.PandaModules import loadPrcFileData
 # pandaConfig defines a list of options to setup Panda3D
@@ -29,6 +27,12 @@ from Utils.YamlTools import fixTuples
 # basic Panda3D imports
 from direct.showbase.DirectObject import DirectObject
 from direct.gui.OnscreenText import OnscreenText
+from direct.gui.DirectScrolledList import DirectScrolledList
+from direct.gui.DirectButton import DirectButton
+from direct.gui.DirectLabel import DirectLabel
+from direct.gui.DirectOptionMenu import DirectOptionMenu
+from direct.gui.DirectOptionMenu import DirectOptionMenu
+
 from panda3d.core import TextNode
 from panda3d.core import WindowProperties
 import direct.directbase.DirectStart
@@ -48,16 +52,21 @@ from Keyboard import Keyboard
 
 # from threading import Thread
 
+
+
 class World(DirectObject):
     def __init__(self, experiment_file = ''):
         """
         create socket and a task to wait for remote commands,
         or start right away an experiment from a file.
         """
-        if experiment_file not in ['', 'online']:
+        if experiment_file not in ['']:
             try:
                 self.experiment = yaml.load(open(experiment_file))
                 self.restartSimulation()
+                self.accept('r', self.restartSimulation)
+                self.showElements()
+
             except IOError, e:
                 printOut("EXPERIMENT FILE NOT FOUND. TERMINATING",0)
                 self.quit()
@@ -72,11 +81,8 @@ class World(DirectObject):
             #}
             # launch a task to listen for messages
             #base.taskMgr.add(self.pollZMQ, "poll messages")
-            self.setupGUI()
+            # self.setupGUI()
             return
-
-    def setupGUI(self):
-        pass
 
     def cleanSimulation(self):
         # clean up everything
@@ -88,6 +94,41 @@ class World(DirectObject):
     def restartSimulation(self):
         self.cleanSimulation()
         self.initialSetup(self.experiment)
+
+
+    def showElements(self):
+        buttons = []
+        for e in self.elements.keys():
+            buttons.append ( DirectButton(text = (e.upper(),e,e,e), text_scale=0.1, borderWidth = (0.01, 0.01), relief=2))
+
+        temp = [ b.getWidth() for b in buttons ]
+        maxWidth = max(temp)
+
+        numItemsVisible = 8
+        itemHeight = 0.12
+
+        myScrolledList = DirectScrolledList(
+            decButton_pos= (maxWidth / 2.0, 0, 0.53),
+            decButton_text = "Dec",
+            decButton_text_scale = 0.04,
+            decButton_borderWidth = (0.005, 0.005),
+
+            incButton_pos= (maxWidth / 2.0, 0, -0.59),
+            incButton_text = "Inc",
+            incButton_text_scale = 0.04,
+            incButton_borderWidth = (0.005, 0.005),
+
+            frameSize = (-maxWidth / 2.0 - 0.05, maxWidth / 2.0 + 0.05, -0.65, 0.59),
+            frameColor = (1,0,0,0.5),
+            pos = (-0.9, 0, 0.5),
+            scale = 0.6,
+            items = buttons,
+            numItemsVisible = 9,
+            forceHeight = itemHeight,
+            itemFrame_frameSize = (-maxWidth / 2.0 - 0.03, maxWidth / 2.0 + 0.03, -0.95, 0.1),
+            #itemFrame_frameSize = (0, 4, -0.95, 0.1),
+            itemFrame_pos = (0.0, 0, 0.4),
+            )
 
     def testElement(self, yamlElementString):
         """Take a SINGLE element, and adds elements start end, and transitions

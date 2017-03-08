@@ -117,7 +117,7 @@ class VisualTarget(Element):
         mouseX,mouseY = (0.0,0.0)
         eyeX,eyeY = (0,0)
         pos = self.imgNode.getPos()
-        if self.config.trackMouse:
+        if self.config.trackMouse and base.mouseWatcherNode.hasMouse():
             mouseX,mouseY = map(float,base.mouseWatcherNode.getMouse())
         if self.config.trackEye:
             try:
