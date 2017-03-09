@@ -1,5 +1,5 @@
 # python imports
-import sys
+import sys, os
 import time
 from time import ctime
 # from multiprocessing import Process, Pipe
@@ -10,7 +10,7 @@ import copy
 import yaml
 
 # utility to load options from file (panda3d config files) or strings
-from pandac.PandaModules import loadPrcFileData
+from pandac.PandaModules import *
 # pandaConfig defines a list of options to setup Panda3D
 
 import pandaConfig
@@ -32,6 +32,9 @@ from direct.gui.DirectButton import DirectButton
 from direct.gui.DirectLabel import DirectLabel
 from direct.gui.DirectOptionMenu import DirectOptionMenu
 from direct.gui.DirectOptionMenu import DirectOptionMenu
+
+from ContextMenu import ScrolledButtonsList
+from ContextMenu import PopupMenu
 
 from panda3d.core import TextNode
 from panda3d.core import WindowProperties
@@ -60,12 +63,17 @@ class World(DirectObject):
         create socket and a task to wait for remote commands,
         or start right away an experiment from a file.
         """
+        os.chdir(sys.path[0])
+        modelsPath=filter(lambda p: p.getBasename().find('models')>-1, [getModelPath().getDirectory(i) for i in range(getModelPath().getNumDirectories())])
+        getModelPath().appendPath(modelsPath[0].getFullpath()+'/maps')
+
         if experiment_file not in ['']:
             try:
                 self.experiment = yaml.load(open(experiment_file))
                 self.restartSimulation()
                 self.accept('r', self.restartSimulation)
-                self.showElements()
+                self.createContextMenuElements()
+                self.accept('t', self.menu.toggleVisibility)
 
             except IOError, e:
                 printOut("EXPERIMENT FILE NOT FOUND. TERMINATING",0)
@@ -96,39 +104,110 @@ class World(DirectObject):
         self.initialSetup(self.experiment)
 
 
-    def showElements(self):
-        buttons = []
-        for e in self.elements.keys():
-            buttons.append ( DirectButton(text = (e.upper(),e,e,e), text_scale=0.1, borderWidth = (0.01, 0.01), relief=2))
+    def elementsScroll(self, offset):
+        print offset
+        #self.elementsScrollList.scrollBy(offset)
 
-        temp = [ b.getWidth() for b in buttons ]
-        maxWidth = max(temp)
+    def createContextMenuElements(self):
+        menu = ScrolledButtonsList( parent=None, # attach to this parent node
+                                    frameSize=(.8,1.2), buttonTextColor=(1,1,1,1),
+                                    font=None, itemScale=.045, itemTextScale=1, itemTextZ=0,
+                                    # font=transMtl, itemScale=.05, itemTextScale=1, itemTextZ=0,
+                                    command=self.cmElementClicked, # user defined method, executed when a node get selected,
+                                    # receiving extraArgs (which passed to addItem)
+                                    contextMenu=self.cmElementRightClicked, # user defined method, executed when a node right-clicked,
+                                    # receiving extraArgs (which passed to addItem)
+                                    autoFocus=0, # initial auto view-focus on newly added item
+                                    colorChange=1,
+                                    colorChangeDuration=.7,
+                                    newItemColor=(0,1,0,1),
+                                    rolloverColor=(1,.8,.2,1),
+                                    suppressMouseWheel=1,  # 1 : blocks mouse wheel events from being sent to all other objects.
+                                                             #     You can scroll the window by putting mouse cursor
+                                                             #     inside the scrollable window.
+                                                             # 0 : does not block mouse wheel events from being sent to all other objects.
+                                                             #     You can scroll the window by holding down the modifier key
+                                                             #     (defined below) while scrolling your wheel.
+                                    modifier='control'  # shift/control/alt
+                                    )
+        self.menu = menu
+        self.menu.addItem("test 1")
+        self.menu.addItem("test 2")
+        self.menu.addItem("test 3")
+        self.menu.addItem("test 4")
+        self.menu.addItem("test 5")
+        self.menu.addItem("test 6")
+        self.menu.hide()
 
-        numItemsVisible = 8
-        itemHeight = 0.12
+    def cmElementClicked(self, item, index, button):
+        print "Clicked:", index, button
 
-        myScrolledList = DirectScrolledList(
-            decButton_pos= (maxWidth / 2.0, 0, 0.53),
-            decButton_text = "Dec",
-            decButton_text_scale = 0.04,
-            decButton_borderWidth = (0.005, 0.005),
+    def dothis(self, argument):
+        print 'dothis', argument
 
-            incButton_pos= (maxWidth / 2.0, 0, -0.59),
-            incButton_text = "Inc",
-            incButton_text_scale = 0.04,
-            incButton_borderWidth = (0.005, 0.005),
-
-            frameSize = (-maxWidth / 2.0 - 0.05, maxWidth / 2.0 + 0.05, -0.65, 0.59),
-            frameColor = (1,0,0,0.5),
-            pos = (-0.9, 0, 0.5),
-            scale = 0.6,
-            items = buttons,
-            numItemsVisible = 9,
-            forceHeight = itemHeight,
-            itemFrame_frameSize = (-maxWidth / 2.0 - 0.03, maxWidth / 2.0 + 0.03, -0.95, 0.1),
-            #itemFrame_frameSize = (0, 4, -0.95, 0.1),
-            itemFrame_pos = (0.0, 0, 0.4),
+    def cmElementRightClicked(self, item, index, button):
+        print item,index,button
+        p = PopupMenu(
+            items=(
+            ('Test', 'common/images/controller.png', self.testElement,'this'),
+            0, # separator
+            ('Reload (r)', 'common/images/reload.png', self.testElement,'this'),
+            #('do that', 0, (
+            #    ('submenu 1', 0, lambda:0),
+            #    ('submenu 2', 0, lambda:0)
+            #)),
+            #('disabled option',0,[])
+            ),
             )
+
+
+#  def showElements(self):
+#       buttons = []
+#       for e in self.elements.keys():
+#           buttons.append ( DirectButton(text = ([e.upper()]*4), text_scale=0.1, borderWidth = (0.01, 0.01), relief=2))
+
+#       for e in self.elements.keys():
+#           buttons.append ( DirectButton(text = ([e.upper()]*4), text_scale=0.1, borderWidth = (0.01, 0.01), relief=2))
+#       for e in self.elements.keys():
+#           buttons.append ( DirectButton(text = ([e.upper()]*4), text_scale=0.1, borderWidth = (0.01, 0.01), relief=2))
+#       for e in self.elements.keys():
+#           buttons.append ( DirectButton(text = ([e.upper()]*4), text_scale=0.1, borderWidth = (0.01, 0.01), relief=2))
+#       for e in self.elements.keys():
+#           buttons.append ( DirectButton(text = ([e.upper()]*4), text_scale=0.1, borderWidth = (0.01, 0.01), relief=2))
+#       for e in self.elements.keys():
+#           buttons.append ( DirectButton(text = ([e.upper()]*4), text_scale=0.1, borderWidth = (0.01, 0.01), relief=2))
+#       for e in self.elements.keys():
+#           buttons.append ( DirectButton(text = ([e.upper()]*4), text_scale=0.1, borderWidth = (0.01, 0.01), relief=2))
+#       temp = [ b.getWidth() for b in buttons ]
+#       maxWidth = max(temp)
+
+#       numItemsVisible = 8
+#       itemHeight = 0.12
+
+#       self.elementsScrollList = DirectScrolledList(
+#           decButton_pos= (maxWidth / 2.0, 0, 0.53),
+#           decButton_text = "Dec",
+#           decButton_text_scale = 0.04,
+#           decButton_borderWidth = (0.005, 0.005),
+
+#           incButton_pos= (maxWidth / 2.0, 0, -0.59),
+#           incButton_text = "Inc",
+#           incButton_text_scale = 0.04,
+#           incButton_borderWidth = (0.005, 0.005),
+
+#           frameSize = (-maxWidth / 2.0 - 0.05, maxWidth / 2.0 + 0.05, -0.65, 0.59),
+#           frameColor = (1,0,0,0.5),
+#           pos = (-0.9, 0, 0.5),
+#           scale = 0.6,
+#           items = buttons,
+#           numItemsVisible = numItemsVisible,
+#           forceHeight = itemHeight,
+#           itemFrame_frameSize = (-maxWidth / 2.0 - 0.03, maxWidth / 2.0 + 0.03, -0.95, 0.1),
+#           #itemFrame_frameSize = (0, 4, -0.95, 0.1),
+#           itemFrame_pos = (0.0, 0, 0.4),
+#           )
+#       self.accept('wheel_down', self.elementsScroll, extraArgs=[1])
+#       self.accept('wheel_up', self.elementsScroll, extraArgs=[-1])
 
     def testElement(self, yamlElementString):
         """Take a SINGLE element, and adds elements start end, and transitions
