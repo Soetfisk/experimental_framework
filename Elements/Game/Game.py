@@ -3,12 +3,8 @@ from time import ctime
 # game imports
 from targetGuide import targetGuide
 from pointsHUD import pointsHUD
-from Logger import Logger
-from PositionGenerator import PositionGenerator
 from Parachute import *
-from LodManager import *
 from Elements.Element.Element import *
-import random
 
 from Utils.Debug import printOut
 

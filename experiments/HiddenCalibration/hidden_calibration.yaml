@@ -8,7 +8,7 @@ elements:
 ####################################
  - className: EmptyState
    name: start
-   color_background: (0.3,0.3,0.3,1)
+   color_background: (0.3,0.3,0.4,1)
    # send message timeout_start after 0.1
    timeout: 0.5
 
@@ -25,6 +25,7 @@ elements:
    values: ['$pid$_tobii.cal','$pid$_mole.cal']
 
  - className: EmptyState
+   color_background: (0.3,0.3,0.4,1)
    name: end
 
  - className: MouseLogger
@@ -36,25 +37,30 @@ elements:
 
  # introduction to the experiment
  - className: ScreenText
-   file message: experiments/HiddenCalibration/data/introExperiment.txt
+   file_message: experiments/HiddenCalibration/data/introExperiment.txt
+   color_background: (0.3,0.3,0.4,1)
    name: introText
 
  - className: ScreenText
-   file message: experiments/HiddenCalibration/data/visualTargetIntro.txt
+   file_message: experiments/HiddenCalibration/data/visualTargetIntro.txt
+   color_background: (0.3,0.3,0.4,1)
    name: visualTargetIntro
 
  - className: ScreenText
-   file message: experiments/HiddenCalibration/data/calibrateTobii.txt
+   file_message: experiments/HiddenCalibration/data/calibrateTobii.txt
+   color_background: (0.3,0.3,0.4,1)
    name: calibrateTobii
 
  - module: DataForm
    className: ConsentForm
    name: consentForm
-   file config: experiments/HiddenCalibration/data/consentForm.yaml
+   color_background: (0.3,0.3,0.4,1)
+   file_config: experiments/HiddenCalibration/data/consentForm.yaml
 
  - className: ScreenText
    name: game1Intro
-   file message: experiments/HiddenCalibration/data/game1Intro.txt
+   color_background: (0.3,0.3,0.4,1)
+   file_message: experiments/HiddenCalibration/data/game1Intro.txt
    keys:
     - key: n
       callback: sendMessage
@@ -62,7 +68,8 @@ elements:
 
  - className: ScreenText
    name: game2Intro
-   file message: experiments/HiddenCalibration/data/game2Intro.txt
+   color_background: (0.3,0.3,0.4,1)
+   file_message: experiments/HiddenCalibration/data/game2Intro.txt
    keys:
     - key: n
       callback: sendMessage
@@ -70,7 +77,8 @@ elements:
 
  - className: ScreenText
    name: whackIntroText
-   file message: experiments/HiddenCalibration/data/whackIntroText.txt
+   color_background: (0.3,0.3,0.4,1)
+   file_message: experiments/HiddenCalibration/data/whackIntroText.txt
    keys:
     - key: n
       callback: sendMessage
@@ -78,9 +86,10 @@ elements:
 
  - className: ScreenText
    name: FinalScreen
+   color_background: (0.3,0.3,0.4,1)
    # send message FinalScreen_timeout after 1 second
    timeout: 1.0
-   file message: experiments/HiddenCalibration/data/finalText.txt
+   file_message: experiments/HiddenCalibration/data/finalText.txt
    keys:
     - key: q
       callback: sendMessage
@@ -88,20 +97,22 @@ elements:
 
  - className: ScreenText
    name: colourBlindText
-   file message: experiments/HiddenCalibration/data/colourBlindText.txt
+   color_background: (0.3,0.3,0.4,1)
+   file_message: experiments/HiddenCalibration/data/colourBlindText.txt
    # example defining the keybindings directly here
 
  - className: ScreenText
    name: colourBlindProblem
+   color_background: (0.3,0.3,0.4,1)
    # the LAST element is the option selected now, which has to be in the list
    #option_level: ('easy','hard','easy')
-   file message: experiments/HiddenCalibration/data/colourBlindProblem.txt
+   file_message: experiments/HiddenCalibration/data/colourBlindProblem.txt
 
 # Display ishihara test, expects an exact number as an answer.
  - module: FullScreenImage
    className: ImageQuery
    name: colourBlindCheck
-   file imageNameStr: experiments/HiddenCalibration/data/colourblind/%d.png
+   file_imageNameStr: experiments/HiddenCalibration/data/colourblind/%d.png
    #tuple_imageStrArgs: (2,3,6,42,45,74,97)
    tuple_imageStrArgs: (2)
    #tuple_imageAnswers: (2,3,6,42,45,74,97)
@@ -114,13 +125,14 @@ elements:
 
  - className: DataForm
    name: userInfo
+   color_background: (0.3,0.3,0.4,1)
    settings:
     outfiledir: run
     outfileprefix: userdata
     formId: userdata
     scale: 0.06
     maxlabel: 10
-    color_label: (1.0,0.5,0.5,1.0)
+    color_label: (1.0,1.0,0.3,1.0)
     title: 'Please provide us with some information about you:'
    # form description
    input:
@@ -220,41 +232,36 @@ elements:
    logFilePath: 'experiments/HiddenCalibration/run'
 
 transitions:
-# - trans: 'start @ introText: timeout_start'
- - trans: 'start @ introText: timeout_start'
-# - trans: 'introText @ end: auto'
- - trans: 'introText @ visualTarget:auto'
- - trans: 'visualTarget @ introText: 0'
- - trans: 'introText @ end: 1'
-## background elements
-# - trans: 'introText @ consentForm:auto'
-# - trans: 'consentForm @ userInfo:yesPressed'
-# - trans: 'consentForm @ end:noPressed'
-# - trans: 'userInfo @ colourBlindText:nextPressed'
-# - trans: 'colourBlindText @ colourBlindCheck:auto'
-# - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
-# - trans: 'colourBlindCheck @ calibrateTobii:imageQueryOk'
-# - trans: 'calibrateTobii @ eyeTracker:q'
-# - trans: 'calibrateTobii @ whackIntroText: q'
-# - trans: 'calibrateTobii @ mouseLog:q'
+ - trans: 'start @ introText: auto'
+ - trans: 'introText @ consentForm:auto'
+ - trans: 'consentForm @ userInfo:yesPressed'
+ - trans: 'consentForm @ end:noPressed'
+
+ - trans: 'userInfo @ colourBlindText:nextPressed'
+ - trans: 'colourBlindText @ colourBlindCheck:auto'
+ - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
+ - trans: 'colourBlindCheck @ calibrateTobii:imageQueryOk'
+ - trans: 'calibrateTobii @ eyeTracker:q'
+ - trans: 'calibrateTobii @ whackIntroText: q'
+ - trans: 'calibrateTobii @ mouseLog:q'
 # # whackAMole saves current calibration to file
 # # whackAMole calibrates again, and saves as well the
 # # new calibration.
-# - trans: 'whackIntroText @ whackAMole:auto'
+ - trans: 'whackIntroText @ whackAMole:auto'
 # # loop part, through calibration methods
-# - trans: 'whackAMole @ repeatRandom: calibrationFinished'
-# - trans: 'repeatRandom @ game1Intro : repeat'
-# - trans: 'repeatRandom @ FinalScreen : end'
-# - trans: 'game1Intro @ game1: auto'
-# - trans: 'game1 @ game2Intro: end_game1'
-# - trans: 'game2Intro @ game2: auto'
-# - trans: 'game2 @ visualTargetIntro: end_game2'
-# - trans: 'visualTargetIntro @ visualTarget: auto'
+ - trans: 'whackAMole @ repeatRandom: calibrationFinished'
+ - trans: 'repeatRandom @ game1Intro : repeat'
+ - trans: 'repeatRandom @ FinalScreen : end'
+ - trans: 'game1Intro @ game1: auto'
+ - trans: 'game1 @ game2Intro: end_game1'
+ - trans: 'game2Intro @ game2: auto'
+ - trans: 'game2 @ visualTargetIntro: end_game2'
+ - trans: 'visualTargetIntro @ visualTarget: auto'
 # # loop back to repeatRandom
 # # end_animation is triggered when the visual target stops moving...
-# - trans: 'visualTarget @ repeatRandom : end_animation'
-# - trans: 'FinalScreen @ end: timeout_FinalScreen'
-# - trans: 'mouseLog @ end: timeout_FinalScreen'
-# - trans: 'eyeTracker @ end:timeout_FinalScreen'
-# - trans: 'colourBlindProblem @ end:auto'
+ - trans: 'visualTarget @ repeatRandom : end_animation'
+ - trans: 'FinalScreen @ end: timeout_FinalScreen'
+ - trans: 'mouseLog @ end: timeout_FinalScreen'
+ - trans: 'eyeTracker @ end:timeout_FinalScreen'
+ - trans: 'colourBlindProblem @ end:auto'
 

@@ -27,7 +27,7 @@ class SideBySideImage(Element):
         urlB = getattr(self,'s_urlB',None)
         if (urlA is None or urlB is None):
             print "Missing references of images to compare"
-            sys.exit()
+            sys.quit()
 
         sx,sz = getattr(self,'f_scale',[1.0,1.0])
 

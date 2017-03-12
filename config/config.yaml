@@ -1,18 +1,10 @@
 # main configuration file for the framework.
 cameraConfig:
   pos: [0.0,0.0,0.0]
-#  pos: [0.0,-110.0,7.0],
-# lookAt: [0.0,0.0,20.0],
   lookAt: [0.0,1.0,0.0]
   fov: 60.0
-  # dimensions of the screen
-  # screenWidth: 1920
-  # screenHeight: 1080
-  # distance of the plane of parachutes from the camera
-  # parDistCam: 250.0,
-  # delta: 0
 
 simulationLog:
-  # main log for the framework.
+  # main log for the entire framework.
   outfile: run/SimulationLog.txt
   mode: a

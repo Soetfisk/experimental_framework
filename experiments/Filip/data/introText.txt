@@ -1,2 +1,6 @@
-write any text here, is the first thing is going to appear.
+
+Write any text here, is pretty cool!!!
+
+Testing first thing is going to appear.
+
 Press Escape to continue

@@ -72,7 +72,7 @@ class VisualTarget(Element):
         self.moveSequence.append( self.imgNode.scaleInterval( 2, imgScale ) )
 
         cam = self.config.world.getCamera()
-        self.width, self.height = map(float,(cam.screenWidth,cam.screenHeight))
+        self.width, self.height = map(float,(base.win.getXSize(),base.win.getYSize()))
         self.hideElement()
         self.imgNode.setPos(Vec3(0,0,0))
         self.moveSequence.setDoneEvent('end_animation')

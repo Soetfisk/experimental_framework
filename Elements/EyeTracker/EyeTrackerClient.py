@@ -1,9 +1,5 @@
-from panda3d.core import *
-
-from Utils.Debug import printOut
-from Utils.Utils import enum
 from Elements.Element.Element import *
-from Logger import Logger
+from Utils.Logger import Logger
 
 # Basic protocol to communicate with the Eye Tracker
 # message from Client to EyeTracker server
@@ -96,9 +92,8 @@ class EyeTrackerClient(Element):
         gazeNode.setTexture(gazeTex)
         gazeNode.setPos(-1.7,0,0)
         self.gazeNode = gazeNode
-        cam = self.config.world.getCamera()
-        w,h = map(float,(cam.screenWidth,cam.screenHeight))
-        self.normX = w/h
+        #w,h = map(float,(cam.screenWidth,cam.screenHeight))
+        self.normX = base.win.getXSize() / float(base.win.getYSize()) # self.config.world.getCamera().ratio
         self.hudNP.setBin('fixed',10)
 
 

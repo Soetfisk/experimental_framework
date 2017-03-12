@@ -37,11 +37,16 @@ class ConsentForm(Element):
         # global scale of the frame
         scale = self.config.settings.scale
         # canvas with scrolling capabilities
+        try:
+            frameColor = self.config.color_background
+        except:
+            frameColor = self.colours['dark_grey']
+
         self.myFrame = DirectScrolledFrame(canvasSize=(frameSize[0],
                                                        frameSize[1],
                                                        50*frameSize[2],
                                                        frameSize[3]),
-                                                       frameColor=self.colours['dark_grey'],
+                                                       frameColor=frameColor,
                                                        frameSize=frameSize,
                                                        pos=pos)
 

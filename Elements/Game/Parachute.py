@@ -43,7 +43,7 @@ class Parachute(DirectObject):
         if (world is None or textureName is None or
             conf is None):
             printOut("Bad call to create parachutes",0)
-            sys.exit()
+            sys.quit()
 
         self.name = name
         self.game = world

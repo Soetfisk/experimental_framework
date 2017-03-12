@@ -31,12 +31,14 @@ class ScreenText(Element):
         if text is None:
             printOut("Missing reference to what text to display when building ScreenText!", 0)
             printOut("You need to set a property 'file_message' and set a path to a file',0")
-            sys.exit()
+            sys.quit()
+        else:
+            self.config.world.watchFile(text)
 
-        margin = 0.9 # used as a %
+        margin = 0.90 # used as a %
 
         # text is hung by the aspect2D, which is -1 to 1 in height and w/h in width.
-        leftBorder = - self.config.world.camera.screenWidth / float(self.config.world.camera.screenHeight)
+        leftBorder = - base.win.getXSize() / float(base.win.getYSize())
         leftBorder = leftBorder * margin
 
         topBorder = 1.0 * margin
@@ -47,7 +49,7 @@ class ScreenText(Element):
         tNP = NodePath(tN)
         tNP.setName("message")
         tNP.setPos(leftBorder,0.0,topBorder)
-        tNP.setScale(0.09)
+        tNP.setScale(0.10)
 
         lines = open(text).read()
         tN.setText(lines)

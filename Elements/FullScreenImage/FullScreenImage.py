@@ -27,7 +27,7 @@ class FullScreenImage(Element):
         url = getattr(self.config,'s_url',None)
         if (url is None):
             print "Missing url of image to display"
-            sys.exit()
+            sys.quit()
 
         sx,sz = getattr(self.config,'f_scale',[1.0,1.0])
 
@@ -51,7 +51,7 @@ class FullScreenImage(Element):
             print "Fatal error, could not load texture file or model in models/plane"
             print "Check the file path"
             print e
-            sys.exit()
+            sys.quit()
 
         self.hideElement()
 

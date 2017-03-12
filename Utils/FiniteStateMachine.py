@@ -79,6 +79,13 @@ class FiniteStateMachine(object):
         for newState in list(set(updateLast)):
             self.states[newState].enterState()
 
+    def forceState(self, state):
+        """Force the state machine to 'jump' to the given state, by exiting any current
+        state, and entering a SINGLE state. The main purpose of this is for debugging."""
+        # brute force exit (even possibly 'state')
+        [ s.exitState() for s in self.states.values() if s.isActive() ]
+        # enter if state exists
+        if self.states.get(state,None): self.states[state].enterState()
 
     def getTransitions(self):
         return self.transitions

@@ -27,11 +27,11 @@ class HUDText(Element):
         text = getattr(self.config, 'text', None)
         if text is None:
             printOut("Missing 'text' attribute in experiment file", 0)
-            sys.exit()
+            sys.quit()
 
         # text is hung by the aspect2D, which is -1 to 1
         # in height and w/h in width.
-        leftBorder = - self.config.world.camera.screenWidth / float(self.config.world.camera.screenHeight)
+        leftBorder = - base.win.getXSize() / float(base.win.getYSize())
 
         tN = TextNode(self.config.name)
         tN.setAlign(TextNode.ALeft)

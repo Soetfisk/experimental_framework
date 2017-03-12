@@ -1,6 +1,5 @@
 
-
-This experiment has been designed by the following researchers:
+This experiment has been designed by:
 
 Lopez Luro Francisco - fll@bth.se
 Sundstedt Veronica - vsu@bth.se

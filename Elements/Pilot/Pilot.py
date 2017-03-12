@@ -175,8 +175,8 @@ class Pilot(Element):
             nodeHeight = abs(aspectMax[2] - aspectMin[2])
 
             # calculate pixels on screen using the size of the screen
-            pixWidth = nodeWidth * self.config.world.camera.screenHeight * 0.5
-            pixHeight = nodeHeight * self.config.world.camera.screenHeight * 0.5
+            pixWidth = nodeWidth * base.win.getXSize() * 0.5
+            pixHeight = nodeHeight * base.win.getYSize() * 0.5
 
             return (pixWidth ,pixHeight)
 

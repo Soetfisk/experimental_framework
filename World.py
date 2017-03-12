@@ -1,24 +1,21 @@
 # python imports
-import sys, os
+import os
+import sys
 import time
-from time import ctime
-# from multiprocessing import Process, Pipe
-# import zmq
-import copy
 
-# config files are in yaml
 import yaml
-
 # utility to load options from file (panda3d config files) or strings
 from pandac.PandaModules import *
-# pandaConfig defines a list of options to setup Panda3D
-
-import pandaConfig
-for o in pandaConfig.options:
-    loadPrcFileData('', o)
+# Panda Engine Options
+# "cursor-hidden #f", "show-frame-rate-meter #t",
+# "undecorated 1"
+options = [ "win-size 1280 800", "win-fixed-size #f", "fullscreen #f", "sync-video 1", "multisamples 4" ]
+for o in options: loadPrcFileData('', o)
 
 # basic finite state machine
 from Utils.FiniteStateMachine import *
+
+# TODO: REMOVE THIS
 # In YamlTools I have a few functions that massage the YAML
 # files so I can use them in the pyqtgraph for the property
 # editor
@@ -27,25 +24,17 @@ from Utils.YamlTools import fixTuples
 # basic Panda3D imports
 from direct.showbase.DirectObject import DirectObject
 from direct.gui.OnscreenText import OnscreenText
-from direct.gui.DirectScrolledList import DirectScrolledList
-from direct.gui.DirectButton import DirectButton
-from direct.gui.DirectLabel import DirectLabel
-from direct.gui.DirectOptionMenu import DirectOptionMenu
-from direct.gui.DirectOptionMenu import DirectOptionMenu
+import direct.directbase.DirectStart
 
-from ContextMenu import ScrolledButtonsList
-from ContextMenu import PopupMenu
+from UI.ContextMenu import ScrolledButtonsList
 
 from panda3d.core import TextNode
 from panda3d.core import WindowProperties
-import direct.directbase.DirectStart
 
 # logger class
-from Logger import Logger
+from Utils.Logger import Logger
 # debug class
 from Utils.Debug import printOut
-# services management class
-# from ServiceMgr import *
 
 # some misc useful functions
 from Utils.Utils import *
@@ -53,44 +42,37 @@ from Utils.Utils import *
 # simple keyboard class that wraps around Panda messenger
 from Keyboard import Keyboard
 
-# from threading import Thread
-
-
-
 class World(DirectObject):
+
     def __init__(self, experiment_file = ''):
         """
         create socket and a task to wait for remote commands,
         or start right away an experiment from a file.
         """
-        os.chdir(sys.path[0])
-        modelsPath=filter(lambda p: p.getBasename().find('models')>-1, [getModelPath().getDirectory(i) for i in range(getModelPath().getNumDirectories())])
-        getModelPath().appendPath(modelsPath[0].getFullpath()+'/maps')
-
-        if experiment_file not in ['']:
-            try:
-                self.experiment = yaml.load(open(experiment_file))
-                self.restartSimulation()
-                self.accept('r', self.restartSimulation)
-                self.createContextMenuElements()
-                self.accept('t', self.menu.toggleVisibility)
-
-            except IOError, e:
-                printOut("EXPERIMENT FILE NOT FOUND. TERMINATING",0)
-                self.quit()
+        if (os.path.isfile(experiment_file)):
+            self.experiment_file = experiment_file
         else:
-            self.experiment = ''
-            self.empty_experiment = yaml.load(open("experiments/exp_empty.yaml"))
-            #self.context = zmq.Context()
-            #self.commands_receiver = self.context.socket(zmq.REP)
-            #self.commands_receiver.bind("tcp://127.0.0.1:7778")
-            #self.msgHandlers = {
-            #    'testElement': self.testElement,
-            #}
-            # launch a task to listen for messages
-            #base.taskMgr.add(self.pollZMQ, "poll messages")
-            # self.setupGUI()
-            return
+            printOut("FILE DOES NOT EXIST: %s" % experiment_file, 0)
+            self.quit()
+
+        self.watchFiles = {}
+        self.coldStart = True
+        self.restartSimulation()
+
+        # TODO: remove this.
+        # connection to remove editor, not using this for now.
+        #self.context = zmq.Context()
+        #self.commands_receiver = self.context.socket(zmq.REP)
+        #self.commands_receiver.bind("tcp://127.0.0.1:7778")
+        #self.msgHandlers = {
+        #    'testElement': self.testElement,
+        #}
+        # launch a task to listen for messages
+
+        # function called when the window is closed.
+        base.exitFunc = self.quit
+        base.taskMgr.doMethodLater(0.2, self.watchFSTask, "watch file")
+        return
 
     def cleanSimulation(self):
         # clean up everything
@@ -99,133 +81,123 @@ class World(DirectObject):
                 e.removeElement()
         self.ignoreAll()
 
-    def restartSimulation(self):
-        self.cleanSimulation()
-        self.initialSetup(self.experiment)
+    def restartSimulation(self, extraArg = None):
+        """This can be called at the beginning, not a real "restart", or after the simulation
+        started."""
 
+        if not self.coldStart:
+            # this is used to remember and come back to the actual element after reloading!
+            if getattr(self,'menu',False):
+                if self.menu.getSelected():
+                    self.lastActiveElementIdx = self.menu.getSelectedIndex()
+                else:
+                    self.lastActiveElementIdx = 0
+                self.menu.destroy()
+        else:
+            self.lastActiveElementIdx = 0
+            self.coldStart = False
 
-    def elementsScroll(self, offset):
-        print offset
-        #self.elementsScrollList.scrollBy(offset)
+        # reload yaml file
+        with open(self.experiment_file) as f:
+            self.watchFile(self.experiment_file)
+            self.experiment = yaml.load(f)
+        try:
+            self.cleanSimulation()
+            self.initialSetup(self.experiment)
+            self.createContextMenuElements()
+            self.menu.deselect()
+            # either select 'start', or selects the last one selected in the list
+            self.menu.select(self.lastActiveElementIdx)
+            self.forceFSM(self.menu.getSelected()['text'])
+            self.accept('t', self.menu.toggleVisibility)
+        except Exception, e:
+            printOut("General error whilst reloading: " + str(e), 0)
+        finally:
+            # always allow to reload!
+            self.accept('r', self.restartSimulation)
 
     def createContextMenuElements(self):
-        menu = ScrolledButtonsList( parent=None, # attach to this parent node
-                                    frameSize=(.8,1.2), buttonTextColor=(1,1,1,1),
-                                    font=None, itemScale=.045, itemTextScale=1, itemTextZ=0,
-                                    # font=transMtl, itemScale=.05, itemTextScale=1, itemTextZ=0,
-                                    command=self.cmElementClicked, # user defined method, executed when a node get selected,
-                                    # receiving extraArgs (which passed to addItem)
-                                    contextMenu=self.cmElementRightClicked, # user defined method, executed when a node right-clicked,
-                                    # receiving extraArgs (which passed to addItem)
-                                    autoFocus=0, # initial auto view-focus on newly added item
-                                    colorChange=1,
-                                    colorChangeDuration=.7,
-                                    newItemColor=(0,1,0,1),
-                                    rolloverColor=(1,.8,.2,1),
-                                    suppressMouseWheel=1,  # 1 : blocks mouse wheel events from being sent to all other objects.
-                                                             #     You can scroll the window by putting mouse cursor
-                                                             #     inside the scrollable window.
-                                                             # 0 : does not block mouse wheel events from being sent to all other objects.
-                                                             #     You can scroll the window by holding down the modifier key
-                                                             #     (defined below) while scrolling your wheel.
-                                    modifier='control'  # shift/control/alt
-                                    )
+        menu = ScrolledButtonsList(
+            parent=None, # attach to this parent node
+            frameSize=(.8,1.2), buttonTextColor=(1,1,1,1),
+            font=None, itemScale=.045, itemTextScale=1, itemTextZ=0,
+            # font=transMtl, itemScale=.05, itemTextScale=1, itemTextZ=0,
+            command=self.cmElementClicked, # user defined method, executed when a node get selected,
+            # receiving extraArgs (which passed to addItem)
+            contextMenu=self.cmElementRightClicked, # user defined method, executed when a node right-clicked,
+            # receiving extraArgs (which passed to addItem)
+            autoFocus=0, # initial auto view-focus on newly added item
+            colorChange=1,
+            colorChangeDuration=.7,
+            newItemColor=(0,1,0,1),
+            rolloverColor=(1,.8,.2,1),
+            suppressMouseWheel=1,  # 1 : blocks mouse wheel events from being sent to all other objects.
+            #     You can scroll the window by putting mouse cursor
+            #     inside the scrollable window.
+            # 0 : does not block mouse wheel events from being sent to all other objects.
+            #     You can scroll the window by holding down the modifier key
+            #     (defined below) while scrolling your wheel.
+            modifier='control'  # shift/control/alt
+        )
+
+        # make an ordered list of elements to put in the menu...
+        # a bit cumbersome, walk through the transitions, in breadth first order,
+        # make a list of transitions and at the end (finalList) clean up repeated
+        # elements
         self.menu = menu
-        self.menu.addItem("test 1")
-        self.menu.addItem("test 2")
-        self.menu.addItem("test 3")
-        self.menu.addItem("test 4")
-        self.menu.addItem("test 5")
-        self.menu.addItem("test 6")
+        finalList = []
+        listElements = []
+        # start is always!
+        listElements.append('start')
+        while (listElements):
+            top = listElements.pop()
+            finalList.append(top)
+            trans = self.fsm.transitions[top].values()
+            for tl in trans:
+                for t in tl:
+                    if not t in finalList:
+                        listElements.append(t)
+        for i,x in enumerate(finalList):
+            if x not in finalList[i+1:]:
+                self.menu.addItem(x, extraArgs=x)
+        menu.select(idx=0)
         self.menu.hide()
 
-    def cmElementClicked(self, item, index, button):
-        print "Clicked:", index, button
-
-    def dothis(self, argument):
-        print 'dothis', argument
+    def cmElementClicked(self, item, index=None, button=None):
+        self.forceFSM(item)
 
     def cmElementRightClicked(self, item, index, button):
-        print item,index,button
-        p = PopupMenu(
-            items=(
-            ('Test', 'common/images/controller.png', self.testElement,'this'),
-            0, # separator
-            ('Reload (r)', 'common/images/reload.png', self.testElement,'this'),
-            #('do that', 0, (
-            #    ('submenu 1', 0, lambda:0),
-            #    ('submenu 2', 0, lambda:0)
-            #)),
-            #('disabled option',0,[])
-            ),
-            )
+        return
+        #print item,index,button
+        #p = PopupMenu(
+        #    items=(
+        #    ('Test', 'common/images/controller.png', self.testElement,'this'),
+        #    0, # separator
+        #    ('Reload (r)', 'common/images/reload.png', self.testElement,'this'),
+        #    #('do that', 0, (
+        #    #    ('submenu 1', 0, lambda:0),
+        #    #    ('submenu 2', 0, lambda:0)
+        #    #)),
+        #    #('disabled option',0,[])
+        #    ),
+        #    )
 
-
-#  def showElements(self):
-#       buttons = []
-#       for e in self.elements.keys():
-#           buttons.append ( DirectButton(text = ([e.upper()]*4), text_scale=0.1, borderWidth = (0.01, 0.01), relief=2))
-
-#       for e in self.elements.keys():
-#           buttons.append ( DirectButton(text = ([e.upper()]*4), text_scale=0.1, borderWidth = (0.01, 0.01), relief=2))
-#       for e in self.elements.keys():
-#           buttons.append ( DirectButton(text = ([e.upper()]*4), text_scale=0.1, borderWidth = (0.01, 0.01), relief=2))
-#       for e in self.elements.keys():
-#           buttons.append ( DirectButton(text = ([e.upper()]*4), text_scale=0.1, borderWidth = (0.01, 0.01), relief=2))
-#       for e in self.elements.keys():
-#           buttons.append ( DirectButton(text = ([e.upper()]*4), text_scale=0.1, borderWidth = (0.01, 0.01), relief=2))
-#       for e in self.elements.keys():
-#           buttons.append ( DirectButton(text = ([e.upper()]*4), text_scale=0.1, borderWidth = (0.01, 0.01), relief=2))
-#       for e in self.elements.keys():
-#           buttons.append ( DirectButton(text = ([e.upper()]*4), text_scale=0.1, borderWidth = (0.01, 0.01), relief=2))
-#       temp = [ b.getWidth() for b in buttons ]
-#       maxWidth = max(temp)
-
-#       numItemsVisible = 8
-#       itemHeight = 0.12
-
-#       self.elementsScrollList = DirectScrolledList(
-#           decButton_pos= (maxWidth / 2.0, 0, 0.53),
-#           decButton_text = "Dec",
-#           decButton_text_scale = 0.04,
-#           decButton_borderWidth = (0.005, 0.005),
-
-#           incButton_pos= (maxWidth / 2.0, 0, -0.59),
-#           incButton_text = "Inc",
-#           incButton_text_scale = 0.04,
-#           incButton_borderWidth = (0.005, 0.005),
-
-#           frameSize = (-maxWidth / 2.0 - 0.05, maxWidth / 2.0 + 0.05, -0.65, 0.59),
-#           frameColor = (1,0,0,0.5),
-#           pos = (-0.9, 0, 0.5),
-#           scale = 0.6,
-#           items = buttons,
-#           numItemsVisible = numItemsVisible,
-#           forceHeight = itemHeight,
-#           itemFrame_frameSize = (-maxWidth / 2.0 - 0.03, maxWidth / 2.0 + 0.03, -0.95, 0.1),
-#           #itemFrame_frameSize = (0, 4, -0.95, 0.1),
-#           itemFrame_pos = (0.0, 0, 0.4),
-#           )
-#       self.accept('wheel_down', self.elementsScroll, extraArgs=[1])
-#       self.accept('wheel_up', self.elementsScroll, extraArgs=[-1])
-
-    def testElement(self, yamlElementString):
-        """Take a SINGLE element, and adds elements start end, and transitions
-        start -> elementToTest -> end with the event 'Esc' to move forward"""
-        yamlElement = yaml.load(yamlElementString)
-        print yamlElement.keys()
-        experiment = copy.deepcopy(self.empty_experiment)
-        experiment['elements'].append(yamlElement)
-        for t in experiment['transitions']:
-            t['trans'] = t['trans'].replace('dummy',yamlElement['name'])
-        self.experiment = experiment
-        print self.experiment
-        self.restartSimulation()
+    # TODO: remove this method for now.
+    #def testElement(self, yamlElementString):
+    #    """Take a SINGLE element, and adds elements start end, and transitions
+    #    start -> elementToTest -> end with the event 'Esc' to move forward"""
+    #    yamlElement = yaml.load(yamlElementString)
+    #    print yamlElement.keys()
+    #    experiment = copy.deepcopy(self.empty_experiment)
+    #    experiment['elements'].append(yamlElement)
+    #    for t in experiment['transitions']:
+    #        t['trans'] = t['trans'].replace('dummy',yamlElement['name'])
+    #    self.experiment = experiment
+    #    print self.experiment
+    #    self.restartSimulation()
 
     def initialSetup(self, experiment):
-
         yaml_experiment = fixTuples(experiment)
-
         # register global values for use by any other part of the simulation
         self.globals = yaml_experiment.get('globals',{})
         # first timestamp since the whole application started
@@ -241,6 +213,7 @@ class World(DirectObject):
 
         # get global keys configuration, always available application wide
         self.keyConfig = yaml.load(open("config/globalKeys.yaml"))
+        self.watchFile("config/globalKeys.yaml")
         # tuples are not supported by YAML
 
         # This class inherits from DirectObject, and Keyboard
@@ -250,7 +223,7 @@ class World(DirectObject):
         # display attached to Aspect2D
         self.screenText = {}
         # set very basic keys, and removes any event hook
-        printOut("Reseting keys", 3)
+        printOut("Resetting keys", 3)
         self.resetKeys()
 
         # do some basic setup common to the whole framework
@@ -259,7 +232,7 @@ class World(DirectObject):
         # build FSM of the experiment
         self.fsm = self.setupFSM(yaml_experiment)
         if (not self.fsm.isValid()):
-            printOut("Invalid FSM")
+            printOut("Invalid FSM, probably some states failed to build")
             self.quit()
 
         # enter into the START state
@@ -333,8 +306,13 @@ class World(DirectObject):
                     print e
                     mod = __import__('Elements.' + module + '.' + className,
                                     globals(), locals(), [className], -1)
+
                 # get a reference to the class based on className
                 myElementClass = getattr(mod, className)
+
+                fname = mod.__file__
+                self.watchFile( fname.replace('.pyc','.py') )
+
                 # build dictionary with ALL the arguments for this element
                 # INCLUDING a reference to SELF (World) object to access Panda3d.
                 # Default arguments:
@@ -354,7 +332,7 @@ class World(DirectObject):
                 printOut("Error importing module, missing file or wrong className", 0)
                 print className
                 print i
-                sys.exit()
+                sys.quit()
             except ValueError, v:
                 # if the name cannot be split in two pieces by the dot
                 #printOut("Missing or extra dots in the name of :" + s,0)
@@ -383,6 +361,11 @@ class World(DirectObject):
             # the simulation has finished.
             self.quit()
 
+    def forceFSM(self, state):
+        self.fsm.forceState(state)
+        self.createTextKeys()
+
+
     def FsmEventHandler(self, event):
         """This method is used to capture events triggered by
         any state in the FSM"""
@@ -406,6 +389,7 @@ class World(DirectObject):
         # general configuration lies in this YAML file
         # such as camera settings, etc.
         configDict = yaml.load(open("config/config.yaml"))
+        self.watchFile("config/config.yaml")
 
         # create an object from dictionary to simplify usage
         self.config = objFromDict(configDict)
@@ -414,18 +398,19 @@ class World(DirectObject):
 
         # create general log file
         genLog = self.config.simulationLog
+        if getattr(self,'log',None):
+            self.log.stopLog()
         self.log = Logger(self.baseTime, genLog.outfile, genLog.mode)
         self.log.startLog()
         printOut("==== Application started ====\n", 2)
         self.log.logEvent("==== Application started ====\n")
-        self.log.logEvent("date: " + ctime() + "\n")
+        self.log.logEvent("date: " + time.ctime() + "\n")
         self.log.logEvent("participant id: %s\n" % self.participantId)
         self.log.logEvent("loading Elements\n")
 
         self.setupCamera()
-        self.setupPandaCamera()
 
-        base.win.setClearColor(getColors()['dark_grey'])
+        #base.win.setClearColor(getColors()['dark_grey'])
 
         # dictionary with key values for Elements to communicate.
         # between each other.
@@ -465,7 +450,9 @@ class World(DirectObject):
     #========== CAMERA HANDLING ==============================================================
     #=========================================================================================
 
+    # TODO: Remove this. Example on how to setup camera properties
     def setupPandaCamera(self):
+        pass
         """Using the object cam with some basic properties about the
         the camera, setup the Panda camera through the object base
         from panda API"""
@@ -477,7 +464,6 @@ class World(DirectObject):
 
         # no mouse interaction
         # fix the camera!
-        base.disableMouse()
 
         # set Panda basic camera
         #base.camera.setPos(cam.pos[0], cam.pos[1], cam.pos[2])
@@ -528,19 +514,9 @@ class World(DirectObject):
         # setup the camera based purely on the YAML configuration
 
         self.camera = self.config.cameraConfig
+        setattr(self.camera, 'ratio', base.win.getXSize() / float(base.win.getYSize()))
 
-        # ==========================================================
-        # override screenWidth,screenHeight
-        # from pandaConfig.py if they have been defined
-        for o in pandaConfig.options:
-            if 'win-size' in o:
-                # "win-size 1280 800"
-                w, h = o.split(' ')[1:]
-                printOut("Saving window config: %s %s" % (w, h), 4)
-                self.camera.screenWidth = int(w)
-                self.camera.screenHeight = int(h)
-        # ===========================================================
-        setattr(self.camera, 'ratio', self.camera.screenWidth / float(self.camera.screenHeight))
+        base.disableMouse()
 
         # fovRads = (self.camera.fov * pi / 180.0)
 
@@ -676,15 +652,32 @@ class World(DirectObject):
 
             self.log.logEvent("Simulation finished\n")
             self.log.stopLog()
+            return
         except Exception,e:
             printOut("Error whilst closing!")
             print e
         finally:
             # sleep 1 second of grace
-            if getattr(self, 'context', False):
-                self.commands_receiver.close()
+            # if getattr(self, 'context', False):
+            #     self.commands_receiver.close()
+            return
+
             time.sleep(1)
-            sys.exit()
+            sys.quit()
+
+    def watchFile(self, filename):
+        self.watchFiles[filename] = os.stat(filename).st_mtime
+
+    def watchFSTask(self,t):
+        for f,value in self.watchFiles.items():
+            current = os.stat(f).st_mtime
+            if current != self.watchFiles[f]:
+                print "File changed: %s, reloading. " %f,current
+                taskMgr.doMethodLater(0.01,self.restartSimulation, 'reload scene')
+                self.watchFiles[f] = current
+                break
+        return t.again
+
 
     def pollZMQ(self,t):
         try:

@@ -1,20 +1,11 @@
 # panda imports
 from direct.gui.DirectGui import *
-from direct.task.Task import *
-from panda3d.core import *
 
 #sys utils
-from time import ctime
-import sys
-from random import *
 
 #game imports
-from Logger import Logger
 from Elements.Game.Game import Game as GameClass
-from Elements.Game.pointsHUD import pointsHUD
-from Elements.Game.PositionGenerator import PositionGenerator
 from Elements.Game.Parachute import *
-from Elements.Game.LodManager import *
 from Elements.Element.Element import *
 from Elements.Game.targetGuide import *
 
@@ -110,10 +101,10 @@ class Replay(GameClass):
             self.readLogFile(self.s_replayLog)
         except AttributeError:
             print "Missing replay log file in the Experiment setup"
-            sys.exit()
+            sys.quit()
         except IOError:
             print "Could not open the file " + self.s_replayLog
-            sys.exit()
+            sys.quit()
         self.playing = False
         self.replaySlider = DirectSlider( range=(0,len(self.logged_events)),
                                           value=0,pageSize=1, command=self.updateSlider)

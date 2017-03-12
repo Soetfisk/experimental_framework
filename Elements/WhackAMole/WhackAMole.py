@@ -135,7 +135,7 @@ class WhackAMole(Element):
         except Exception,e:
             printOut("Error building mole holes!: %s"%e,0)
 
-        gridSize = self.config.int_gridSize
+        gridSize = self.config.gridSize
 
         # holes in the corners
         fixedHoles = [(0,0), (0,gridSize-1), (gridSize-1,0), (gridSize-1,gridSize-1)]
@@ -170,13 +170,13 @@ class WhackAMole(Element):
         self.camRatio = self.config.world.camera.ratio
 
         # remove some calibration points until reaching the limit from the config file
-        while len(self.calibPoints) > self.config.int_moleCalibPoints:
+        while len(self.calibPoints) > self.config.moleCalibPoints:
             x = random.choice([y for y in self.calibPoints if y not in fixedCalibPoints])
             self.calibPoints.remove(x)
 
         self.lastTime=time.time()
         self.randomWaitForUp = random.randint(1,2)
-        self.waitForDown = self.config.int_waitForDown
+        self.waitForDown = self.config.waitForDown
         self.hideElement()
 
     def hammerMouse(self, task):
@@ -207,7 +207,7 @@ class WhackAMole(Element):
 
     def hammerDown(self):
         cam = self.config.world.getCamera()
-        w,h = map(float,(cam.screenWidth,cam.screenHeight))
+        w,h = map(float,(base.win.getXSize(),base.win.getYSize()))
 
         if self.hammerAnim.getFrame()!=0:
             return

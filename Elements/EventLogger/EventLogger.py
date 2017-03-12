@@ -2,10 +2,11 @@ __author__ = 'Francholi'
 __author__ = 'Francholi'
 
 # panda imports
-from Elements.Element.Element import *
 from direct.showbase.DirectObject import DirectObject
 
-from Logger import Logger
+from Elements.Element.Element import *
+from Utils.Logger import Logger
+
 
 class EventLogger(Element):
     """

@@ -18,6 +18,7 @@ class RepeatSequence(Element):
         from scratch
         """
         super(RepeatSequence, self).__init__(**kwargs)
+        self.variable = ''
         self.hideElement()
 
     def enterState(self):
@@ -42,6 +43,9 @@ class RepeatSequence(Element):
             self.sendMessage('repeat')
         else:
             self.sendMessage('end')
+
+    def getVariable(self):
+        return self.variable
 
     def exitState(self):
         # super class exitState

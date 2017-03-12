@@ -1,14 +1,14 @@
-from panda3d.core import *
-from direct.showbase import DirectObject
-
-import sys
-from Utils.Debug import printOut
-from Utils.Utils import *
-from Logger import Logger
-from collections import OrderedDict
 import os.path
+from collections import OrderedDict
+
+from direct.showbase import DirectObject
+from panda3d.core import *
 
 import external.yaml as yaml
+from Utils.Debug import printOut
+from Utils.Logger import Logger
+from Utils.Utils import *
+
 
 class Element(object):
     """
@@ -54,6 +54,7 @@ class Element(object):
         if 'file_config' in kwargs:
             try:
                 dictionary = yaml.load(open(kwargs['file_config']))
+                kwargs['world'].watchFile(kwargs['file_config'])
             except Exception, e:
                 print e
                 printOut("Fatal error loading config file " + kwargs['file_config'], 0)
@@ -332,6 +333,7 @@ class Element(object):
         self.active = True
 
     def removeElement(self):
+        self.hideElement()
         self.sceneNP.detachNode()
         self.hudNP.detachNode()
 

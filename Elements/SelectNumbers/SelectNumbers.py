@@ -1,19 +1,12 @@
 # panda imports
-from direct.gui.DirectGui import *
-from direct.task.Task import *
-from panda3d.core import *
-from direct.gui.OnscreenText import OnscreenText
-import random as rnd
-from direct.interval.MetaInterval import *
-from direct.interval.FunctionInterval import *
-from direct.interval.IntervalGlobal import *
 import random
 
+from direct.gui.DirectGui import *
+
 from Elements.Element.Element import *
-from Logger import Logger
+
 
 #sys utils
-import sys
 
 #from Elements.EyeTracker.Tobii import TobiiEyeTracker
 
@@ -167,7 +160,7 @@ class SelectNumbers(Element):
             mouseX,mouseY = base.mouseWatcherNode.getMouse()
 
             cam = self.config.world.getCamera()
-            width,height = map(float,(cam.screenWidth,cam.screenHeight))
+            width,height = map(float,(base.win.getXSize(),base.win.getYSize()))
 
             eyeX,eyeY = (0,0)
             try:
@@ -250,10 +243,10 @@ class SelectNumbers(Element):
             self.makeGrid()
         # set calibration in the eye-tracker (if eye-tracker is present)
         try:
-            self.eyeTracker.loadAndSetCalibration(self.repeatRandom.variable)
+            self.eyeTracker.loadAndSetCalibration(self.repeatRandom.getVariable())
             self.eyeTracker.startTracking()
         except:
-            pass
+            printOut("Error trying to set the calibration, is the eyeTracker connected?")
 
     def exitState(self):
         # super class leaveState

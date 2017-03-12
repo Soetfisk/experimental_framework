@@ -31,13 +31,13 @@ class ImageChoice(Element):
 
         if (not s):
             print "Missing i_slots property in ImageChoice, can't continue"
-            sys.exit()
+            sys.quit()
         if (not rating):
             print "Missing rating property in ImageChoice, can't continue"
-            sys.exit()
+            sys.quit()
         if (s != len(rating)):
             print "Error, rating is different from number of slots (i_slots), can't continue"
-            sys.exit()
+            sys.quit()
         
         # load list of images to compare from a CSV file
         # the number of files per line has to match the i_slots value
@@ -97,7 +97,7 @@ class ImageChoice(Element):
         except:
             print "Fatal error, could not load texture file or model in models/plane"
             print "Check the file path"
-            sys.exit()
+            sys.quit()
         return nodepaths
 
 

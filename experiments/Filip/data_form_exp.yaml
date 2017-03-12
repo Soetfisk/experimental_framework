@@ -8,7 +8,7 @@ elements:
 ####################################
  - className: EmptyState
    name: start
-   color_background: (0.3,0.3,0.3,1)
+   color_background: (0.4,0.3,0.3,1)
    # send message timeout_start after 0.1
    # message is defined in the FSM at the bottom
    timeout: 1.0
@@ -19,6 +19,7 @@ elements:
  # introduction to the experiment
  - className: ScreenText
    file_message: experiments/Filip/data/introText.txt
+   color_background: (0.9,0.3,0.3,1)
    name: introText
 
  - module: DataForm
@@ -51,15 +52,32 @@ elements:
       type: TextEntry
       default: 0
 
+ - className: DataForm
+   name: userInfo2
+   settings:
+    outfiledir: experiments/Filip/run
+    outfileprefix: userdata2
+    formId: userdata2
+    scale: 0.06
+    maxlabel: 10
+    color_label: (0.0,0.5,0.5,1.0)
+    title: 'Another form:'
+   # form description
+   input:
+    - label: Gender
+      type: Option
+      tuple_values: ("Male","Female")
+
 # not template yet...
 # - module: EventLogger
 #   className: EventLogger
 #   name: eventLogger
 
 transitions:
- - trans: 'start @ introText: timeout_start'
+ - trans: 'start @ introText: auto'
  - trans: 'introText @ consentForm: auto'
  - trans: 'consentForm @ userInfo:yesPressed'
+ - trans: 'userInfo @ userInfo2:nextPressed'
  - trans: 'consentForm @ end:noPressed'
- - trans: 'userInfo @ end: nextPressed'
+ - trans: 'userInfo2 @ end: nextPressed'
 

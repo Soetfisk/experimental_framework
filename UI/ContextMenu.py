@@ -5,6 +5,7 @@ from direct.gui.DirectGui import DirectFrame,DirectButton,DirectScrolledFrame,DG
 from direct.interval.IntervalGlobal import Sequence
 from direct.task import Task
 from types import IntType
+from functools import partial
 
 
 SEQUENCE_TYPES=(tuple,list)
@@ -52,8 +53,11 @@ class ScrolledButtonsList(DirectObject):
       self.itemVertSpacing=self.fontHeight*self.itemScale
       self.frameWidth,self.frameHeight=frameSize
       # I set canvas' Z size smaller than the frame to avoid the auto-generated vertical slider bar
+
+      winRatio = float(base.win.getXSize()) / base.win.getYSize()
+
       self.frame = DirectScrolledFrame(
-                   parent=parent,pos=(-self.frameWidth*.5,0,.5*self.frameHeight), relief=DGG.GROOVE,
+                   parent=parent,pos=(-winRatio + 0.1,0,0.9), relief=DGG.GROOVE,
                    state=DGG.NORMAL, # to create a mouse watcher region
                    frameSize=(0, self.frameWidth, -self.frameHeight, 0), frameColor=(0,0,0,.7),
                    canvasSize=(0, 0, -self.frameHeight*.5, 0), borderWidth=(0.01,0.01),
@@ -268,7 +272,8 @@ class ScrolledButtonsList(DirectObject):
       else:
          self.accept(self.inOutBTprefix+self.modifier+'-wheel_up',self.__scrollCanvas, [-.07])
          self.accept(self.inOutBTprefix+self.modifier+'-wheel_down',self.__scrollCanvas, [.07])
-      print 'enteringFrame'
+
+      #print 'enteringFrame'
 
   def __exitingFrame(self,m=None):
       if not hasattr(self,'inOutBTprefix'):
@@ -281,7 +286,8 @@ class ScrolledButtonsList(DirectObject):
       else:
          self.ignore(self.inOutBTprefix+self.modifier+'-wheel_up')
          self.ignore(self.inOutBTprefix+self.modifier+'-wheel_down')
-      print 'exitingFrame'
+
+      #print 'exitingFrame'
 
   def __setFocusButton(self,button,item):
       if self.focusButton:
@@ -347,7 +353,7 @@ class ScrolledButtonsList(DirectObject):
          clear the list
       """
       for c in self.buttonsList:
-          c.remove()
+          c.remove_node()
       self.buttonsList=[]
       self.focusButton=None
       self.numItems=0
@@ -503,11 +509,39 @@ class ScrolledButtonsList(DirectObject):
       elif not taskMgr.hasTaskNamed('mouseInRegionCheck'):
          taskMgr.add(self.__mouseInRegionCheck,'mouseInRegionCheck')
 
+  def selectUpDown(self, dir):
+      next=self.getSelectedIndex()
+      if next == None:
+          next = dir
+      else:
+          next += dir
+
+      if next == self.getNumItems() or next == -1:
+          return
+      else:
+          self.deselect()
+          self.select(next)
+
+  def returnOnSelected(self):
+      button = self.getSelected()
+      if button:
+        self.command( button['text'], self.getSelectedIndex(), button)
+
   def toggleVisibility(self):
       if self.frame.isHidden():
          self.show()
+         self.accept('arrow_down', self.selectUpDown, extraArgs=[1] )
+         self.accept('arrow_down-repeat', self.selectUpDown, extraArgs=[1] )
+         self.accept('arrow_up', self.selectUpDown, extraArgs=[-1] )
+         self.accept('arrow_up-repeat', self.selectUpDown, extraArgs=[-1] )
+         self.accept('enter', self.returnOnSelected)
       else:
          self.hide()
+         self.ignore('arrow-down-repeat')
+         self.ignore('arrow_down')
+         self.ignore('arrow_up-repeat')
+         self.ignore('arrow_up')
+
 
   def sort(self,reverse=False):
       buttonsTexts=[(b['text'],b) for b in self.buttonsList]
@@ -544,7 +578,7 @@ class PopupMenu(DirectObject):
                 # so the same image will be converted to grayscale only once
 
   def __init__(self,items, parent=None, buttonThrower=None, onDestroy=None,
-               font=None, baselineOffset=.0,
+               font=None, baselineOffset=-.2,
                scale=.05, itemHeight=0.9, leftPad=.0, separatorHeight=.5,
                underscoreThickness=1,
                BGColor=(0,0,0,.7),

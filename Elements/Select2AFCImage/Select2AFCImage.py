@@ -1,15 +1,13 @@
 # panda imports
 from direct.gui.DirectGui import *
-from direct.task.Task import *
-from panda3d.core import *
-from Elements.Element.Element import *
 from direct.gui.OnscreenImage import OnscreenImage
+
+from Elements.Element.Element import *
 # os module to list filenames in a directory
 import os,itertools
-import sys
 import random
 from Utils.Debug import printOut
-from Logger import Logger
+from Utils.Logger import Logger
 
 class Select2AFCImage(Element):
     """
