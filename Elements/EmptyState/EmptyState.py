@@ -17,7 +17,7 @@ class EmptyState(Element):
         from scratch
         """
         super(EmptyState, self).__init__(**kwargs)
-        self.hideElement)
+        self.hideElement()
 
     def enterState(self):
         # super class enterState
