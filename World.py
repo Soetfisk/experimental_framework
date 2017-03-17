@@ -264,33 +264,52 @@ class World(DirectObject):
             printOut("You have to define the transitions in the YAML file", 0)
             self.quit()
 
-        # list of Elements to load when the transitions have been processed.
-        toLoad = []
+        # set of Elements to load when the transitions have been processed.
+        toLoad = set()
+        toLoad.add('start')
+        toLoad.add('end')
+
         # stack to perform a tree traversal, HAS to have 'start' transition
         transitionsStack = ['start']
-        # while the stack is not empty
-        while (transitionsStack):
-            fromNode = transitionsStack.pop()
-            if (fromNode in toLoad):
-                continue
-            else:
-                toLoad.append(fromNode)
-                fsmTransitions[fromNode] = {}
 
-            for t in transitions:
-                (fromState, toState, evt) = splitTransitionString(t['trans'])
-                if (fromState == fromNode):
-                    # add child to stack
-                    transitionsStack.append(toState)
-                    for event in evt.split(','):
-                        fsmTransitions[fromState][event] = fsmTransitions[fromState].get(event, []) + [toState]
-                        # notify the FSM when the event happens
-                        self.accept(event, self.FsmEventHandler, [event])
+        allTransitions = [ splitTransitionString(t['trans']) for t in transitions]
+
+
+        # while the stack is not empty
+        # while (transitionsStack):
+        for (fromStates, toStates, events) in allTransitions:
+
+            #fromNode = transitionsStack.pop()
+            #if (fromNode in toLoad):
+            #    continue
+            #else:
+            #    toLoad.append(fromNode)
+            #    fsmTransitions[fromNode] = {}
+            #for trans in transitions:
+                #(fromStates, toStates, events) = splitTransitionString(trans['trans'])
+            # for state in fromStates:
+
+            #if (fromNode in fromStates):
+                # add child to stack
+            #    for toState in toStates:
+            #        transitionsStack.append(toState)
+            for event in events:
+                for f in fromStates:
+                    toLoad.add(f)
+                    if f not in fsmTransitions.keys():
+                        fsmTransitions[f] = {}
+                    fsmTransitions[f][event] = []
+
+                    for to in toStates:
+                        fsmTransitions[f][event] = fsmTransitions[f][event] + [to]
+                    # notify the FSM when the event happens
+                    self.accept(event, self.FsmEventHandler, [event])
 
         for el in exp['elements']:
             try:
                 name = el['name']
                 if name not in toLoad:
+                    printOut("Ignored element not mentioned in the transitions: " % name, 0)
                     continue
 
                 className = el['className']

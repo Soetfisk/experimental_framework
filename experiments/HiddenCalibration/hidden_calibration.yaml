@@ -148,6 +148,9 @@ elements:
     - label: Age
       type: TextEntry
       default: 0
+    - label: Test tickbox
+      type: TickBox
+      default: True
 
  - module: EyeTracker
    className: Tobii_UDP_Client
@@ -231,19 +234,20 @@ elements:
    log: True
    logFilePath: 'experiments/HiddenCalibration/run'
 
+
 transitions:
+
+# -trans: ' list of possible active states @ list of destinations : list of events '
+# example: -trans: 'fromA,fromB @ toX,toY : whenX,whenY'
  - trans: 'start @ introText: auto'
  - trans: 'introText @ consentForm:auto'
  - trans: 'consentForm @ userInfo:yesPressed'
  - trans: 'consentForm @ end:noPressed'
-
  - trans: 'userInfo @ colourBlindText:nextPressed'
  - trans: 'colourBlindText @ colourBlindCheck:auto'
  - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
  - trans: 'colourBlindCheck @ calibrateTobii:imageQueryOk'
- - trans: 'calibrateTobii @ eyeTracker:q'
- - trans: 'calibrateTobii @ whackIntroText: q'
- - trans: 'calibrateTobii @ mouseLog:q'
+ - trans: 'calibrateTobii @ eyeTracker, whackIntroText, mouseLog : q'
 # # whackAMole saves current calibration to file
 # # whackAMole calibrates again, and saves as well the
 # # new calibration.
@@ -260,8 +264,13 @@ transitions:
 # # loop back to repeatRandom
 # # end_animation is triggered when the visual target stops moving...
  - trans: 'visualTarget @ repeatRandom : end_animation'
- - trans: 'FinalScreen @ end: timeout_FinalScreen'
- - trans: 'mouseLog @ end: timeout_FinalScreen'
- - trans: 'eyeTracker @ end:timeout_FinalScreen'
+ - trans: 'FinalScreen, mouseLog, eyeTracker @ end: timeout_FinalScreen'
  - trans: 'colourBlindProblem @ end:auto'
 
+
+# - trans: 'FinalScreen @ end: timeout_FinalScreen'
+# - trans: 'mouseLog @ end: timeout_FinalScreen'
+# - trans: 'eyeTracker @ end: timeout_FinalScreen'
+# - trans: 'calibrateTobii @ eyeTracker:q'
+# - trans: 'calibrateTobii @ whackIntroText: q'
+# - trans: 'calibrateTobii @ mouseLog:q'

@@ -9,23 +9,30 @@ FSM_RES = enum(FSM_KEY_ERROR=0, FSM_INCOMPLETE=1, FSM_OK=2)
 This finiteStateMachine allows for CONCURRENT states,
 so it is a bit more complex when transitioning
 from one state to another
+
 The transitions in YAML are defined as follows:
 {'currentState':{'event':['dest1','dest2'] } }
 Meaning, from currentState I can go to dest1 and dest2 if 'event' happens
 """
 
-# splits a transition string into a tuple of strings (fromState,toState,event)
+# splits a transition string into a tuple of LISTS of strings
+# ([fromStates],[toStates],[events])
 def splitTransitionString(transition):
     try:
         if ':' in transition:
-            evt = transition.split(':')[1].strip()
+            events = transition.split(':')[1].strip()
+            events = events.split(',')
         else:
-            evt = 'auto'
-        # parse the transition "fromA @ toB : whenEvt"
-        fromState, toState = transition.split('@')
-        fromState = fromState.strip()
-        toState = toState.split(':')[0].strip()
-        return (fromState, toState, evt)
+            events = ['auto']
+
+        # parse the transition "fromA,fromB @ toA,toB : whenEvt"
+        temp = transition.split('@')
+        temp[1] = temp[1].split(':')[0]
+
+        fromStates = [f.strip() for f in temp[0].strip().split(',')]
+        toStates = [f.strip() for f in temp[1].strip().split(',')]
+
+        return (fromStates, toStates, events)
     except:
         printOut("Malformed transition: " + transition, 0)
         printOut("fix the file and press ctrl+R")

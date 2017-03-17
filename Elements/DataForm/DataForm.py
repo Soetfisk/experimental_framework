@@ -78,7 +78,7 @@ class DataForm(Element):
 
         # title of the frame
         label = OnscreenText( text = title,
-                              pos = (0, frameSize[3] - scale*1.5 ),
+                              pos = (0, frameSize[3] - scale*2.5 ),
                               scale = scale * 1.5, fg=labelColour, align=TextNode.ACenter,
                               mayChange=1 )
         label.reparentTo(self.myFrame.getCanvas())
@@ -106,26 +106,26 @@ class DataForm(Element):
                 self.guiLabels.append(label2)
 
 
-            # for each label, create a widget matching the JSOSN
+            # for each label, create a widget matching the YAML
             widgetYpos = lastYpos
             if ( str(i.type) == 'TextEntry' ):
                 widget = DirectEntry(text = "" , scale=scale,
                         cursorKeys=1,
                         command=self.setText, extraArgs=[],
-                        pos=(0,1,widgetYpos), numLines = 1, focus=0)
+                        pos=(0.05,1,widgetYpos), numLines = 1, focus=0)
             elif ( str(i.type) == 'Option' ):
                 widget = DirectOptionMenu( text="options", scale=1.05*scale, items=i.tuple_values,
                         popupMarkerBorder=(1,0),
                         initialitem=0, command=self.optionMenu, extraArgs=[],
-                        pos=(0,1,widgetYpos),
+                        pos=(0.05,1,widgetYpos),
                         text_scale=(0.7,0.7),
                         text_pos=(0.3,0.1))
 
             elif ( str(i.type) == 'TickBox' ):
                 widget = DirectCheckButton( text="", scale=scale,
                          command=self.tickBoxClicked, extraArgs=[],
-                         pos=(scale,1,widgetYpos+scale/3.0))
-                widget.clicked=False
+                         pos=(scale + 0.04,1,widgetYpos+scale/3.0))
+                widget.clicked = getattr(i,'default', False)
 
             # order of creation
             widget['extraArgs'] = [widget]
