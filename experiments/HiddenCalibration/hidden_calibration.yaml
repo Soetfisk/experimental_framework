@@ -12,6 +12,39 @@ elements:
    # send message timeout_start after 0.1
    timeout: 0.5
 
+ - className: VideoPlayer
+   name: testNew
+   file_video: 'common/video/test.avi'
+   loop: 0
+   speed: 2.0
+   keys:
+   - key: p
+     callback: play
+   - key: s
+     callback: stop
+   - key: r
+     callback: rewind
+   - key: arrow_right
+     callback: forward5
+   - key: arrow_left
+     callback: backward5
+
+ - className: SoundPlayer
+   name: testNew2
+   file_sound: 'common/audio/test.wav'
+   # 0 is forever, 1 is once, 2 twice, ... Default is 1
+   loop: 0
+   speed: 2.0
+   keys:
+   - key: p
+     callback: play
+   - key: s
+     callback: stop
+   - key: i
+     callback: incVolume
+   - key: d
+     callback: decVolume
+
  - className: RepeatSequence
    # for each value, send message
    # 'repeat' and assign the value to variable,
@@ -144,13 +177,13 @@ elements:
       tuple_values: ("No","Yes")
     - label: Do you have experience playing games
       type: Option
-      tuple_values: ("Yes","No")
+      tuple_values: ("Yes","No","Moderate")
     - label: Age
       type: TextEntry
       default: 0
     - label: Test tickbox
       type: TickBox
-      default: True
+      default: false
 
  - module: EyeTracker
    className: Tobii_UDP_Client
@@ -229,7 +262,7 @@ elements:
    gridHeight: 3
    margin: 1.1
    #tileSizes: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
-   tileSizes: [0.3, 0.05]
+   tileSizes: [0.3, 0.2, 0.1, 0.05]
    refsto: [eyeTracker,repeatRandom]
    log: True
    logFilePath: 'experiments/HiddenCalibration/run'
@@ -241,6 +274,10 @@ transitions:
 # example: -trans: 'fromA,fromB @ toX,toY : whenX,whenY'
  - trans: 'start @ introText: auto'
  - trans: 'introText @ consentForm:auto'
+
+ - trans: 'introText @ testNew: n'
+ - trans: 'testNew @ end: n'
+
  - trans: 'consentForm @ userInfo:yesPressed'
  - trans: 'consentForm @ end:noPressed'
  - trans: 'userInfo @ colourBlindText:nextPressed'

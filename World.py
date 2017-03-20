@@ -3,13 +3,14 @@ import os
 import sys
 import time
 
-import yaml
+import external.yaml as yaml
 # utility to load options from file (panda3d config files) or strings
 from pandac.PandaModules import *
 # Panda Engine Options
 # "cursor-hidden #f", "show-frame-rate-meter #t",
 # "undecorated 1"
-options = [ "win-size 1280 800", "win-fixed-size #f", "fullscreen #f", "sync-video 1", "multisamples 4" ]
+options = [ "win-size 1280 800", "win-fixed-size #f", "fullscreen #f", "sync-video 1", "multisamples 4",
+            "audio-library-name p3openal_audio"]
 for o in options: loadPrcFileData('', o)
 
 # basic finite state machine
@@ -76,6 +77,7 @@ class World(DirectObject):
 
     def cleanSimulation(self):
         # clean up everything
+        self.forceFSM('start')
         if getattr(self,'elements',False):
             for e in self.elements.values():
                 e.removeElement()
@@ -117,6 +119,7 @@ class World(DirectObject):
             self.accept('r', self.restartSimulation)
 
     def createContextMenuElements(self):
+        """Menu with all the loaded elements"""
         menu = ScrolledButtonsList(
             parent=None, # attach to this parent node
             frameSize=(.8,1.2), buttonTextColor=(1,1,1,1),
@@ -182,20 +185,6 @@ class World(DirectObject):
         #    ),
         #    )
 
-    # TODO: remove this method for now.
-    #def testElement(self, yamlElementString):
-    #    """Take a SINGLE element, and adds elements start end, and transitions
-    #    start -> elementToTest -> end with the event 'Esc' to move forward"""
-    #    yamlElement = yaml.load(yamlElementString)
-    #    print yamlElement.keys()
-    #    experiment = copy.deepcopy(self.empty_experiment)
-    #    experiment['elements'].append(yamlElement)
-    #    for t in experiment['transitions']:
-    #        t['trans'] = t['trans'].replace('dummy',yamlElement['name'])
-    #    self.experiment = experiment
-    #    print self.experiment
-    #    self.restartSimulation()
-
     def initialSetup(self, experiment):
         yaml_experiment = fixTuples(experiment)
         # register global values for use by any other part of the simulation
@@ -249,11 +238,6 @@ class World(DirectObject):
             has happened. If no event is specified an "auto" event is created.
         """
 
-        # experiment configuration, in YAML format
-        #printOut("Loading yaml experiment: %s" % experiment, 2)
-        #if 'yaml' in experiment:
-        #    exp = yaml.load(open(experiment))
-
         fsmTransitions = {}
 
         # parse transitions from YAML file
@@ -265,53 +249,30 @@ class World(DirectObject):
             self.quit()
 
         # set of Elements to load when the transitions have been processed.
-        toLoad = set()
-        toLoad.add('start')
-        toLoad.add('end')
-
-        # stack to perform a tree traversal, HAS to have 'start' transition
-        transitionsStack = ['start']
+        toLoad = set(['start','end'])
 
         allTransitions = [ splitTransitionString(t['trans']) for t in transitions]
-
-
-        # while the stack is not empty
-        # while (transitionsStack):
         for (fromStates, toStates, events) in allTransitions:
-
-            #fromNode = transitionsStack.pop()
-            #if (fromNode in toLoad):
-            #    continue
-            #else:
-            #    toLoad.append(fromNode)
-            #    fsmTransitions[fromNode] = {}
-            #for trans in transitions:
-                #(fromStates, toStates, events) = splitTransitionString(trans['trans'])
-            # for state in fromStates:
-
-            #if (fromNode in fromStates):
-                # add child to stack
-            #    for toState in toStates:
-            #        transitionsStack.append(toState)
             for event in events:
                 for f in fromStates:
                     toLoad.add(f)
                     if f not in fsmTransitions.keys():
                         fsmTransitions[f] = {}
                     fsmTransitions[f][event] = []
-
                     for to in toStates:
+                        # set from,to,event values
                         fsmTransitions[f][event] = fsmTransitions[f][event] + [to]
+
                     # notify the FSM when the event happens
                     self.accept(event, self.FsmEventHandler, [event])
 
+        # construct the element objects dynamically
         for el in exp['elements']:
             try:
                 name = el['name']
                 if name not in toLoad:
                     printOut("Ignored element not mentioned in the transitions: " % name, 0)
                     continue
-
                 className = el['className']
                 # get module name, or default to className
                 module = el.get('module', className)
@@ -374,6 +335,7 @@ class World(DirectObject):
         return FiniteStateMachine(fsmTransitions, self.elements)
 
     def advanceFSM(self, event):
+        """An event occured, move the FSM to the next step."""
         self.fsm.processEvent(event)
         self.createTextKeys()
         if self.fsm.hasDone():
@@ -381,20 +343,18 @@ class World(DirectObject):
             self.quit()
 
     def forceFSM(self, state):
-        self.fsm.forceState(state)
-        self.createTextKeys()
+        """Force the FSM to a given state, exiting any current state first, and
+        then entering the required state. This is used mainly for testing."""
+        if getattr(self, 'fsm', None):
+            self.fsm.forceState(state)
+            self.createTextKeys()
 
 
     def FsmEventHandler(self, event):
         """This method is used to capture events triggered by
-        any state in the FSM"""
+        any state in the FSM. Panda3D will call this method with the
+        event argument"""
         self.advanceFSM(event)
-        # at this stage, we can't really do anything, an event has
-        # to be queued because the FSM could have a loop farther away
-        # from this point in the FSM therefore this event cannot be
-        # handled right now...It will be handled in the advanceFSM method
-        #printOut("Received event at FsmEventHandler: %s"%event,2)
-        #self.eventQueue.append(event)
 
 
     #=========================================================================================
@@ -413,9 +373,10 @@ class World(DirectObject):
         # create an object from dictionary to simplify usage
         self.config = objFromDict(configDict)
 
+        # timestamp makes up a participant ID
         self.participantId = time.strftime("%y%m%d_%H%M%S")
 
-        # create general log file
+        # create general log file for each participant
         genLog = self.config.simulationLog
         if getattr(self,'log',None):
             self.log.stopLog()
@@ -429,8 +390,7 @@ class World(DirectObject):
 
         self.setupCamera()
 
-        #base.win.setClearColor(getColors()['dark_grey'])
-
+        # TODO: decide what to do with the globals idea.
         # dictionary with key values for Elements to communicate.
         # between each other.
         # They can save values here and use them, ideally using
@@ -442,7 +402,7 @@ class World(DirectObject):
         self.log.logEvent(message)
 
     #=========================================================================================
-    #========== INPUT HANDLING ===============================================================
+    #========== INPUT HANDLING IN PANDA ======================================================
     #=========================================================================================
 
     def hideMouseCursor(self):
@@ -531,34 +491,18 @@ class World(DirectObject):
         pos, lookAt, fov, ratio
         """
         # setup the camera based purely on the YAML configuration
-
         self.camera = self.config.cameraConfig
         setattr(self.camera, 'ratio', base.win.getXSize() / float(base.win.getYSize()))
-
         base.disableMouse()
-
-        # fovRads = (self.camera.fov * pi / 180.0)
-
-        # make a triangle rectangle, from camera pos to the plane
-        # where the parachutes fall. The hiphotenuse is the length of the
-        # line from the camera to the top of this plane
-        # hip = camera.parDistCam / cos(fovRads / 2)
-
-        # (sine(fov/2) * length) is the minX
-        # setattr(camera, 'minX', -hip*sin(fovRads/2.0) )
-
-        # the heigth is simply derived from the aspect ratio
-        # of the screen, should match assuming a perspective frustrum
-        #setattr( camera, 'minZ', -hip*sin(fovRads/2.0) )
-        # setattr(camera, 'minZ', camera.ratio-hip*sin(fovRads/2.0))
 
     def windowEventHandler(self, window=None):
         """Function to handle window resize events"""
+        # TODO: decide what to do with this function
+        printOut("windowEventHandler called!", 0)
+        return
         #const_wp = window.getProperties()
         #w = const_wp.getXSize()
         #h = const_wp.getYSize()
-        pass
-
         #wp = WindowProperties()
         #wp.setSize(w, int(w/h))
         #base.win.requestProperties(wp)
@@ -567,7 +511,7 @@ class World(DirectObject):
         #base.camLens.setFov(w * 65.0 / 1280.0)
         #taskMgr.doMethodLater(0.1, self.realignTextKeys, 'realign text', extraArgs=[])
 
-    def addNode(self, npath, place='3d'):
+    def addNode(self, npath, place='3D'):
         """
         Attach node to "render" or to "aspect2d"
         and adds it to the scenes dictionary
@@ -575,7 +519,6 @@ class World(DirectObject):
         :param npath: nodepath to attach
         :param place: place where to attach, can be 3d or HUD
         """
-
         mapNode={'3D':render,'HUD':aspect2d}
         if place.upper() in mapNode.keys():
             npath.reparentTo(mapNode[place.upper()])
@@ -643,11 +586,11 @@ class World(DirectObject):
                                               align=TextNode.ALeft, scale=.05)
             self.screenText[k].hide()
 
-    def realignTextKeys(self):
-        """Realign the text keys if the window has been resized"""
-        #printOut("Realign text on window resize",0)
-        for (key, val) in self.screenText.items():
-            val.setX(base.a2dLeft)
+#    def realignTextKeys(self):
+#        """Realign the text keys if the window has been resized"""
+#        #printOut("Realign text on window resize",0)
+#        for (key, val) in self.screenText.items():
+#            val.setX(base.a2dLeft)
 
     def toggleTextKeys(self):
         """Hides/shows all key texts. Should be consistent about "ALL" """
@@ -656,7 +599,6 @@ class World(DirectObject):
                 val.show()
             else:
                 val.hide()
-
 
     def toggleVerbose(self):
         messenger.toggleVerbose()
@@ -698,21 +640,21 @@ class World(DirectObject):
         return t.again
 
 
-    def pollZMQ(self,t):
-        try:
-            msg = self.commands_receiver.recv_string(flags=zmq.NOBLOCK)
-            if len(msg) > 0:
-                # answer back
-                self.commands_receiver.send_string('OK')
-                i = msg.find(' ')
-                # find command, use dictionary to call appropriate function with the rest as a string.
-                self.msgHandlers[msg[:i]](msg[i+1:])
-        except Exception, e:
-            pass
-            # print e
-        t.delayTime = 0.1
-        # printOut('running...' + str(t.time))
-        return t.again
+#    def pollZMQ(self,t):
+#        try:
+#            msg = self.commands_receiver.recv_string(flags=zmq.NOBLOCK)
+#            if len(msg) > 0:
+#                # answer back
+#                self.commands_receiver.send_string('OK')
+#                i = msg.find(' ')
+#                # find command, use dictionary to call appropriate function with the rest as a string.
+#                self.msgHandlers[msg[:i]](msg[i+1:])
+#        except Exception, e:
+#            pass
+#            # print e
+#        t.delayTime = 0.1
+#        # printOut('running...' + str(t.time))
+#        return t.again
 
 
 
