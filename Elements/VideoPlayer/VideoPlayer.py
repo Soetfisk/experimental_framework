@@ -21,6 +21,10 @@ class VideoPlayer(Element):
 
         self.videofile = getattr(self.config, 'file_video',None)
         self.loopCount = getattr(self.config, 'loop', 1)
+        self.hoffset = getattr(self.config, 'hoffset', 0)
+        self.voffset = getattr(self.config, 'voffset', 0)
+
+        #self.videoScale = getattr(self.config, 'scale', (1,1))
         #self.playrate = getattr(self.config, 'speed', 1.0)
 
         if self.videofile:
@@ -32,28 +36,31 @@ class VideoPlayer(Element):
             card.reparentTo(self.hudNP)
             card.setTexture(movieTexture)
             card.setTexScale(TextureStage.getDefault(), movieTexture.getTexScale())
+            card.setPos(-0.5 + self.hoffset, 0.0, -0.5 + self.voffset)
             self.movie = movieTexture
-            self.stop()
-
+            print card.getScale()
+            self.time = 0
+            self.movie.stop()
 
         self.hideElement()
 
-    def play(self, args=[]):
-        self.movie.play()
-        print 'play'
+    def playPause(self, args=[]):
+        if self.movie.isPlaying():
+            self.time = self.movie.getTime()
+            self.movie.stop()
+            print 'pause'
+        else:
+            self.movie.play()
+            self.movie.setLoopCount(self.loopCount)
+            self.movie.setTime(self.time)
+            print 'play'
+
 
     def stop(self, args=[]):
         self.movie.stop()
+        self.movie.setTime(0)
+        self.time = 0
         print 'stop'
-
-    def rewind(self):
-        print 'rewind'
-
-    def forward5(self):
-        print 'forward'
-
-    def backward5(self):
-        print 'backward'
 
     def setVolume(self, newVol):
         """volume between 0 and 1"""

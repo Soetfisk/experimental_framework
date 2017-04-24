@@ -1,0 +1,56 @@
+pglobals:
+ # all logFiles created automatically by Element will go into this folder
+ logFilePath: 'experiments/HiddenCalibration/run'
+
+elements:
+####################################
+# Initial and final states in the FSM.
+####################################
+ - className: EmptyState
+   name: start
+   color_background: (0.3,0.3,0.4,1)
+   # send message timeout_start after 0.1
+   timeout: 0.5
+
+ - className: EmptyState
+   name: end
+   color_background: (1.0,0.3,0.4,1)
+   # send message timeout_start after 0.1
+
+ - className: VideoPlayer
+   name: testVideo1
+   file_video: 'common/video/test.avi'
+   loop: 0
+   speed: 2.0
+   # -1 is left,top. +1 is right,bottom
+   hoffset: 1.0
+   voffset: 0.0
+   scale: (1.0,1.0)
+   keys:
+   - key: p
+     callback: playPause
+   - key: s
+     callback: stop
+
+ - className: VideoPlayer
+   name: testVideo2
+   file_video: 'common/video/test2.avi'
+   loop: 1
+   speed: 2.0
+   # -1 is left,top. +1 is right,bottom
+   hoffset: -1.0
+   voffset: 0.0
+   scale: (1.0,1.0)
+   keys:
+   - key: o
+     callback: playPause
+   - key: d
+     callback: stop
+
+transitions:
+
+# -trans: ' list of possible active states @ list of destinations : list of events '
+# example: -trans: 'fromA,fromB @ toX,toY : whenX,whenY'
+ - trans: 'start @ testVideo1, testVideo2: n'
+ - trans: 'testVideo1,testVideo2 @ end: n'
+

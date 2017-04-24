@@ -13,21 +13,34 @@ elements:
    timeout: 0.5
 
  - className: VideoPlayer
-   name: testNew
+   name: testVideo1
    file_video: 'common/video/test.avi'
    loop: 0
    speed: 2.0
+   # -1 is left,top. +1 is right,bottom
+   hoffset: 1.0
+   voffset: 0.0
+   scale: (1.0,1.0)
    keys:
    - key: p
-     callback: play
+     callback: playPause
    - key: s
      callback: stop
-   - key: r
-     callback: rewind
-   - key: arrow_right
-     callback: forward5
-   - key: arrow_left
-     callback: backward5
+
+ - className: VideoPlayer
+   name: testVideo2
+   file_video: 'common/video/test.avi'
+   loop: 0
+   speed: 2.0
+   # -1 is left,top. +1 is right,bottom
+   hoffset: -1.0
+   voffset: 0.0
+   scale: (1.0,1.0)
+   keys:
+   - key: p
+     callback: playPause
+   - key: s
+     callback: stop
 
  - className: SoundPlayer
    name: testNew2
@@ -36,7 +49,7 @@ elements:
    loop: 0
    speed: 2.0
    keys:
-   - key: p
+   - key: player2Play
      callback: play
    - key: s
      callback: stop
@@ -273,36 +286,37 @@ transitions:
 # -trans: ' list of possible active states @ list of destinations : list of events '
 # example: -trans: 'fromA,fromB @ toX,toY : whenX,whenY'
  - trans: 'start @ introText: auto'
- - trans: 'introText @ consentForm:auto'
+# - trans: 'introText @ consentForm:auto'
 
- - trans: 'introText @ testNew: n'
- - trans: 'testNew @ end: n'
+ - trans: 'introText @ testVideo1, testVideo2: n'
+ - trans: 'testVideo1 @ end: n'
+ - trans: 'testVideo2 @ end: n'
 
- - trans: 'consentForm @ userInfo:yesPressed'
- - trans: 'consentForm @ end:noPressed'
- - trans: 'userInfo @ colourBlindText:nextPressed'
- - trans: 'colourBlindText @ colourBlindCheck:auto'
- - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
- - trans: 'colourBlindCheck @ calibrateTobii:imageQueryOk'
- - trans: 'calibrateTobii @ eyeTracker, whackIntroText, mouseLog : q'
+# - trans: 'consentForm @ userInfo:yesPressed'
+# - trans: 'consentForm @ end:noPressed'
+# - trans: 'userInfo @ colourBlindText:nextPressed'
+# - trans: 'colourBlindText @ colourBlindCheck:auto'
+# - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
+# - trans: 'colourBlindCheck @ calibrateTobii:imageQueryOk'
+# - trans: 'calibrateTobii @ eyeTracker, whackIntroText, mouseLog : q'
 # # whackAMole saves current calibration to file
 # # whackAMole calibrates again, and saves as well the
 # # new calibration.
- - trans: 'whackIntroText @ whackAMole:auto'
+# - trans: 'whackIntroText @ whackAMole:auto'
 # # loop part, through calibration methods
- - trans: 'whackAMole @ repeatRandom: calibrationFinished'
- - trans: 'repeatRandom @ game1Intro : repeat'
- - trans: 'repeatRandom @ FinalScreen : end'
- - trans: 'game1Intro @ game1: auto'
- - trans: 'game1 @ game2Intro: end_game1'
- - trans: 'game2Intro @ game2: auto'
- - trans: 'game2 @ visualTargetIntro: end_game2'
- - trans: 'visualTargetIntro @ visualTarget: auto'
+# - trans: 'whackAMole @ repeatRandom: calibrationFinished'
+# - trans: 'repeatRandom @ game1Intro : repeat'
+# - trans: 'repeatRandom @ FinalScreen : end'
+# - trans: 'game1Intro @ game1: auto'
+# - trans: 'game1 @ game2Intro: end_game1'
+# - trans: 'game2Intro @ game2: auto'
+# - trans: 'game2 @ visualTargetIntro: end_game2'
+# - trans: 'visualTargetIntro @ visualTarget: auto'
 # # loop back to repeatRandom
 # # end_animation is triggered when the visual target stops moving...
- - trans: 'visualTarget @ repeatRandom : end_animation'
- - trans: 'FinalScreen, mouseLog, eyeTracker @ end: timeout_FinalScreen'
- - trans: 'colourBlindProblem @ end:auto'
+# - trans: 'visualTarget @ repeatRandom : end_animation'
+# - trans: 'FinalScreen, mouseLog, eyeTracker @ end: timeout_FinalScreen'
+# - trans: 'colourBlindProblem @ end:auto'
 
 
 # - trans: 'FinalScreen @ end: timeout_FinalScreen'
