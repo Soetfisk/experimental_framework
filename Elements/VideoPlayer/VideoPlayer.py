@@ -48,19 +48,16 @@ class VideoPlayer(Element):
         if self.movie.isPlaying():
             self.time = self.movie.getTime()
             self.movie.stop()
-            print 'pause'
         else:
             self.movie.play()
             self.movie.setLoopCount(self.loopCount)
             self.movie.setTime(self.time)
-            print 'play'
 
 
     def stop(self, args=[]):
         self.movie.stop()
         self.movie.setTime(0)
         self.time = 0
-        print 'stop'
 
     def setVolume(self, newVol):
         """volume between 0 and 1"""
