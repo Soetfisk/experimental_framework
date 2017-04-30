@@ -15,6 +15,7 @@ def printUsage():
 if __name__=='__main__':
     # extract experiment file from command line
     experiment = ''
+    test_mode = False
     try:
         for arg in sys.argv:
             if 'exp=' in arg:
@@ -28,6 +29,8 @@ if __name__=='__main__':
             if 'channels=' in arg:
                 debug.channels = arg.split('=')[1]
                 continue
+            if 'test_mode=' in arg:
+                test_mode = arg.split('=')[1]
     except IndexError,e:
         printUsage()
 
@@ -38,7 +41,7 @@ if __name__=='__main__':
     # this will import the Panda3D engine stuff (most of it)
     from World import World
     # create one object with an experiment
-    w = World(experiment)
+    w = World(test_mode, experiment)
     # enter main loop from Panda3D (see tasks in World)
     base.run()
 

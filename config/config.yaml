@@ -1,8 +1,9 @@
 # main configuration file for the framework.
 cameraConfig:
   pos: [0.0,0.0,0.0]
-  lookAt: [0.0,1.0,0.0]
+  look_at: [0.0,1.0,0.0]
   fov: 60.0
+  clear_color: [0.5,0.5,0.5,1.0]
 
 simulationLog:
   # main log for the entire framework.

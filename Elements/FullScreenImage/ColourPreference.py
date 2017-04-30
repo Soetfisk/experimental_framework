@@ -129,7 +129,7 @@ class ColourPreference(Element):
 
     def enterState(self):
         Element.enterState(self)
-        self.logResults.startLog()
+        #self.logResults.startLog()
         # display always the first one, because they have
         # been randomized in the constructor anyway...
         self.displayPair(self.imagePairs[0])

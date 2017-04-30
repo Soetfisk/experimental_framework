@@ -1,0 +1,50 @@
+globals:
+ # all logFiles created automatically by Element will go into this folder
+ logFilePath: 'Elements/Select2AFCImage/run'
+
+elements:
+####################################
+# Initial and final states in the FSM.
+####################################
+ - className: EmptyState
+   name: start
+   color_background: (1.0,1.0,0.0,1)
+   timeout: 0.5
+
+ - className: EmptyState
+   name: end
+   color_background: (1.0,0.0,1.0,1)
+
+ - className: Select2AFCImage
+#   color_background: (0.5,0.2,0.2,1)
+   name: imageCompare
+   # display reference/golden in the top
+   show_reference: True
+   # first in pair is always the "reference" if show_reference is True
+   tuple_image_pairs: [[G1,A,B],[C,C,D]]
+   image_prefix: 'common/images/'
+   image_postfix: '.png'
+   image_scale: [0.3,0.3]
+   image_voffset: -0.4
+   random_pairs: True
+   choice_text: 'Which image looks most similar to the top image'
+   # will present (A,B) and (B,A)
+   mirror_pairs: True
+   output_answers: 'Elements\Select2AFCImage\run'
+   time_between: 1
+   image_between: None
+   keys:
+   - key: arrow_left
+     callback: imageSelected
+     tuple_args: ('left')
+   - key: arrow_right
+     callback: imageSelected
+     tuple_args: ('right')
+
+transitions:
+
+# -trans: ' list of possible active states @ list of destinations : list of events '
+# example: -trans: 'fromA,fromB @ toX,toY : whenX,whenY'
+ - trans: 'start @ imageCompare: n'
+ - trans: 'imageCompare @ end: end_imageCompare'
+

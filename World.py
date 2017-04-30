@@ -6,11 +6,19 @@ import time
 import external.yaml as yaml
 # utility to load options from file (panda3d config files) or strings
 from pandac.PandaModules import *
+
 # Panda Engine Options
-# "cursor-hidden #f", "show-frame-rate-meter #t",
 # "undecorated 1"
-options = [ "win-size 1280 800", "win-fixed-size #f", "fullscreen #f", "sync-video 1", "multisamples 4",
-            "audio-library-name p3openal_audio"]
+options = [ "win-size 1280 800",
+            "win-fixed-size #f",
+            "fullscreen #f",
+            "sync-video 1",
+            "multisamples 4",
+            "audio-library-name p3openal_audio",
+            "cursor-hidden #f",
+            "show-frame-rate-meter #f",
+            "undecorated 0"]
+
 for o in options: loadPrcFileData('', o)
 
 # basic finite state machine
@@ -45,7 +53,7 @@ from Keyboard import Keyboard
 
 class World(DirectObject):
 
-    def __init__(self, experiment_file = ''):
+    def __init__(self, test_mode, experiment_file = ''):
         """
         create socket and a task to wait for remote commands,
         or start right away an experiment from a file.
@@ -56,27 +64,20 @@ class World(DirectObject):
             printOut("FILE DOES NOT EXIST: %s" % experiment_file, 0)
             self.quit()
 
+        self.testMode = test_mode
         self.watchFiles = {}
         self.coldStart = True
         self.restartSimulation()
 
-        # TODO: remove this.
-        # connection to remove editor, not using this for now.
-        #self.context = zmq.Context()
-        #self.commands_receiver = self.context.socket(zmq.REP)
-        #self.commands_receiver.bind("tcp://127.0.0.1:7778")
-        #self.msgHandlers = {
-        #    'testElement': self.testElement,
-        #}
-        # launch a task to listen for messages
-
         # function called when the window is closed.
         base.exitFunc = self.quit
+        # function to watch for file changes
         base.taskMgr.doMethodLater(0.2, self.watchFSTask, "watch file")
         return
 
     def cleanSimulation(self):
         # clean up everything
+        # TODO: delete all nodes that were created (*_hud, ...)
         self.forceFSM('start')
         if getattr(self,'elements',False):
             for e in self.elements.values():
@@ -106,17 +107,16 @@ class World(DirectObject):
         try:
             self.cleanSimulation()
             self.initialSetup(self.experiment)
-            self.createContextMenuElements()
-            self.menu.deselect()
-            # either select 'start', or selects the last one selected in the list
-            self.menu.select(self.lastActiveElementIdx)
-            self.forceFSM(self.menu.getSelected()['text'])
-            self.accept('t', self.menu.toggleVisibility)
+            if self.testMode:
+                self.createContextMenuElements()
+                self.menu.deselect()
+                # either select 'start', or selects the last one selected in the list
+                self.menu.select(self.lastActiveElementIdx)
+                self.forceFSM(self.menu.getSelected()['text'])
+                self.accept('t', self.menu.toggleVisibility)
+                self.accept('r', self.restartSimulation)
         except Exception, e:
-            printOut("General error whilst reloading: " + str(e), 0)
-        finally:
-            # always allow to reload!
-            self.accept('r', self.restartSimulation)
+            printOut("General error whilst loading simulation: " + str(e), 0)
 
     def createContextMenuElements(self):
         """Menu with all the loaded elements"""
@@ -340,7 +340,9 @@ class World(DirectObject):
         self.createTextKeys()
         if self.fsm.hasDone():
             # the simulation has finished.
-            self.quit()
+            # give some short time to allow END state to enter, change colour, and the exit.
+            taskMgr.doMethodLater(1,self.quit, 'end state reached', extraArgs=[])
+
 
     def forceFSM(self, state):
         """Force the FSM to a given state, exiting any current state first, and
@@ -381,7 +383,7 @@ class World(DirectObject):
         if getattr(self,'log',None):
             self.log.stopLog()
         self.log = Logger(self.baseTime, genLog.outfile, genLog.mode)
-        self.log.startLog()
+        #self.log.startLog()
         printOut("==== Application started ====\n", 2)
         self.log.logEvent("==== Application started ====\n")
         self.log.logEvent("date: " + time.ctime() + "\n")
@@ -603,7 +605,7 @@ class World(DirectObject):
     def toggleVerbose(self):
         messenger.toggleVerbose()
 
-    def quit(self):
+    def quit(self, message = ''):
         try:
             self.log.logEvent("quiting simulation")
             self.log.logEvent("calling ExitState on any active element")
@@ -612,19 +614,14 @@ class World(DirectObject):
                     e.exitState()
 
             self.log.logEvent("Simulation finished\n")
+            if message: self.log.logEvent(message)
             self.log.stopLog()
-            return
         except Exception,e:
             printOut("Error whilst closing!")
             print e
-        finally:
-            # sleep 1 second of grace
-            # if getattr(self, 'context', False):
-            #     self.commands_receiver.close()
-            return
-
+        if not self.testMode:
             time.sleep(1)
-            sys.quit()
+            sys.exit(0)
 
     def watchFile(self, filename):
         self.watchFiles[filename] = os.stat(filename).st_mtime

@@ -64,7 +64,7 @@ class Game(Element):
 
     #=============================================
     def startLogging(self):
-        self.gameLog.startLog()
+        #self.gameLog.startLog()
         self.gameLog.logEvent("==== new game participant ====\n")
 
         # process user data if present (from a previous form)

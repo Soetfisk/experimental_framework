@@ -7,30 +7,35 @@ class Logger(object):
     """simple class to dump timestamps and
     events from the game"""
     def __init__(self,basetime, filename, mode = 'a'):
-        "Creates a log, throws exception of error opening file"
+        """Creates a logger utility, will store results in a python list, and dump them at the
+        end when the log is closed..."""
 
-        # set this to -1 until we start logging
-        self.baseTime = basetime
-        self.mode = mode
         self.filename = filename
+        self.baseTime = basetime
+        self.mode = 'a'
+        self.logList = []
 
-        if filename is not 'nolog':
-            self.logging = True
-            printOut("Logging on " + filename, 4)
-
-        else:
+        if self.filename is 'nolog':
             self.logging = False
+            return
 
-    def isLogging(self):
-        return self.logging
+        ts = time.time() - self.baseTime
 
-    def startLog(self):
-        # every time we call startLog we clear the messages
+        try:
+            with open(self.filename, self.mode) as output:
+                output.write("Log created at: ")
+                output.write("%07.5f:EOL\n" % ts)
+                self.logging = True
+        except Exception, e:
+            printOut("Cannot create log file at " + self.filename + "this log file will not be valid:",0)
+            self.logging = False
+            print e
+
+    def resetLog(self):
+        # every time we call resetLog we clear the messages
         if not self.logging:
             return
-        # instead of writing into a file, dump all in memory, and write at the end
         self.logList = []
-        self.logging=True
 
     def writeln(self, text):
         """
@@ -38,6 +43,9 @@ class Logger(object):
         :param text: str
         :return: None
         """
+        if not self.logging:
+            return
+
         if text[-1] != '\n':
             self.logList.append(text)
         else:
@@ -53,6 +61,7 @@ class Logger(object):
         # format output...
         if not self.logging:
             return
+
         ts = time.time()
         # add new line if necessary
         if event[-1] != '\n':
@@ -67,8 +76,10 @@ class Logger(object):
         Opens the file (usually in append mode), dumps the string list, closes the file.
         :return: None
         """
-        if not self.logging:
+        if (not self.logging) and (self.filename != 'nolog'):
+            printOut("Trying to stop an invalid logger\n", 0)
             return
+
         ts = time.time() - self.baseTime
         text = ''.join([s for s in self.logList])
         try:
@@ -91,14 +102,3 @@ class Logger(object):
             self.logList = []
 
 
-#    def _closeLog(self):
-#        """
-#        Private function, used by stopLog, to close the log file if necessary
-#        :param ts: timestamp
-#        :return: None
-#        """
-#        # write backlog
-#        # close file
-#        self.outfile.write(finalTime)
-#        self.outfile.close()
-    

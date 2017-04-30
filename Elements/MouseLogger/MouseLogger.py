@@ -27,7 +27,7 @@ class MouseLogger(Element):
     def enterState(self):
         # super class enterState
         Element.enterState(self)
-        self.mouseLog.startLog()
+        #self.mouseLog.startLog()
         taskMgr.add(self.logMouseTask, "mouseLogTask_%s" % self.config.world.participantId)
 
     def exitState(self):

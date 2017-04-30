@@ -201,7 +201,7 @@ class Element(object):
                 printOut('Error!, key or callback missing in when '
                          'setting up %s' % self.config.name, 0)
                 printOut('Ignoring key binding', 0)
-                self.config.world.quit()
+                # self.config.world.quit()
             # this will give us back a [] even if no 'commas' are found
 
             for eachKey in key.split(','):
@@ -266,8 +266,6 @@ class Element(object):
             # nolog is special name to disable logging
             fname = 'nolog'
         self.logFile = Logger(self.baseTime, fname, 'w')
-
-        self.logFile.startLog()
         printOut("Entering state %s" % self.config.name, 1)
 
         # log all global variables before anything into the log file.
@@ -289,26 +287,6 @@ class Element(object):
             except:
                 printOut("error converting timeout value %s in %s " % (str(t), self.config.name), 0)
                 self.config.world.quit()
-        #self.config.world.createTextKeys()
-
-        # THIS IS OVER COMPLICATED, FOR NOW ANY ELEMENT CAN READ AND WRITE FROM
-        # GLOBALS BY HAND...
-        ## globals are variables that are accessible experiment wise.
-        ## check if we need to load values from globals! or set them
-        ## to the defaults specified in the configuration of the Element
-        ## check the experiment!
-        #try:
-        #    globals = self.yaml_config['readFromGlobals']
-        #except KeyError, e:
-        #    #print e
-        #    globals = None
-
-        #if globals:
-        #    for g in globals.keys():
-        #        if g in self.config.world.globals:
-        #            setattr(self, g, self.config.world.globals[g])
-        #        else:
-        #            setattr(self, g, globals[g])
 
         # finally, there is a refsto attribute in the config file, which allows to provide a reference from
         # one Element to another, provided that the target reference exists.
@@ -322,12 +300,12 @@ class Element(object):
                 printOut("ERROR: Element %s trying to set a reference to non-existent element %s!" %
                          (self.config.name, ref ),0)
 
-        # save last clear color
-        self.lastClearColor = base.getBackgroundColor()
         # set clear color if it has been explicitly stated in the config
         c = getattr(self.config,'color_background',None)
         if c:
             base.setBackgroundColor(Vec4(*c))
+        else:
+            base.setBackgroundColor(Vec4(* self.config.world.camera.clear_color))
         # lastly, register keys.
         self.registerKeys()
         self.active = True
@@ -349,32 +327,9 @@ class Element(object):
 #        self.config.world.createTextKeys()
         self.active = False
 
-        base.setBackgroundColor(self.lastClearColor)
-
-        # DO NOT USE readFromGlobals or writeFromGlobals in config file.
-        # save globals if we have them.
-        #try:
-        #    globals = self.yaml_config['writeToGlobals']
-        #except KeyError, e:
-        #    #print e
-        #    globals = None
-        #if globals:
-        #    for g in globals.keys():
-        #        # read value or assign default from config!
-        #        newValue = getattr (self, g, globals[g])
-        #        self.config.world.globals[g] = newValue
-
         if self.logFile:
             self.logFile.stopLog()
 
     def isActive(self):
         return self.active
 
-#    def createService(self, serverName, serviceName, callback):
-#       """ Creates and registers a service in the ServiceMgr to handle
-#       queries of data obtained in the data form """
-#       service = self.config.world.serviceMgr.createFromTemplate( serviceName )
-#       service.setServerName(serverName)
-#       service.setServiceImp( self.getUserData )
-#       # register service
-#       self.config.world.serviceMgr.registerService ( service )

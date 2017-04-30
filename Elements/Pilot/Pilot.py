@@ -23,7 +23,7 @@ class Pilot(Element):
         if l is 'nolog,w':
             printOut("-- Warning -- logging for the Pilot disabled",0)
         self.pilotLog = Logger(self.baseTime,l[0],l[1])
-        self.pilotLog.startLog()
+        #self.pilotLog.startLog()
         
         self.pilotLog.logEvent("==== new pilot participant ====\n")
         self.pilotLog.logEvent("date: " +  ctime() + "\n")

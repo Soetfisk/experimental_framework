@@ -12,6 +12,10 @@ from Utils.Logger import Logger
 class Select2AFCImage(Element):
     """
     Class to display two images and allow the user to select one or the other
+    This object CANNOT be re-entered in the same execution, because the list
+    of images is destroyed after the user has made the choices.
+    Other copies of the Element can be defined in the experiment with different
+    names without any issue.
     """
 
     def __init__(self, **kwargs):
@@ -22,132 +26,154 @@ class Select2AFCImage(Element):
         super(Select2AFCImage,self).__init__(**kwargs)
 
         # scale is used to change the size of the images
-        sx, sz = getattr(self.config,'tuple_scale',[1.0,1.0])
+        sx, sz = getattr(self.config,'image_scale',[1.0,1.0])
 
-        # in this DICTIONARY we will hold the images
+        self.voffset = getattr(self.config,'image_voffset', -0.5)
+        self.showReference = getattr(self.config,'show_reference')
+
+        # in this DICTIONARY we will hold all the image Nodes
         self.imageNodes={}
+        # for golden images
+        self.imageRefNodes={}
 
-        # check if explicit list of pairs has been provided.
-        tempImagePairs = getattr(self.config,'imagePairs',None)
+        self.setupListPairs()
 
-        # if tempImagePairs does not exist, read file names from directory
-        if not tempImagePairs:
-            try:
-                files = os.listdir(self.config.imagePath)
-                # remove extension from filename
-                files = [ x.rsplit('.',1)[0] for x in files]
-                # compute all pairs as a result of a combination of filenames
-                tempImagePairs = list(itertools.combinations(files,2))
-            except AttributeError,e:
-                printOut("Attribute imagePath in config file does not exist!")
-                self.config.world.quit()
-            except WindowsError,e:
-                printOut("Directory %s with images does not exist!" % self.config.imagePath)
-                self.config.world.quit()
-
-        # check if mirrors are desired, and append them.
-        if getattr(self.config,'genMirrorPair',None):
-            for i in range(len(tempImagePairs)):
-                a,b = tempImagePairs[i]
-                tempImagePairs.append((b,a))
-
-        if getattr(self.config,'randomizePairs',False):
-            # shuffle the image pairs before start
-            random.shuffle(tempImagePairs)
-
-        self.imagePairs = tempImagePairs
-
-        # if extension has been set use it, otherwise assume PNG
-        imageExtension = getattr(self.config,'imageExtension','.png')
+        postfix = getattr(self.config,'image_postfix','')
+        prefix = getattr(self.config,'image_prefix','')
 
         try:
-            # load every image into a Panda node and attach it to the
-            # special hudNP node for 2d stuff
-            for pair in self.imagePairs:
-                for p in pair:
-                    if p not in self.imageNodes.keys():
-                        finalname = self.config.imagePath + p + imageExtension
-                        printOut("loading %s" % finalname)
-                        self.imageNodes[p] = OnscreenImage(
-                            image=finalname,
-                            scale=Vec3(sx,1.0, sz))
-                        self.imageNodes[p].setTransparency(TransparencyAttrib.MAlpha)
-                        self.imageNodes[p].hide()
-                        self.imageNodes[p].setName(p)
-                        self.imageNodes[p].reparentTo(self.hudNP)
+           # load every image into a Panda node and attach it to the
+           # special hudNP node for 2d stuff
+           # image pairs in the bottom
+            for pair in self.image_pairs:
+                for image in pair:
+                    if image not in self.imageNodes.keys():
+                        fullname = prefix + image + postfix
+                        printOut("loading %s" % fullname, 0)
+                        self.imageNodes[image] = OnscreenImage( image=fullname, scale=Vec3(sx,1.0, sz) )
+                        self.imageNodes[image].setTransparency(TransparencyAttrib.MAlpha)
+                        self.imageNodes[image].hide()
+                        self.imageNodes[image].setName(image)
+                        self.imageNodes[image].reparentTo(self.hudNP)
+            # reference image if present
+            for ref in self.image_pairs_refs:
+                if ref not in self.imageRefNodes.keys():
+                    fullname = prefix + ref + postfix
+                    printOut("loading %s" % fullname, 0)
+                    self.imageRefNodes[ref] = OnscreenImage( image=fullname, scale=Vec3(sx,1.0, sz) )
+                    self.imageRefNodes[ref].setTransparency(TransparencyAttrib.MAlpha)
+                    self.imageRefNodes[ref].hide()
+                    self.imageRefNodes[ref].setName(ref)
+                    self.imageRefNodes[ref].reparentTo(self.hudNP)
         except Exception,e:
             printOut("Fatal error, could not load texture file",0)
             printOut(str(e), 0)
-            self.config.world.quit()
+            return
 
-        # label text
-        label = OnscreenText( text = "Which path feels most SAFE?",
-                              pos = (0,0.9,0),
-                              scale = .08,
+#        # label text
+        if getattr(self.config, 'choice_text', None):
+            label = OnscreenText( text = self.config.choice_text,
+                              pos = (0,-0.9,0), scale = .08,
                               fg= [1.0,1.0,1.0,1.0],
                               align=TextNode.ACenter,
                               mayChange=0 )
         label.reparentTo(self.hudNP)
-        # place holder to write
+#
+#        # file output to store the results
+        outputDir = getattr(self.config,'output_answers','run')
+        logName = outputDir+"\\"+self.config.name+"_"+self.config.world.participantId+".log"
+        self.logResults = Logger(self.baseTime, logName,mode='w')
 
-        # file output to store the results
-        outputDir = getattr(self.config,'logOutputDir','run')
-        self.logResults = Logger(self.baseTime, outputDir+"/userAnswers_"+self.config.world.participantId+".log",mode='w')
-        #self.currentPair = None
+    def setupListPairs(self):
+         # check if explicit list of pairs has been provided.
+        if getattr(self.config, 'tuple_image_pairs', None) is None:
+            printOut("Error constructing " + self.config.name + ", attribute 'image_pairs' is missing'", 0)
 
-    def hidePair(self, pair):
-        left, right = pair
-        self.imageNodes[left].hide()
-        self.imageNodes[right].hide()
-        # remove the first pair from the list
-        self.imagePairs.pop(0)
+        image_pairs = self.config.tuple_image_pairs
+
+        if self.showReference:
+            for p in image_pairs:
+                if len(p) != 3:
+                    printOut("ERROR: All images must be triplets if 'show_reference' is True", 0)
+                    return
+            image_pairs_refs = [pair[0] for pair in image_pairs]
+            image_pairs = [pair[1:3] for pair in image_pairs]
+
+        # check if mirrors are desired, and append them.
+        if getattr(self.config,'mirror_pairs',None):
+            size = len(image_pairs)
+            for i in range(size):
+                a,b = image_pairs[i]
+                image_pairs.append([b,a])
+                if self.showReference:
+                    image_pairs_refs.append(a)
+#
+        if getattr(self.config,'random_pairs',None):
+#           # shuffle BOTH LISTS (pairs and references) so they are kept in sync
+            if self.showReference:
+                combined = list(zip(image_pairs, image_pairs_refs))
+                random.shuffle(combined)
+                image_pairs[:], image_pairs_refs[:] = zip(*combined)
+            else:
+                random.shuffle(image_pairs)
+
+        # keep a reference to variables
+        self.image_pairs = image_pairs
+        self.image_pairs_refs = image_pairs_refs
+
 
     def imageSelected(self,args):
+        """This method should be called when one choice is made."""
+        if len(self.image_pairs) == 0:
+            return
 
-        currPair = self.imagePairs[0]
-        selection = None
-        if (args == 'right'):
-            selection = currPair[1]
-        elif args == 'left':
-            selection = currPair[0]
-        else:
-            printOut('invalid message passed to imageSelected!!!')
-            self.config.world.quit()
+        direction={'left':0,'right':1}
+        currPair = self.image_pairs[0]
+        currGolden = self.image_pairs_refs[0]
 
-        answerText = "Selected {s} from {p[0]} -- {p[1]}".format(p = currPair, s=selection)
-
+        selection = currPair[direction[args]]
+        answerText = "Selected {s} from {p[0]} -- {p[1]}, golden: {g}".format(
+            p = currPair, s=selection, g=self.image_pairs_refs[0])
+        printOut(answerText, 1)
         self.logResults.logEvent(answerText)
 
         #hide pair
         self.imageNodes[currPair[0]].hide()
         self.imageNodes[currPair[1]].hide()
+        self.imageRefNodes[currGolden].hide()
 
-        # remove the first pair from the list
-        self.imagePairs.pop(0)
+        # remove the first pair from the list,
+        # the logfile will have the history of how things were presented.
+        self.image_pairs.pop(0)
+        self.image_pairs_refs.pop(0)
 
         # display new pair only if there are more...
-        if len(self.imagePairs):
-            self.displayPair(self.imagePairs[0])
+        if len(self.image_pairs):
+            self.displayFirstPair()
         else:
             # exit the state sending the signal endComparison
-            self.sendMessage('endComparison')
-
-    def displayPair(self, pair):
+            self.sendMessage('end_'+self.config.name)
+#
+    def displayFirstPair(self):
         # UNHIDE the images, and displace them on left and right
-        # they could also be randomized here, so that not always
-        # a goes left and b goes right
         # TUPLES CANNOT BE SHUFFLED, BECAUSE THEY ARE INMUTABLE.
+        pair = self.image_pairs[0]
         self.imageNodes[pair[0]].show()
-        self.imageNodes[pair[0]].setPos(-0.8, 1.0, 0.0)
+        self.imageNodes[pair[0]].setPos(-0.6, 0.0, self.voffset)
         self.imageNodes[pair[1]].show()
-        self.imageNodes[pair[1]].setPos(0.8, 1.0, 0.0)
+        self.imageNodes[pair[1]].setPos(0.6, 0.0, self.voffset)
+        # only when there is a golden reference at the top.
+        if self.showReference:
+            self.imageRefNodes[self.image_pairs_refs[0]].show()
+            self.imageRefNodes[self.image_pairs_refs[0]].setPos(0.0, 0.0, -self.voffset+0.1)
 
     def enterState(self):
         Element.enterState(self)
-        self.logResults.startLog()
         # display always the first one, because they have
         # been randomized in the constructor anyway...
-        self.displayPair(self.imagePairs[0])
+        if len(self.image_pairs) == 0:
+            self.setupListPairs()
+        self.displayFirstPair()
 
     def exitState(self):
         # we could unload the images here...
