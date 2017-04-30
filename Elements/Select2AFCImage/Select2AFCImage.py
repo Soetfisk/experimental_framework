@@ -79,17 +79,15 @@ class Select2AFCImage(Element):
                               mayChange=0 )
         label.reparentTo(self.hudNP)
 #
-#        # file output to store the results
-        outputDir = getattr(self.config,'output_answers','run')
-        logName = outputDir+"\\"+self.config.name+"_"+self.config.world.participantId+".log"
-        self.logResults = Logger(self.baseTime, logName,mode='w')
 
     def setupListPairs(self):
          # check if explicit list of pairs has been provided.
         if getattr(self.config, 'tuple_image_pairs', None) is None:
             printOut("Error constructing " + self.config.name + ", attribute 'image_pairs' is missing'", 0)
 
-        image_pairs = self.config.tuple_image_pairs
+        # copy list ...
+        image_pairs = list(self.config.tuple_image_pairs)
+        image_pairs_refs = []
 
         if self.showReference:
             for p in image_pairs:
@@ -129,23 +127,28 @@ class Select2AFCImage(Element):
 
         direction={'left':0,'right':1}
         currPair = self.image_pairs[0]
-        currGolden = self.image_pairs_refs[0]
+        if self.showReference:
+            currGolden = self.image_pairs_refs[0]
 
         selection = currPair[direction[args]]
-        answerText = "Selected {s} from {p[0]} -- {p[1]}, golden: {g}".format(
-            p = currPair, s=selection, g=self.image_pairs_refs[0])
-        printOut(answerText, 1)
-        self.logResults.logEvent(answerText)
+        answer_text = "Selected %s from %s -- %s " % (selection, currPair[0], currPair[1])
+        if self.showReference:
+            answer_text = answer_text + "golden: " + self.image_pairs_refs[0]
+        printOut(answer_text, 1)
+        self.logResults.logEvent(answer_text)
 
         #hide pair
         self.imageNodes[currPair[0]].hide()
         self.imageNodes[currPair[1]].hide()
-        self.imageRefNodes[currGolden].hide()
+
+        if self.showReference:
+            self.imageRefNodes[currGolden].hide()
 
         # remove the first pair from the list,
         # the logfile will have the history of how things were presented.
         self.image_pairs.pop(0)
-        self.image_pairs_refs.pop(0)
+        if self.showReference:
+            self.image_pairs_refs.pop(0)
 
         # display new pair only if there are more...
         if len(self.image_pairs):
@@ -169,6 +172,12 @@ class Select2AFCImage(Element):
 
     def enterState(self):
         Element.enterState(self)
+
+        #        # file output to store the results
+        outputDir = getattr(self.config,'output_answers','run')
+        logName = outputDir+"\\"+self.config.name+"_"+self.config.world.participantId+".log"
+        self.logResults = Logger(self.baseTime, logName,mode='w')
+
         # display always the first one, because they have
         # been randomized in the constructor anyway...
         if len(self.image_pairs) == 0:
