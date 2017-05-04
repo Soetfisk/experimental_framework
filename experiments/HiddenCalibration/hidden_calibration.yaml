@@ -143,9 +143,6 @@ elements:
     - label: Do you have vision problems
       type: Option
       tuple_values: ("No","Yes")
-    - label: Do you have experience playing games
-      type: Option
-      tuple_values: ("Yes","No","Moderate")
     - label: Age
       type: TextEntry
       default: 0

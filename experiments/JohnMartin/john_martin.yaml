@@ -11,6 +11,69 @@ elements:
    file_message: experiments/JohnMartin/introtext.txt
    name: introText
 
+ - className: ScreenText
+   file_message: experiments/JohnMartin/starttext.txt
+   name: startText
+
+ - className: ScreenText
+   file_message: experiments/JohnMartin/endtext.txt
+   name: endText
+
+ - module: DataForm
+   className: ConsentForm
+   name: consentForm
+   color_background: (0.3,0.3,0.4,1)
+   file_config: experiments/JohnMartin/data/consentForm.yaml
+
+ - className: ScreenText
+   name: colourBlindText
+   color_background: (0.3,0.3,0.4,1)
+   file_message: experiments/JohnMartin/data/colourBlindText.txt
+   # example defining the keybindings directly here
+
+ - className: ScreenText
+   name: colourBlindProblem
+   color_background: (0.3,0.3,0.4,1)
+   # the LAST element is the option selected now, which has to be in the list
+   #option_level: ('easy','hard','easy')
+   file_message: experiments/JohnMartin/data/colourBlindProblem.txt
+
+# Display ishihara test, expects an exact number as an answer.
+ - module: FullScreenImage
+   className: ImageQuery
+   name: colourBlindCheck
+   file_imageNameStr: experiments/JohnMartin/data/colourblind/%d.png
+   #tuple_imageStrArgs: (2,3,6,42,45,74,97)
+   tuple_imageStrArgs: (2)
+   #tuple_imageAnswers: (2,3,6,42,45,74,97)
+   tuple_imageAnswers: (2)
+   tuple_scale: (0.5,0.5)
+
+ - className: Select2AFCImage
+   #color_background: (0.5,0.2,0.2,1)
+   name: imageCompare
+   # display reference/golden in the top
+   show_reference: True
+   # first in pair is always the "reference" if show_reference is True
+   tuple_image_pairs: [[G1,A,B],[C,C,D],[gold,gold,hejda]]
+   image_prefix: 'common/images/'
+   image_postfix: '.png'
+   image_scale: [0.3,0.3]
+   image_voffset: -0.4
+   random_pairs: True
+   choice_text: 'Which image looks most similar to the top image'
+   # will present (A,B) and (B,A)
+   mirror_pairs: True
+   output_answers: 'experiments\JohnMartin\run'
+   time_between: 1
+   image_between: None
+   keys:
+   - key: arrow_left
+     callback: imageSelected
+     tuple_args: ('left')
+   - key: arrow_right
+     callback: imageSelected
+     tuple_args: ('right')
 # - module: WhackAMole
 #   className: WhackAMole
 #   name: mole1
@@ -29,5 +92,16 @@ elements:
 
 transitions:
 - trans: 'start @ introText:timeout_start'
-- trans: 'introText @ end:auto'
+- trans: 'introText @ consentForm:auto'
+- trans: 'consentForm @ colourBlindText:yesPressed'
+- trans: 'consentForm @ end:noPressed'
+- trans: 'colourBlindText @ colourBlindCheck:auto'
+- trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
+- trans: 'colourBlindCheck @ startText:imageQueryOk'
+- trans: 'startText @ imageCompare:auto'
+- trans: 'imageCompare @ endText:end_imageCompare'
+- trans: 'endText @ end:auto'
+
+
+
 #- trans: 'mole1 @ end:auto'

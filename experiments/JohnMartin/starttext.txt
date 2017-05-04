@@ -1,4 +1,6 @@
+The following step is the accual experiment.
 
-There was a problem during the colour blind test, please contact the leading researcher to verify the issue or stop the experiment pressing 'Ctrl-q' if you have no assistance.
+You will be presented with three images. The top image is the reference image.
+Using the arrow keys 'left' or 'right' select the one of the other two images you think looks the most like the reference.
 
-Thanks for your participation!
+Press 'escape' key to continue.
