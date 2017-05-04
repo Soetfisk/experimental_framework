@@ -1,5 +1,6 @@
 This experiment has been designed by:
-	Julia Karlsson - julia_s_karlsson@hotmail.com
+	John Augustsson - john@merbom.com
+	Martin Clementson - martin.clementson@outlook.com
 
 	Before starting the experiment, a quick check on colour blindness  needs to be performed in order to ensure the validity of the results.
 
