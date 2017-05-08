@@ -55,10 +55,16 @@ elements:
    # display reference/golden in the top
    show_reference: True
    # first in pair is always the "reference" if show_reference is True
-   tuple_image_pairs: [[G1,A,B],[C,C,D],[gold,gold,hejda]]
-   image_prefix: 'common/images/'
+   tuple_image_pairs: [
+   [Mip0bunny24,Mip0bunny24,Mip0bunnyQ],
+   [Mip1bunny24,Mip1bunny24,Mip1bunnyQ],
+   [Mip2bunny24,Mip2bunny24,Mip2bunnyQ],
+   [Mip3bunny24,Mip3bunny24,Mip3bunnyQ],
+   [Mip4bunny24,Mip4bunny24,Mip4bunnyQ]
+   ]
+   image_prefix: 'experiments/JohnMartin/images/'
    image_postfix: '.png'
-   image_scale: [0.3,0.3]
+   image_scale: [1.0,1.0]
    image_voffset: -0.4
    random_pairs: True
    choice_text: 'Which image looks most similar to the top image'
