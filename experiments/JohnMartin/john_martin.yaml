@@ -43,10 +43,10 @@ elements:
    className: ImageQuery
    name: colourBlindCheck
    file_imageNameStr: experiments/JohnMartin/data/colourblind/%d.png
-   #tuple_imageStrArgs: (2,3,6,42,45,74,97)
-   tuple_imageStrArgs: (2)
-   #tuple_imageAnswers: (2,3,6,42,45,74,97)
-   tuple_imageAnswers: (2)
+   tuple_imageStrArgs: (2,3,6,42,45,74,97)
+   #tuple_imageStrArgs: (2)
+   tuple_imageAnswers: (2,3,6,42,45,74,97)
+   #tuple_imageAnswers: (2)
    tuple_scale: (0.5,0.5)
 
  - className: Select2AFCImage
@@ -98,6 +98,7 @@ transitions:
 - trans: 'colourBlindText @ colourBlindCheck:auto'
 - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
 - trans: 'colourBlindCheck @ startText:imageQueryOk'
+- trans: 'colourBlindProblem @ end:auto'
 - trans: 'startText @ imageCompare:auto'
 - trans: 'imageCompare @ endText:end_imageCompare'
 - trans: 'endText @ end:auto'
