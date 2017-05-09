@@ -150,6 +150,10 @@ class Select2AFCImage(Element):
         answer_text = "Selected %s from %s -- %s " % (selection, currPair[0], currPair[1])
         if self.showReference:
             answer_text = answer_text + "golden: " + self.image_pairs_refs[0]
+            if selection == self.image_pairs_refs[0]:
+                answer_text = answer_text + " CORRECT"
+            else:
+                answer_text = answer_text + " MISS"
         printOut(answer_text, 1)
         self.logResults.logEvent(answer_text)
 
