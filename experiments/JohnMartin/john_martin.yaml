@@ -34,8 +34,6 @@ elements:
  - className: ScreenText
    name: colourBlindProblem
    color_background: (0.3,0.3,0.4,1)
-   # the LAST element is the option selected now, which has to be in the list
-   #option_level: ('easy','hard','easy')
    file_message: experiments/JohnMartin/data/colourBlindProblem.txt
 
 # Display ishihara test, expects an exact number as an answer.
@@ -49,25 +47,35 @@ elements:
    #tuple_imageAnswers: (2)
    tuple_scale: (0.5,0.5)
 
+
  - className: Select2AFCImage
-   #color_background: (0.5,0.2,0.2,1)
+   color_background: (0.3,0.3,0.3,1)
    name: imageCompare
    # display reference/golden in the top
    show_reference: True
    # first in pair is always the "reference" if show_reference is True
    tuple_image_pairs: [
-   [Mip0bunny24,Mip0bunny24,Mip0bunnyQ],
-   [Mip1bunny24,Mip1bunny24,Mip1bunnyQ],
-   [Mip2bunny24,Mip2bunny24,Mip2bunnyQ],
-   [Mip3bunny24,Mip3bunny24,Mip3bunnyQ],
-   [Mip4bunny24,Mip4bunny24,Mip4bunnyQ]
+   [MIP0b,MIP0b,MIP0bq],
+   [MIP1b,MIP1b,MIP1bq],
+   [MIP3b,MIP3b,MIP3bq],
+   [MIP4b,MIP4b,MIP4bq],
+   [MIP0c,MIP0c,MIP0cq],
+   [MIP1c,MIP1c,MIP1cq],
+   [MIP2c,MIP2c,MIP2cq],
+   [MIP3c,MIP3c,MIP3cq],
+   [MIP4c,MIP4c,MIP4cq],
+   [MIP0s,MIP0s,MIP0sq],
+   [MIP1s,MIP1s,MIP1sq],
+   [MIP2s,MIP2s,MIP2sq],
+   [MIP3s,MIP3s,MIP3sq],
+   [MIP4s,MIP4s,MIP4sq],
    ]
    image_prefix: 'experiments/JohnMartin/images/'
    image_postfix: '.png'
    image_scale: [1.0,1.0]
-   image_voffset: -0.4
+   image_voffset: 0.0
    random_pairs: True
-   choice_text: 'Which image looks most similar to the top image'
+   choice_text: 'Which image looks most similar to the top image?'
    # will present (A,B) and (B,A)
    mirror_pairs: True
    output_answers: 'experiments\JohnMartin\run'
@@ -103,6 +111,7 @@ transitions:
 - trans: 'consentForm @ end:noPressed'
 - trans: 'colourBlindText @ colourBlindCheck:auto'
 - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
+- trans: 'colourBlindProblem @ end:auto'
 - trans: 'colourBlindCheck @ startText:imageQueryOk'
 - trans: 'colourBlindProblem @ end:auto'
 - trans: 'startText @ imageCompare:auto'

@@ -9,15 +9,17 @@ from pandac.PandaModules import *
 
 # Panda Engine Options
 # "undecorated 1"
-options = [ "win-size 1280 800",
+options = [ "win-size 1920 1080",
             "win-fixed-size #f",
             "fullscreen #f",
             "sync-video 1",
-            "multisamples 4",
+            "multisamples 1",
             "audio-library-name p3openal_audio",
             "cursor-hidden #f",
             "show-frame-rate-meter #f",
-            "undecorated 0"]
+            "undecorated 1",
+            "compressed-textures 0"]
+
 
 for o in options: loadPrcFileData('', o)
 

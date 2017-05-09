@@ -1,0 +1,161 @@
+Index: Elements/Select2AFCImage/Select2AFCImage.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Elements/Select2AFCImage/Select2AFCImage.py	(revision d74f70dbdedbca18ba52e7fd81af8f5ec084484b)
++++ Elements/Select2AFCImage/Select2AFCImage.py	(revision )
+@@ -50,8 +50,17 @@
+                     if image not in self.imageNodes.keys():
+                         fullname = prefix + image + postfix
+                         printOut("loading %s" % fullname, 0)
+-                        self.imageNodes[image] = OnscreenImage( image=fullname, scale=Vec3(sx,1.0, sz) )
+-                        self.imageNodes[image].setTransparency(TransparencyAttrib.MAlpha)
++                        cm = CardMaker('card')
++                        cm.setFrame(0,0.95,0,0.95)
++                        self.imageNodes[image] = self.hudNP.attachNewNode(cm.generate())
++
++                        tex = loader.loadTexture( fullname )
++                        tex.setMagfilter(SamplerState.FT_nearest)
++                        tex.setMinfilter(SamplerState.FT_nearest)
++
++                        self.imageNodes[image].setTexture(tex)
++
++                        # self.imageNodes[image].setTransparency(TransparencyAttrib.MAlpha)
+                         self.imageNodes[image].hide()
+                         self.imageNodes[image].setName(image)
+                         self.imageNodes[image].reparentTo(self.hudNP)
+@@ -60,11 +69,17 @@
+                 if ref not in self.imageRefNodes.keys():
+                     fullname = prefix + ref + postfix
+                     printOut("loading %s" % fullname, 0)
+-                    self.imageRefNodes[ref] = OnscreenImage( image=fullname, scale=Vec3(sx,1.0, sz) )
++                    cm = CardMaker('card')
++                    cm.setFrame(0,0.95,0,0.95)
++                    self.imageRefNodes[ref] = self.hudNP.attachNewNode(cm.generate())
++                    tex = loader.loadTexture( fullname )
++                    tex.setMagfilter(SamplerState.FT_nearest)
++                    tex.setMinfilter(SamplerState.FT_nearest)
++                    self.imageRefNodes[ref].setTexture(tex)
++                    #self.imageRefNodes[ref] = OnscreenImage( image=fullname, scale=Vec3(sx,1.0, sz) )
+                     self.imageRefNodes[ref].setTransparency(TransparencyAttrib.MAlpha)
+                     self.imageRefNodes[ref].hide()
+                     self.imageRefNodes[ref].setName(ref)
+-                    self.imageRefNodes[ref].reparentTo(self.hudNP)
+         except Exception,e:
+             printOut("Fatal error, could not load texture file",0)
+             printOut(str(e), 0)
+@@ -73,9 +88,10 @@
+ #        # label text
+         if getattr(self.config, 'choice_text', None):
+             label = OnscreenText( text = self.config.choice_text,
+-                              pos = (0,-0.9,0), scale = .08,
++                              pos = (0,-0.8,0), scale = .05,
+                               fg= [1.0,1.0,1.0,1.0],
+                               align=TextNode.ACenter,
++                              wordwrap=15.0,
+                               mayChange=0 )
+         label.reparentTo(self.hudNP)
+ #
+@@ -162,13 +178,13 @@
+         # TUPLES CANNOT BE SHUFFLED, BECAUSE THEY ARE INMUTABLE.
+         pair = self.image_pairs[0]
+         self.imageNodes[pair[0]].show()
+-        self.imageNodes[pair[0]].setPos(-0.6, 0.0, self.voffset)
++        self.imageNodes[pair[0]].setPos(-1.7, 0.0, -0.95)
+         self.imageNodes[pair[1]].show()
+-        self.imageNodes[pair[1]].setPos(0.6, 0.0, self.voffset)
++        self.imageNodes[pair[1]].setPos(0.7, 0.0, -0.95)
+         # only when there is a golden reference at the top.
+         if self.showReference:
+             self.imageRefNodes[self.image_pairs_refs[0]].show()
+-            self.imageRefNodes[self.image_pairs_refs[0]].setPos(0.0, 0.0, -self.voffset+0.1)
++            self.imageRefNodes[self.image_pairs_refs[0]].setPos(-0.5, 0.0, -0.1)
+ 
+     def enterState(self):
+         Element.enterState(self)
+Index: experiments/JohnMartin/john_martin.yaml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- experiments/JohnMartin/john_martin.yaml	(revision d74f70dbdedbca18ba52e7fd81af8f5ec084484b)
++++ experiments/JohnMartin/john_martin.yaml	(revision )
+@@ -34,8 +34,6 @@
+  - className: ScreenText
+    name: colourBlindProblem
+    color_background: (0.3,0.3,0.4,1)
+-   # the LAST element is the option selected now, which has to be in the list
+-   #option_level: ('easy','hard','easy')
+    file_message: experiments/JohnMartin/data/colourBlindProblem.txt
+ 
+ # Display ishihara test, expects an exact number as an answer.
+@@ -49,25 +47,23 @@
+    #tuple_imageAnswers: (2)
+    tuple_scale: (0.5,0.5)
+ 
++
+  - className: Select2AFCImage
+-   #color_background: (0.5,0.2,0.2,1)
++   color_background: (0.3,0.3,0.3,1)
+    name: imageCompare
+    # display reference/golden in the top
+    show_reference: True
+    # first in pair is always the "reference" if show_reference is True
+    tuple_image_pairs: [
+-   [Mip0bunny24,Mip0bunny24,Mip0bunnyQ],
+-   [Mip1bunny24,Mip1bunny24,Mip1bunnyQ],
+-   [Mip2bunny24,Mip2bunny24,Mip2bunnyQ],
+-   [Mip3bunny24,Mip3bunny24,Mip3bunnyQ],
+-   [Mip4bunny24,Mip4bunny24,Mip4bunnyQ]
++   [Mip0bunny24-1,Mip0bunny24-2,Mip0bunny24-3],
++   [Mip4bunny24,Mip4bunny24,Mip4bunnyQ],
+    ]
+    image_prefix: 'experiments/JohnMartin/images/'
+    image_postfix: '.png'
+    image_scale: [1.0,1.0]
+-   image_voffset: -0.4
+-   random_pairs: True
+-   choice_text: 'Which image looks most similar to the top image'
++   image_voffset: 0.0
++   random_pairs: False
++   choice_text: 'Which image looks most similar to the top image?'
+    # will present (A,B) and (B,A)
+    mirror_pairs: True
+    output_answers: 'experiments\JohnMartin\run'
+@@ -103,6 +99,7 @@
+ - trans: 'consentForm @ end:noPressed'
+ - trans: 'colourBlindText @ colourBlindCheck:auto'
+ - trans: 'colourBlindCheck @ colourBlindProblem:imageQueryBad'
++- trans: 'colourBlindProblem @ end:auto'
+ - trans: 'colourBlindCheck @ startText:imageQueryOk'
+ - trans: 'colourBlindProblem @ end:auto'
+ - trans: 'startText @ imageCompare:auto'
+Index: World.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- World.py	(revision d74f70dbdedbca18ba52e7fd81af8f5ec084484b)
++++ World.py	(revision )
+@@ -9,15 +9,17 @@
+ 
+ # Panda Engine Options
+ # "undecorated 1"
+-options = [ "win-size 1280 800",
++options = [ "win-size 1920 1080",
+             "win-fixed-size #f",
+             "fullscreen #f",
+             "sync-video 1",
+-            "multisamples 4",
++            "multisamples 1",
+             "audio-library-name p3openal_audio",
+             "cursor-hidden #f",
+             "show-frame-rate-meter #f",
+-            "undecorated 0"]
++            "undecorated 1",
++            "compressed-textures 0"]
++
+ 
+ for o in options: loadPrcFileData('', o)
+ 

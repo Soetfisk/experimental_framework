@@ -50,7 +50,16 @@ class Select2AFCImage(Element):
                     if image not in self.imageNodes.keys():
                         fullname = prefix + image + postfix
                         printOut("loading %s" % fullname, 0)
-                        self.imageNodes[image] = OnscreenImage( image=fullname, scale=Vec3(sx,1.0, sz) )
+                        cm = CardMaker('card')
+                        cm.setFrame(0,0.95,0,0.95)
+                        self.imageNodes[image] = self.hudNP.attachNewNode(cm.generate())
+
+                        tex = loader.loadTexture( fullname )
+                        tex.setMagfilter(SamplerState.FT_nearest)
+                        tex.setMinfilter(SamplerState.FT_nearest)
+
+                        self.imageNodes[image].setTexture(tex)
+
                         self.imageNodes[image].setTransparency(TransparencyAttrib.MAlpha)
                         self.imageNodes[image].hide()
                         self.imageNodes[image].setName(image)
@@ -60,11 +69,17 @@ class Select2AFCImage(Element):
                 if ref not in self.imageRefNodes.keys():
                     fullname = prefix + ref + postfix
                     printOut("loading %s" % fullname, 0)
-                    self.imageRefNodes[ref] = OnscreenImage( image=fullname, scale=Vec3(sx,1.0, sz) )
+                    cm = CardMaker('card')
+                    cm.setFrame(0,0.95,0,0.95)
+                    self.imageRefNodes[ref] = self.hudNP.attachNewNode(cm.generate())
+                    tex = loader.loadTexture( fullname )
+                    tex.setMagfilter(SamplerState.FT_nearest)
+                    tex.setMinfilter(SamplerState.FT_nearest)
+                    self.imageRefNodes[ref].setTexture(tex)
+                    #self.imageRefNodes[ref] = OnscreenImage( image=fullname, scale=Vec3(sx,1.0, sz) )
                     self.imageRefNodes[ref].setTransparency(TransparencyAttrib.MAlpha)
                     self.imageRefNodes[ref].hide()
                     self.imageRefNodes[ref].setName(ref)
-                    self.imageRefNodes[ref].reparentTo(self.hudNP)
         except Exception,e:
             printOut("Fatal error, could not load texture file",0)
             printOut(str(e), 0)
@@ -73,9 +88,10 @@ class Select2AFCImage(Element):
 #        # label text
         if getattr(self.config, 'choice_text', None):
             label = OnscreenText( text = self.config.choice_text,
-                              pos = (0,-0.9,0), scale = .08,
+                              pos = (0,-0.8,0), scale = .05,
                               fg= [1.0,1.0,1.0,1.0],
                               align=TextNode.ACenter,
+                              wordwrap=15.0,
                               mayChange=0 )
         label.reparentTo(self.hudNP)
 #
@@ -162,13 +178,13 @@ class Select2AFCImage(Element):
         # TUPLES CANNOT BE SHUFFLED, BECAUSE THEY ARE INMUTABLE.
         pair = self.image_pairs[0]
         self.imageNodes[pair[0]].show()
-        self.imageNodes[pair[0]].setPos(-0.6, 0.0, self.voffset)
+        self.imageNodes[pair[0]].setPos(-1.7, 0.0, -0.95)
         self.imageNodes[pair[1]].show()
-        self.imageNodes[pair[1]].setPos(0.6, 0.0, self.voffset)
+        self.imageNodes[pair[1]].setPos(0.7, 0.0, -0.95)
         # only when there is a golden reference at the top.
         if self.showReference:
             self.imageRefNodes[self.image_pairs_refs[0]].show()
-            self.imageRefNodes[self.image_pairs_refs[0]].setPos(0.0, 0.0, -self.voffset+0.1)
+            self.imageRefNodes[self.image_pairs_refs[0]].setPos(-0.5, 0.0, -0.1)
 
     def enterState(self):
         Element.enterState(self)
