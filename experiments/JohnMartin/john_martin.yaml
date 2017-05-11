@@ -8,32 +8,35 @@ elements:
    name: end
 
  - className: ScreenText
+   color_background: (0.969, 0.549, 0.573,1)
    file_message: experiments/JohnMartin/introtext.txt
    name: introText
 
  - className: ScreenText
+   color_background: (0.969, 0.549, 0.573,1)
    file_message: experiments/JohnMartin/starttext.txt
    name: startText
 
  - className: ScreenText
+   color_background: (0.969, 0.549, 0.573,1)
    file_message: experiments/JohnMartin/endtext.txt
    name: endText
 
  - module: DataForm
    className: ConsentForm
    name: consentForm
-   color_background: (0.3,0.3,0.4,1)
+   color_background: (0.969, 0.549, 0.573,1)
    file_config: experiments/JohnMartin/data/consentForm.yaml
 
  - className: ScreenText
    name: colourBlindText
-   color_background: (0.3,0.3,0.4,1)
+   color_background: (0.969, 0.549, 0.573,1)
    file_message: experiments/JohnMartin/data/colourBlindText.txt
    # example defining the keybindings directly here
 
  - className: ScreenText
    name: colourBlindProblem
-   color_background: (0.3,0.3,0.4,1)
+   color_background: (0.969, 0.549, 0.573,1)
    file_message: experiments/JohnMartin/data/colourBlindProblem.txt
 
 # Display ishihara test, expects an exact number as an answer.
@@ -49,7 +52,7 @@ elements:
 
 
  - className: Select2AFCImage
-   color_background: (0.3,0.3,0.3,1)
+   color_background: (0.969, 0.549, 0.573, 1)
    name: imageCompare
    # display reference/golden in the top
    show_reference: True
@@ -57,6 +60,7 @@ elements:
    tuple_image_pairs: [
    [MIP0b,MIP0b,MIP0bq],
    [MIP1b,MIP1b,MIP1bq],
+   [MIP2b,MIP2b,MIP2bq],
    [MIP3b,MIP3b,MIP3bq],
    [MIP4b,MIP4b,MIP4bq],
    [MIP0c,MIP0c,MIP0cq],
